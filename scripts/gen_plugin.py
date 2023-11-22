@@ -90,17 +90,17 @@ def create_plugin_py(plugin_type: str, class_name: str, config_class_name: str) 
         method_body = "return track"
     return f"""from nendo import Nendo, {plugin_type}, NendoConfig, NendoTrack
 from .config import {config_class_name}
-    
+
 settings = {config_class_name}()
 
 class {class_name}({plugin_type}):
     nendo_instance: Nendo = None
     config: NendoConfig = None
 
-    @NendoAnalysisPlugin.run_track
+    @{plugin_type}.run_track
     def run_plugin(self, track: NendoTrack) -> {return_type}:
         {method_body}
-        
+
         """
 
 
@@ -111,13 +111,13 @@ site_name: {plugin_name}
 nav:
     - "index.md"
     - Example Page: "example.md"
-    
+
     """
 
 
 def create_readme_md(plugin_name: str, description: str, author: str) -> str:
     return f"""# {plugin_name}
-    
+
 ![Documentation](https://img.shields.io/website/https/nendo.ai)
 [![Twitter](https://img.shields.io/twitter/url/https/twitter.com/okio_ai.svg?style=social&label=Follow%20%40okio_ai)](https://twitter.com/okio_ai) [![](https://dcbadge.vercel.app/api/server/XpkUsjwXTp?compact=true&style=flat)](https://discord.gg/XpkUsjwXTp)
 
@@ -140,7 +140,7 @@ pip install {to_kebab_case(plugin_name)}
 >>> track = nd.plugins.{plugin_name.replace("nendo_plugin_", "")}(track=track)
 >>> track.play()
 ```
-    
+
     """
 
 

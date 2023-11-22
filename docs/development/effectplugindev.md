@@ -31,9 +31,8 @@ from typing import Tuple
 import numpy as np
 from nendo import Nendo, NendoConfig, NendoEffectPlugin
 
-
 class DestructionGenerator(NendoEffectPlugin):
-    """Generate some fucked up sounds."""
+    """Generate some weird sounds."""
     nendo_instance: Nendo = None
     config: NendoConfig = None
     logger: Logger = None
@@ -60,13 +59,12 @@ For `NendoEffectPlugin`'s we recommend using `@run_signal`. Then nendo can handl
 from nendo import NendoConfig
 class DestructionConfig(NendoConfig):
     """Configuration defaults for the destroy plugin."""
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
     my_default_param: bool = False
 
-    class Config:
-        """Pydantic configuration."""
-        arbitrary_types_allowed = True
 ```
-
+aaaa
 This class extends the base `NendoConfig` and allows you to define some default and overridable parameters for your plugin.
 It behaves just like `NendoConfig`, read up more on basic `nendo` configuration [here](../usage/config.md).
 
@@ -86,6 +84,7 @@ if __name__ == "__main__":
 This is a standard `setup.py` file.
 You can read up more on how to configure it [here](https://packaging.python.org/tutorials/packaging-projects/).
 You just need to define some basics like the name of your plugin, a version number and a description.
+Make sure to also enter the same version in `src/nendo_plugin_destruct/__init__.py`.
 
 ### pyproject.toml
 

@@ -826,7 +826,7 @@ class NendoLibraryPlugin(NendoPlugin):
         self,
         filters: Optional[dict] = None,
         resource_filters: Optional[Dict[str, Any]] = None,
-        track_type: Optional[str] = None,
+        track_type: Optional[Union[str, List[str]]] = None,
         user_id: Optional[Union[str, uuid.UUID]] = None,
         collection_id: Optional[Union[str, uuid.UUID]] = None,
         plugin_names: Optional[List[str]] = None,
@@ -844,7 +844,8 @@ class NendoLibraryPlugin(NendoPlugin):
                 over the track.resource.meta field. The dictionary's values
                 should contain singular search tokens and  the keys currently have no
                 effect but might in the future. Defaults to {}.
-            track_type (str): Track type to filter for. Defaults to None.
+            track_type (Union[str, List[str]], optional): Track type to filter for.
+                Can be a singular type or a list of types. Defaults to None.
             user_id (Union[str, UUID], optional): The user ID to filter for.
             collection_id (Union[str, uuid.UUID], optional): Collection id to
                 which the filtered tracks must have a relationship. Defaults to None.

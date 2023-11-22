@@ -4,7 +4,7 @@ import os
 import sys
 import shutil
 from git import Repo
-from urllib.parse import urlparse, urlunparse
+from urllib.parse import urlparse
 
 # List of GitHub repository URLs
 github_repos = [
@@ -21,7 +21,7 @@ github_repos = [
 banner_image_code = [
     "<br>\n",
     '<p align="left">\n',
-    '    <img src="https://okio.ai/docs/assets/nendo_core_logo.png" width="350" alt="Nendo Core logo">\n',
+    '    <img src="https://okio.ai/docs/assets/nendo_core_logo.png" width="350" alt="nendo core">\n',
     "</p>\n",
     "<br>\n",
 ]

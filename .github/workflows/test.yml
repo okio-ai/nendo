@@ -104,6 +104,11 @@ jobs:
       - run: ls -la coverage
       - run: coverage combine coverage
       - run: coverage report
+      - run: |
+          COVERAGE_PERCENT=$(coverage report | grep 'TOTAL' | awk '{print $NF}')
+          curl -X POST -H "Authorization: token ${{ secrets.GH_TOKEN }}" \
+              -d '{"state": "success", "description": "Coverage $COVERAGE_PERCENT", "context": "CI/coverage"}' \
+              "https://api.github.com/repos/okio-ai/nendo/statuses/${{ github.sha }}"
       - run: coverage html --show-contexts --title "Coverage for ${{ github.sha }}"
       - name: Store coverage HTML
         uses: actions/upload-artifact@v3

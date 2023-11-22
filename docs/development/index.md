@@ -1,6 +1,6 @@
 # Nendo Development
 
-Developing with and for Nendo Core is straightforward. If you want to get started right away, please refer to the [contribution guidelines](../contributing.md). If you are interested in the general architecture of the Nendo Core framework, the design decisions driving our development, or the guidelines for writing good documentation pages, keep reading below.
+Developing with and for Nendo Core is straightforward. If you want to get started right away, please refer to the [contribution guidelines](../contributing.md). If you are interested in the design decisions driving our development, or the guidelines for writing good documentation pages, keep reading below.
 
 ## Design Decisions
 

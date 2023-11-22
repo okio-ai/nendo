@@ -1,8 +1,3 @@
-- Inherit from which `class`?
-- Run which tests?
-- What is the `storage_driver` and how does it work?
-
-
 # Writing a `LibraryPlugin`
 
 We'll go step by step through all the files you need to create and what they'll do.
@@ -14,7 +9,7 @@ Remember the directory structure from before:
 ├── pyproject.toml
 ├── setup.py
 ├── src
-│   └── nendo_plugin_destroy
+│   └── nendo_plugin_library_mongodb
 │       ├── __init__.py
 │       ├── config.py
 │       └── plugin.py
@@ -27,15 +22,15 @@ Let's look into the different files now.
 ### plugin.py
 
 The most important thing in your plugin. Here is where all your magic happens.
-Below, you'll find a simple implementation that just overrides a single library method.
+Below, you'll find a simple implementation that just implements the library initializationa method.
 We'll go through it step by step.
 
 ```python
 from logging import Logger
-from nendo import Nendo, NendoConfig, NendoLibraryPlugin, NendoStorageLocalFS, NendoTrack
+from nendo import Nendo, NendoConfig, SqlAlchemyNendoLibrary, NendoStorageLocalFS, NendoTrack
 
 
-class MongoDBLibrary(NendoLibraryPlugin):
+class MongoDBLibrary(SqlAlchemyNendoLibrary):
     """A MongoDB implementation of the nendo library."""
     config: NendoConfig = None
     user: NendoUser = None
@@ -87,7 +82,14 @@ class MongoDBLibrary(NendoLibraryPlugin):
 
 ```
 
-The basics are very simple: Make sure to extend `NendoLibraryPlugin`, and make sure that your plugin connects to the database upon initialization.
+The basics are very simple:
+
+- To implement a new library plugin, you have two options:a
+    1. Inherit from the `SqlAlchemyNendoLibrary`, if your taget DBMS is compatible with SQLAlchemy, i.e. an SQLAlchemy driver exists for it. In this case, you only have to implement the initialization of the library as shown bove.
+    1. Inherit from the `NendoLibraryPlugin`, and implement a general library plugin that does not use SQLAlchemy to connect to the DBMS backend. In this case, you have to implement/override all public methods defined in the `NendoLibraryPlugin`. Refer to the [API Reference](https://okio.ai/docs/reference/schema/plugin/#nendo.schema.plugin.NendoLibraryPlugin) to see the full list of functions that have to be implemented.a
+- Use nendo's `NendoStorageLocalFS` storage driver or implement your own.
+- Overwrite any methods whose behavior you want to change
+- Make sure that your implementation of the nendo library passes the library tests defined in `tests/test_library.py`.
 
 ### config.py
 
@@ -95,13 +97,11 @@ The basics are very simple: Make sure to extend `NendoLibraryPlugin`, and make s
 from nendo import NendoConfig
 
 
-class DestructionConfig(NendoConfig):
-    """Configuration defaults for the destroy plugin."""
-    my_default_param: bool = False
+class MongoDBLibraryConfig(NendoConfig):
+    """Configuration defaults for the mongodb library plugin."""
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    class Config:
-        """Pydantic configuration."""
-        arbitrary_types_allowed = True
+    my_default_param: bool = False
 ```
 
 This class extends the base `NendoConfig` and allows you to define some default and overridable parameters for your
@@ -115,15 +115,15 @@ from distutils.core import setup
 
 if __name__ == "__main__":
     setup(
-        name="nendo-plugin-destruct",
+        name="nendo-plugin-library-mongodb",
         version="0.1.0",
-        description="Nendo destroyer plugin",
-        author="Aaron Abebe <aaron@okio.ai>",
+        description="Nendo mongodb librarya plugin",
+        author="Felix Lorenz <felix@okio.ai>",
     )
 ```
 
 This is a standard `setup.py` file.
-You can read up more on how to configure it [here](https://packaging.python.org/tutorials/packaging-projects/).
+You can read up more on how tao configure it [here](https://packaging.python.org/tutorials/packaging-projects/).
 You just need to define some basics like the name of your plugin, a version number and a description.
 
 ### pyproject.toml
@@ -136,7 +136,5 @@ You can read up more on how to configure it [here](https://packaging.python.org/
 That's it!
 
 !!! success
-    When you're finished go back to the plugin development [overview](plugindev.md#running-a-plugin)
+    When you're finished go back to the plugin development [overview](plugindev.md#publishing-a-plugin)
     and learn how to test and publish your plugin.
-
-

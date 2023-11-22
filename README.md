@@ -10,10 +10,10 @@
 <a href="https://okio.ai" target="_blank">
     <img src="https://img.shields.io/website/https/nendo.ai" alt="Documentation">
 </a>
-<a href="https://github.com/okio-ai/nendo/actions?query=workflow%3ATest+event%3Apush+branch%3Amaster" target="_blank">
-    <img src="https://github.com/okio-ai/nendo/workflows/Test/badge.svg?event=push&branch=master" alt="Test">
+<a href="https://github.com/okio-ai/nendo/actions/workflows/test.yml" target="_blank">
+    <img src="https://github.com/okio-ai/nendo/actions/workflows/test.yml/badge.svg" alt="Test">
 </a>
-<a href="" target="_blank">
+<a href="https://coverage-badge.samuelcolvin.workers.dev/redirect/okio-ai/nendo" target="_blank">
     <img src="https://coverage-badge.samuelcolvin.workers.dev/okio-ai/nendo.svg" alt="Coverage">
 </a>
 <a href="https://coverage-badge.samuelcolvin.workers.dev/redirct/okio-ai/nendo" target="_blank">
@@ -45,7 +45,7 @@
 
 Nendo core is the AI audio tool suite allowing you to effortlessly develop audio apps that amplify efficiency & creativity across all aspects of audio production.
 
-**[Features](#features)** - **[Requirements](#requirements)** - **[Installation](#installation)** - **[Usage](#usage)** - **[plugins](#plugins)** - **[Contributing](#contributing)**
+**[Features](#features)** - **[Requirements](#requirements)** - **[Installation](#installation)** - **[Usage](#usage)** - **[Plugins](#plugins)** - **[Contributing](#contributing)**
 
 ## Features
 
@@ -58,7 +58,7 @@ Nendo core is the AI audio tool suite allowing you to effortlessly develop audio
 
 Nendo requires the following software packages to be installed in your system:
 
-- **Ubuntu**: `sudo apt-get install ffmpeg libsndfile libportaudio2`
+- **Ubuntu**: `sudo apt-get install ffmpeg libsndfile1 libportaudio2`
 - **Mac OS**: `brew install ffmpeg libsndfile portaudio`
 - **Windows**
 

@@ -72,24 +72,20 @@ theme:
   - search.suggest
   - toc.follow
   palette:
-  - media: "(prefers-color-scheme)"
-    toggle:
-      icon: material/brightness-auto
-      name: Switch to light mode
-  - media: "(prefers-color-scheme: light)"
-    scheme: default
-    primary: teal
-    accent: purple
-    toggle:
-      icon: material/weather-sunny
-      name: Switch to dark mode
   - media: "(prefers-color-scheme: dark)"
     scheme: slate
     primary: black
     accent: lime
     toggle:
       icon: material/weather-night
-      name: Switch to system preference
+      name: Switch to light mode
+  - media: "(prefers-color-scheme: light)"
+    scheme: default
+    primary: indigo
+    accent: purple
+    toggle:
+      icon: material/weather-sunny
+      name: Switch to dark mode
 
 validation:
   omitted_files: warn

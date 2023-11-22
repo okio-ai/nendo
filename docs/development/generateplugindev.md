@@ -35,7 +35,7 @@ from nendo import Nendo, NendoConfig, NendoGeneratePlugin, NendoTrack
 
 
 class DestructionGenerator(NendoGeneratePlugin):
-    """Generate some fucked up sounds."""
+    """Generate some weird sounds."""
     nendo_instance: Nendo = None
     config: NendoConfig = None
     logger: Logger = None
@@ -74,11 +74,9 @@ or `@NendoGeneratePlugin.run_collection`.
 from nendo import NendoConfig
 class DestructionConfig(NendoConfig):
     """Configuration defaults for the destroy plugin."""
-    my_default_param: bool = False
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    class Config:
-        """Pydantic configuration."""
-        arbitrary_types_allowed = True
+    my_default_param: bool = False
 ```
 
 This class extends the base `NendoConfig` and allows you to define some default and overridable parameters for your plugin.
@@ -100,6 +98,7 @@ if __name__ == "__main__":
 This is a standard `setup.py` file.
 You can read up more on how to configure it [here](https://packaging.python.org/tutorials/packaging-projects/).
 You just need to define some basics like the name of your plugin, a version number and a description.
+Make sure to also enter the same version in `src/nendo_plugin_destroy/__init__.py`.
 
 ### pyproject.toml
 

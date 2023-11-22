@@ -23,7 +23,7 @@ from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union
 import librosa
 import numpy as np
 import soundfile as sf
-from sqlalchemy import Float, String, and_, asc, desc, func, or_, true
+from sqlalchemy import Float, and_, asc, desc, func, or_, true
 from sqlalchemy.orm import Query, Session, joinedload, sessionmaker
 from sqlalchemy.sql.expression import cast
 from sqlalchemy.sql.sqltypes import Text
@@ -1144,7 +1144,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         self,
         filters: Optional[Dict[str, Any]] = None,
         resource_filters: Optional[Dict[str, Any]] = None,
-        track_type: Optional[str] = None,
+        track_type: Optional[Union[str, List[str]]] = None,
         user_id: Optional[Union[str, uuid.UUID]] = None,
         collection_id: Optional[Union[str, uuid.UUID]] = None,
         plugin_names: Optional[List[str]] = None,
@@ -1163,7 +1163,8 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                 over the track.resource.meta field. The dictionary's values
                 should contain singular search tokens and the keys currently have no
                 effect but might in the future. Defaults to {}.
-            track_type (str, optional): Track type to filter for. Defaults to None.
+            track_type (Union[str, List[str]], optional): Track type to filter for.
+                Can be a singular type or a list of types. Defaults to None.
             user_id (Union[str, UUID], optional): The user ID to filter for.
             collection_id (Union[str, uuid.UUID], optional): Collection id to
                 which the filtered tracks must have a relationship. Defaults to None.
@@ -1198,7 +1199,10 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
 
             # apply track type filter if applicable
             if track_type is not None:
-                query = query.filter(model.NendoTrackDB.track_type == track_type)
+                if isinstance(track_type, list):
+                    query = query.filter(model.NendoTrackDB.value.in_(track_type))
+                else:
+                    query = query.filter(model.NendoTrackDB.track_type == track_type)
 
             # apply collection filter if applicable
             if collection_id is not None:

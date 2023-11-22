@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 # ruff: noqa: F401
-"""The Nendo Core AI audio framework."""
+"""The Nendo AI Audio Tool Suite."""
 
 from importlib import metadata
 

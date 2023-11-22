@@ -21,7 +21,7 @@ log_fmt = "[%(asctime)s.%(msecs)03dZ] %(name)s         %(levelname)s %(message)s
 
 
 class Nendo:
-    """Main class of the nendo framework."""
+    """Main class that runs nendo core."""
 
     _instance = None
     library: schema.NendoLibraryPlugin = None
