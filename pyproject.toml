@@ -1,0 +1,212 @@
+[tool.poetry]
+name = "nendo"
+version = "0.1.0"
+authors = [
+    "Okio Team <team@okio.ai>",
+]
+description = "The Nendo AI Audio Tool Suite"
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/okio-ai/nendo"
+homepage = "https://okio.ai"
+keywords = [
+    "AI",
+    "Machine Learning",
+    "Audio",
+    "Generative",
+    "Music",
+    "Audio Production",
+    "Audio Generation",
+    "Audio Analysis",
+]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Topic :: Multimedia :: Sound/Audio",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+]
+
+[tool.poetry.dependencies]
+python = "^3.8,<3.11"
+pydantic = { version = "^2.0.0, <2.5.0" }
+pydantic-settings = "^2.1.0"
+duckdb-engine = "^0.9.0"
+librosa = "^0.10.0"
+numpy = "^1.20"
+pytz = "2023.3.post1"
+sqlalchemy = "^2.0.16"
+sqlalchemy-json = "^0.5.0"
+sounddevice = "^0.4.6"
+soundfile = "^0.12"
+tinytag = "^1.8"
+
+# linting and tests
+alembic = { version = "^1.12.0", optional = true }
+psycopg2 = { version = "^2.9.9", optional = true }
+black = { version = "^23.1.0", optional = true }
+coverage = { version = "^7.3.2", optional = true}
+freezegun = { version = "^1.2.2", optional = true }
+pytest = { version = "^7.3.0", optional = true }
+ruff = { version = "^0.0.275", optional = true }
+setuptools = { version = "^67.6.1", optional = true }
+rich = { version = "^12.5.1", optional = true }
+
+# docs
+materialx = { version = "^1.38.8", optional = true }
+markdown-callouts = { version = "^0.3.0", optional = true }
+markdown-exec = { version = "^1.7.0", optional = true }
+mkdocs =  { version ="^1.5.3", optional = true }
+mkdocs-autorefs = { version ="^0.5.0", optional = true }
+mkdocs-coverage = { version = "^1.0.0", optional = true }
+mkdocs-gen-files = { version = "^0.5.0", optional = true }
+mkdocs-git-committers-plugin-2 = { version = "^2.2.0", optional = true }
+mkdocs-material = { version ="^9.4.7", optional = true }
+mkdocs-minify-plugin = { version = "^0.7.1", optional = true }
+mkdocs-monorepo-plugin = { version = "^1.0.5", optional = true }
+mkdocs-literate-nav = { version = "^0.6.1", optional = true }
+mkdocs-pymdownx-material-extras = { version = "^2.5.5", optional = true }
+mkdocs-redirects = { version = "^1.2.1", optional = true }
+mkdocstrings-python = { git = "ssh://git@github.com/okio-ai/mkdocstrings-python.git", optional = true }
+# mkdocstrings-python = { version = "^1.7.3", optional = true }
+toml = { version = "^0.10.2", optional = true }
+git_changelog = { version = "^2.3.2", optional = true }
+GitPython = { version = "^3.1.40", optional = true }
+
+[tool.poetry.extras]
+dev = [
+    "toml", "alembic", "black", "freezegun", "pytest", "ruff",
+    "setuptools", "coverage", "git_changelog"
+]
+doc = [
+    "mkdocs", "mkdocstrings", "mkdocs-coverage", "mkdocs-minify-plugin",
+    "mkdocs-git-committers-plugin-2", "markdown-exec", "mkdocs-literate-nav",
+    "materialx", "markdown-callouts", "mkdocs-autorefs", "mkdocs-redirects",
+    "mkdocs-pymdownx-material-extras", "mkdocs-gen-files", "mkdocstrings-python",
+    "mkdocs-material", "mkdocs-monorepo-plugin", "GitPython"
+]
+
+[tool.ruff]
+target-version = "py38"
+# Same as Black.
+line-length = 88
+src = ["src"]
+select = [
+    "A",
+    # "ANN", # flake8-annotations
+    "ARG",
+    "B",
+    "BLE",
+    "C",
+    "C4",
+    "COM",
+    "D",
+    "DTZ",
+    "E",
+    "ERA",
+    "EXE",
+    "F",
+    # "FBT", # flake8-boolean-trap
+    "G",
+    "I", # Isort
+    "ICN",
+    "INP",
+    "ISC",
+    "N",
+    "PGH",
+    "PIE",
+    "PL",
+    "PLC",
+    "PLE",
+    "PLR",
+    "PLW",
+    # "PT", # flake8-pytest-style
+    "PYI",
+    "Q",
+    "RUF",
+    "RSE",
+    "RET",
+    "S",
+    "SIM",
+    "SLF",
+    "T",
+    "T10",
+    "T20",
+    "TCH",
+    "TID",
+    # "TRY", # tryceratops
+    # "UP", # pyupgrade
+    "W",
+    "YTT",
+]
+ignore = [
+  "A001",  # Variable is shadowing a Python builtin
+  "ANN101",  # Missing type annotation for self
+  "ANN102",  # Missing type annotation for cls
+  "ANN204",  # Missing return type annotation for special method __str__
+  "ANN401",  # Dynamically typed expressions (typing.Any) are disallowed
+  "ARG005",  # Unused lambda argument
+  "C901",  # Too complex
+  "D105",  # Missing docstring in magic method
+  "D417",  # Missing argument description in the docstring
+  "E501",  # Line too long
+  "ERA001",  # Commented out code
+  "G004",  # Logging statement uses f-string
+  "PLR0911",  # Too many return statements
+  "PLR0912",  # Too many branches
+  "PLR0913",  # Too many arguments to function call
+  "PLR0915",  # Too many statements
+  "SLF001", # Private member accessed
+  "TRY003",  # Avoid specifying long messages outside the exception class
+]
+fixable = [
+    "F401", # Remove unused imports.
+    "NPY001", # Fix numpy types, which are removed in 1.24.
+]
+unfixable = ["B"]
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    ".pytest_cache",
+    ".vscode",
+    "__pypackages__",
+    "_build",
+    "alembic",
+    "buck-out",
+    "node_modules",
+    "venv",
+    "site",
+    "docs",
+]
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.mccabe]
+max-complexity = 10
+
+[tool.ruff.isort]
+known-first-party = ["nendo"]
+
+[tool.ruff.pydocstyle]
+convention = "google"
+
+[tool.isort]
+profile = "black"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

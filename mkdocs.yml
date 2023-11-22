@@ -1,0 +1,181 @@
+site_name: "Nendo Core"
+site_description: "The Nendo Core AI Audio framework."
+site_url: "https://nendo.ai"
+repo_url: "https://github.com/okio-ai/nendo"
+repo_name: "okio-ai/nendo"
+site_dir: "site"
+watch: [mkdocs.yml, README.md, CONTRIBUTING.md, CHANGELOG.md, src/nendo]
+copyright: Copyright &copy; 2023 Okio Inc.
+edit_uri: edit/main/docs/
+
+nav:
+- Home:
+  - Nendo core: index.md
+  - Changelog: changelog.md
+  # - Credits: credits.md
+  - License: license.md
+- Get Started:
+  - First steps: usage/index.md
+  - Overview: usage/concepts.md
+  - Configuration: usage/config.md
+  - Tracks: usage/tracks.md
+  - Collections: usage/collections.md
+  - Library: usage/library.md
+  - Plugins: 'plugins.md'
+  - Guides:
+    - FAQ: usage/faq.md
+    - Troubleshooting: usage/troubleshooting.md
+- Plugins: 
+  - Overview: 'plugins.md'
+  - Catalog: '*include ./plugindocs/*/mkdocs.yml'
+# defer to gen-files + literate-nav
+- API reference:
+  - nendo: reference/
+- Development:
+  - development/index.md
+  - Contributing: contributing.md
+  - Documentation: development/documentation.md
+  - Plugin Development:
+    - development/plugindev.md
+    - Analysis Plugin: development/analysisplugindev.md
+    - Generate Plugin: development/generateplugindev.md
+    - Effect Plugin: development/effectplugindev.md
+    - Library Plugin: development/libraryplugindev.md
+  # - App Development: development/appdev.md
+  # - Code of Conduct: code_of_conduct.md
+  - Coverage report: coverage.md
+# - Insiders:
+#   - insiders/index.md
+#   - Getting started:
+#     - Installation: insiders/installation.md
+#     - Changelog: insiders/changelog.md
+- Okio's website: https://okio.ai/
+
+theme:
+  name: material
+  logo: assets/logo.png
+  custom_dir: docs/.overrides
+  features:
+  - announce.dismiss
+  - content.action.edit
+  - content.action.view
+  - content.code.annotate
+  - content.code.copy
+  - content.tooltips
+  - navigation.footer
+  - navigation.indexes
+  - navigation.sections
+  - navigation.tabs
+  - navigation.tabs.sticky
+  - navigation.top
+  - search.highlight
+  - search.suggest
+  - toc.follow
+  palette:
+  - media: "(prefers-color-scheme)"
+    toggle:
+      icon: material/brightness-auto
+      name: Switch to light mode
+  - media: "(prefers-color-scheme: light)"
+    scheme: default
+    primary: teal
+    accent: purple
+    toggle:
+      icon: material/weather-sunny
+      name: Switch to dark mode
+  - media: "(prefers-color-scheme: dark)"
+    scheme: slate
+    primary: black
+    accent: lime
+    toggle:
+      icon: material/weather-night
+      name: Switch to system preference
+
+validation:
+  omitted_files: warn
+  absolute_links: warn
+  unrecognized_links: warn
+
+markdown_extensions:
+  - attr_list
+  - admonition
+  - callouts
+  - footnotes
+  - pymdownx.details
+  - pymdownx.magiclink
+  - pymdownx.inlinehilite
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.snippets:
+      check_paths: true
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+      slugify: !!python/object/apply:pymdownx.slugs.slugify
+        kwds:
+          case: lower
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+  - toc:
+      permalink: "¤"
+
+plugins:
+- search
+- monorepo
+- coverage:
+    page_name: coverage
+    html_report_dir: htmlcov
+# - pdf-export
+- literate-nav:
+    nav_file: SUMMARY.txt
+# - git-committers:
+#     enabled: !ENV [DEPLOY, false]
+#     token: !ENV ["GH_TOKEN"]
+#     repository: okio-ai/nendo
+- minify:
+    minify_html: !ENV [DEPLOY, false]
+- gen-files:
+    scripts:
+    - scripts/gen_ref_nav.py
+# - section-index
+- mkdocstrings:
+    handlers:
+      python:
+        import:
+        - https://docs.python.org/3/objects.inv
+        - https://mkdocstrings.github.io/autorefs/objects.inv
+        paths: [src]
+        options:
+          docstring_options:
+            ignore_init_summary: true
+            returns_named_value: false
+          docstring_section_style: table
+          filters: ["!^_"]
+          heading_level: 1
+          inherited_members: true
+          merge_init_into_class: true
+          separate_signature: true
+          show_root_heading: true
+          show_root_full_path: false
+          show_signature_annotations: true
+          show_symbol_type_heading: true
+          show_symbol_type_toc: true
+          signature_crossrefs: true
+          summary: true
+
+extra:
+  social:
+  - icon: fontawesome/brands/github
+    link: https://github.com/okio-ai
+  - icon: fontawesome/brands/mastodon
+    link: https://fosstodon.org/@okio-ai
+  - icon: fontawesome/brands/twitter
+    link: https://twitter.com/okio_ai
+  - icon: fontawesome/brands/python
+    link: https://pypi.org/project/nendo/
