@@ -96,7 +96,7 @@ and then run it using nendo:
 from nendo import Nendo
 
 nd = Nendo(plugins=["nendo_plugin_musicgen"])
-song = nd.plugins.musicgen(prompt="funky 70s disco", bpm=120)
+songs = nd.plugins.musicgen(prompt="funky 70s disco", bpm=120)
 songs[0].export("funky_disco.mp3")
 ```
 
