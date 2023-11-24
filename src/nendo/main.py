@@ -79,7 +79,7 @@ class Nendo:
                 config=self.config,
                 logger=self.logger,
                 plugin_name="DuckDBLibrary",
-                plugin_version="0.1.0",
+                plugin_version="0.1.1",
             )
         else:
             self.logger.info(f"Loading {self.config.library_plugin}")

@@ -12,8 +12,8 @@ DOCS_CMD = mkdir -p htmlcov/ && touch htmlcov/index.html && mkdir -p docs/.overr
 DOCS_SERVE_CMD = mkdir -p htmlcov/ && touch htmlcov/index.html && mkdir -p docs/.overrides && python3 ./scripts/gen_plugin_docs.py && mkdocs serve -s
 POETRY_SETUP_CMD = poetry install --all-extras --sync
 POETRY_PUBLISH_CMD = poetry build && poetry publish
-CHANGELOG_CMD = git-changelog -c angular -t keepachangelog -s build,deps,feat,fix,refactor -i -o CHANGELOG.md -T -b .
-RELEASE_CMD = git add pyproject.toml CHANGELOG.md && git commit -m "chore: Prepare release $(version)" && git tag $(version) && git push && git push --tags
+CHANGELOG_CMD = git-changelog -c angular -t keepachangelog -s build,deps,feat,fix,refactor,docs -i -o CHANGELOG.md -T --bump=auto .
+RELEASE_CMD = git add pyproject.toml CHANGELOG.md && git commit -m "release/$(version)" && git tag $(version) && git push && git push --tags
 
 .PHONY: setup setup-test setup-poetry clean format check test docs orm changelog publish release
 
