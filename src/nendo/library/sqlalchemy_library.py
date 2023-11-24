@@ -2155,14 +2155,16 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         collection_tracks = self.get_collection_tracks(collection_id)
         now = datetime.now().strftime("%Y%m%d%H%M%S") # noqa: DTZ005
         if not os.path.isdir(export_path):
-            logger.error(f"export_path {export_path} is not a valid directory!")
-            return []
+            logger.info(
+                f"Export path {export_path} does not exist, creating now.",
+            )
+            os.makedirs(export_path, exist_ok=True)
         track_file_paths = []
         for track in collection_tracks:
             if track.has_meta("original_filename"):
                 original_filename = track.get_meta("original_filename")
             else:
-                original_filename = track.get_meta("file_name")
+                original_filename = track.resource.file_name
             file_name = f"{original_filename}_{filename_suffix}_{now}.{file_format}"
             file_path = os.path.join(export_path, file_name)
             track_file_path = self.export_track(

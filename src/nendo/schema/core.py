@@ -1661,7 +1661,7 @@ class NendoStorageLocalFS(NendoStorage):
     def init_storage_for_user(self, user_id: str) -> str:  # noqa: ARG002
         """Initialize local storage for user."""
         if not os.path.isdir(self.library_path):
-            logger.warning(
+            logger.info(
                 f"Library path {self.library_path} does not exist, creating now.",
             )
             os.makedirs(self.library_path)
