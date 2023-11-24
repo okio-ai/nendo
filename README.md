@@ -56,7 +56,11 @@ Nendo core is the AI audio tool suite allowing you to effortlessly develop audio
 
 ## Requirements
 
-Nendo requires the following software packages to be installed in your system:
+**Nendo core requires Python version 3.8, 3.9 or 3.10.**
+
+> It is recommended to use a [virtual environment](https://docs.python.org/3/library/venv.html) for installing nendo core, in order to avoid dependency conflicts. You can use your favorite virtual environment management system, like [conda](https://docs.conda.io/en/latest/), [poetry](https://python-poetry.org/), or [pyenv](https://github.com/pyenv/pyenv) for example.
+
+Furthermore, the following software packages need to be installed in your system:
 
 - **Ubuntu**: `sudo apt-get install ffmpeg libsndfile1 libportaudio2`
 - **Mac OS**: `brew install ffmpeg libsndfile portaudio`
@@ -84,13 +88,9 @@ nendo = Nendo()
 
 ## Usage
 
-For example, install the [musicgen plugin](https://github.com/okio-ai/nendo_plugin_musicgen):
+For example, [install the musicgen nendo plugin](https://github.com/okio-ai/nendo_plugin_musicgen#requirements).
 
-```bash
-pip install nendo-plugin-musicgen
-```
-
-and then run it using nendo:
+And then run it using nendo:
 
 ```python
 from nendo import Nendo
