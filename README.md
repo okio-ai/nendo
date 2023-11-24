@@ -96,9 +96,8 @@ and then run it using nendo:
 from nendo import Nendo
 
 nd = Nendo(plugins=["nendo_plugin_musicgen"])
-song = nd.plugins.musicgen(prompt="funky 70s disco", bpm=120)
-song.export("funky_disco.mp3")
-
+songs = nd.plugins.musicgen(prompt="funky 70s disco", bpm=120)
+songs[0].export("funky_disco.mp3")
 ```
 
 Please refer to the [documentation](https://okio.ai/docs/usage/) to learn more about how to use nendo.
@@ -117,7 +116,7 @@ Nendo thrives on its rich [plugin](https://okio.ai/docs/plugins) ecosystem. Ther
 - Audio Quantization
 - Audio Loop-Extraction
 
-If you want to develop your own plugin for nendo, consult the [plugin development documentation](https://okio.ai/docs/development/pluginsdev/), you'll be surprised how simple it is.
+If you want to develop your own plugin for nendo, consult the [plugin development documentation](https://okio.ai/docs/development/plugindev/), you'll be surprised how simple it is.
 
 ## Contributors
 

@@ -45,13 +45,14 @@ In nendo we currently differentiate between four types of plugins.
     !!! warning
         Library plugins are a special type of plugin, they differ a lot from other plugins and should only be used if you know what you are doing.
 
-    Plugins that add new or completely different functionality to the `NendoLibrary` are called library plugins.
+    Plugins that implement new DBMS backends for the nendo library are called _library plugins_. To implement a new library plugin, you have two options:
 
-    TODO write more here Felix please, thanks
+        1. Inherit from the `SqlAlchemyNendoLibrary`, if your taget DBMS is compatible with SQLAlchemy, i.e. an SQLAlchemy driver exists for it. In this case, you only have to implement the initialization of the library as shown bove.
+        1. Inherit from the `NendoLibraryPlugin`, and implement a general library plugin that does not use SQLAlchemy to connect to the DBMS backend. In this case, you have to implement/override all public methods defined in the `NendoLibraryPlugin`. Refer to the [API Reference](https://okio.ai/docs/reference/schema/plugin/#nendo.schema.plugin.NendoLibraryPlugin) to see the full list of functions that have to be implemented.
+    
+    Examples:
 
-    Examples: 
-
-    - [nendo_plugin_library_postgres](https://github.com/okio-ai/nendo_plugin_library_postgres)
+    - [duckdb_library](https://okio.ai/docs/reference/library/duckdb_library/)
 
 !!! note
     Make sure that you understand the different plugin types before you start writing your own plugin.
