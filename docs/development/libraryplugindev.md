@@ -1,6 +1,6 @@
 # Writing a `LibraryPlugin`
 
-Writing a `LibraryPlugin` differs significantly from implementing any of the other plugin types. It requires the implementation of a all functions defined by the `NendoLibraryPlugin`, which can be found in the [API Reference](https://okio.ai/docs/reference/schema/plugin/#nendo.schema.plugin.NendoLibraryPlugin). The following is a preliminary introduction and will be heavily extended in the future.
+Writing a `LibraryPlugin` differs significantly from implementing any of the other plugin types. It requires the implementation of all functions defined by the `NendoLibraryPlugin`, which can be found in the [API Reference](https://okio.ai/docs/reference/schema/plugin/#nendo.schema.plugin.NendoLibraryPlugin). The following is a preliminary introduction and will be heavily extended in the future.
 
 The plugin's directory structure is exactly the same as with any other kind of plugin:
 
