@@ -169,6 +169,8 @@ class DefaultLibraryTests(unittest.TestCase):
         result = nd.library.filter_tracks(track_type="stem")
         self.assertEqual(len(result), 1)
         self.assertEqual(result[0].id, test_track_1.id)
+        result = nd.library.filter_tracks(track_type=["stem", "track"])
+        self.assertEqual(len(result), 2)
 
     def test_get_tracks_filtered_by_collection(self):
         """Test filtering of tracks by collection."""
