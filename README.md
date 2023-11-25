@@ -25,7 +25,7 @@
 <a href="https://opensource.org/licenses/MIT" target="_blank">
     <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT">
 </a>
-<a href="https://discord.gg/XpkUsjwXTp" target="_blank">
+<a href="https://discord.gg/gaZMZKzScj" target="_blank">
     <img src="https://dcbadge.vercel.app/api/server/XpkUsjwXTp?compact=true&style=flat" alt="Discord">
 </a>
 <a href="https://twitter.com/okio_ai" target="_blank">
