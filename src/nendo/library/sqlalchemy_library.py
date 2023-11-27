@@ -1200,7 +1200,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             # apply track type filter if applicable
             if track_type is not None:
                 if isinstance(track_type, list):
-                    query = query.filter(model.NendoTrackDB.value.in_(track_type))
+                    query = query.filter(model.NendoTrackDB.track_type.in_(track_type))
                 else:
                     query = query.filter(model.NendoTrackDB.track_type == track_type)
 
