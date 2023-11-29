@@ -48,7 +48,6 @@ class DuckDBLibrary(SqlAlchemyNendoLibrary):
             self.storage_driver = schema.NendoStorageLocalFS(
                 library_path=self.config.library_path, user_id=self.config.user_id,
             )
-
         self._connect(db, session)
 
     def _connect(

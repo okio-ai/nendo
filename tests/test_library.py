@@ -260,6 +260,10 @@ class DefaultLibraryTests(unittest.TestCase):
         self.assertEqual(len(results), 3)
         results = nd.library.get_tracks(limit=1)
         self.assertEqual(len(results), 1)
+        # try adding again, should update existing
+        nd.library.add_tracks(path="tests/assets")
+        results = nd.library.get_tracks()
+        self.assertEqual(len(results), 3)
 
     def test_remove_file_from_library(self):
         """Test the `nd.library.remove_track()` function."""

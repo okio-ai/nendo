@@ -152,6 +152,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             raise schema.NendoResourceError("Unsupported filetype", file_path)
 
         file_checksum = md5sum(file_path)
+        file_stats = os.stat(file_path)
 
         # skip adding a duplicate based on config flag and hashsum of the file
         skip_duplicate = skip_duplicate or self.config.skip_duplicate
@@ -174,7 +175,6 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         copy_to_library = copy_to_library or self.config.copy_to_library
         if copy_to_library or (self.config.auto_convert and file_path.endswith(".mp3")):
             try:
-                file_stats = os.stat(file_path)
                 sr = None
                 if self.config.auto_convert:
                     if file_path.endswith(".mp3"):
@@ -220,14 +220,6 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                 if sr is not None:
                     meta["sr"] = sr
 
-                meta.update(
-                    {
-                        "original_filename": os.path.basename(file_path),
-                        "original_filepath": os.path.dirname(file_path),
-                        "original_size": file_stats.st_size,
-                        "original_checksum": file_checksum,
-                    },
-                )
                 location = self.storage_driver.get_driver_location()
             except Exception as e:  # noqa: BLE001
                 raise schema.NendoLibraryError(
@@ -236,6 +228,15 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         else:
             path_in_library = file_path
             location = schema.ResourceLocation.original
+
+        meta.update(
+            {
+                "original_filename": os.path.basename(file_path),
+                "original_filepath": os.path.dirname(file_path),
+                "original_size": file_stats.st_size,
+                "original_checksum": file_checksum,
+            },
+        )
 
         resource = schema.NendoResource(
             file_path=self.storage_driver.get_file_path(
@@ -469,7 +470,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         return db_track
 
     def _upsert_tracks_db(
-        self, tracks: List[schema.NendoTrackCreate], session: Session,
+        self, tracks: List[schema.NendoTrackBase], session: Session,
     ) -> List[model.NendoTrackDB]:
         """Create multiple tracks in DB or update if it exists.
 
@@ -482,9 +483,25 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         """
         db_tracks = []
         for track in tracks:
-            track_dict = track.model_dump()
-            track_dict.pop("nendo_instance")
-            db_tracks.append(model.NendoTrackDB(**track_dict))
+            if type(track) == schema.NendoTrackCreate:
+                # create new track
+                track_dict = track.model_dump()
+                track_dict.pop("nendo_instance")
+                db_tracks.append(model.NendoTrackDB(**track_dict))
+            else:
+                # update existing track
+                db_tracks.append(
+                    session.query(model.NendoTrackDB).filter_by(id=track.id).one_or_none()
+                )
+                db_track = db_tracks[-1]
+                if db_track is None:
+                    raise schema.NendoTrackNotFoundError("Track not found", id=track.id)
+                db_track.user_id = track.user_id
+                db_track.visibility = track.visibility
+                db_track.resource = track.resource.model_dump()
+                db_track.track_type = track.track_type
+                db_track.images = track.images
+                db_track.meta = track.meta
         session.add_all(db_tracks)
         session.commit()
         return db_tracks
@@ -1377,10 +1394,10 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             session.delete(target)
         # only delete if file has been copied to the library
         # ("original_filepath" is present)
+        target_track = schema.NendoTrack.model_validate(target)
         if (
             remove_resources
-            and "original_filepath"
-            in schema.NendoTrack.model_validate(target).resource.meta
+            and target_track.resource.location != "original"
         ):
             logger.info("Removing resources associated with Track %s", str(track_id))
             return self.storage_driver.remove_file(
