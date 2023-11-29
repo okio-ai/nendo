@@ -13,7 +13,7 @@ DOCS_SERVE_CMD = mkdir -p htmlcov/ && touch htmlcov/index.html && mkdir -p docs/
 POETRY_SETUP_CMD = poetry install --all-extras --sync
 POETRY_PUBLISH_CMD = poetry build && poetry publish
 CHANGELOG_CMD = git-changelog -c angular -t keepachangelog -s build,deps,feat,fix,refactor,docs -i -o CHANGELOG.md -T --bump=auto .
-RELEASE_CMD = git add pyproject.toml CHANGELOG.md && git commit -m "release/$(version)" && git tag $(version) && git push && git push --tags
+RELEASE_CMD = git add pyproject.toml CHANGELOG.md && git commit -m "chore: prepare release $(version)" && git tag $(version) && git push && git push --tags
 
 .PHONY: setup setup-test setup-poetry clean format check test docs orm changelog publish release
 

@@ -34,7 +34,6 @@ nav:
 - Development:
   - development/index.md
   - Contributing: contributing.md
-  - Documentation: development/documentation.md
   - Plugin Development:
     - development/plugindev.md
     - Analysis Plugin: development/analysisplugindev.md

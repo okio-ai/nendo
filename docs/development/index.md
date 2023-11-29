@@ -47,6 +47,9 @@ Different plugin types like analysis, generate, and effect exist because:
 - There are shared functionalities within each plugin class provided by Nendo Core.
 - These shared functionalities make the implementation of new plugins more effortless for developers.
 
+**Should a plugin depend on or use other plugins?**
+
+We highly advocate against having plugins depend on or use other plugins. The combining of plugins should exclusively happy by means of chaining "from the outside" of Nendo. The reason for this is, that there is a high likelyhood of introducing a dependency conflict if the original project uses say `plugin_a` of a specific version but another plugin, `plugin_b` depends on `plugin_a`, but of another version.
 
 ## Writing Good Documentation
 
