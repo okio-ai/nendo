@@ -553,7 +553,7 @@ class NendoTrack(NendoTrackBase):
         self,
         plugin_name: str = "",
         key: str = "",
-    ) -> Union[List[NendoPluginData], str, NendoBlob]:
+    ) -> List[NendoPluginData]:
         """Get all plugin data related to the given plugin name and the given key.
 
         Note: Function behavior
@@ -563,8 +563,6 @@ class NendoTrack(NendoTrackBase):
                 plugin_name is returned.
             - If neither key, nor plugin_name is specified, all plugin data
                 is returned.
-            - If the return value is a single item, it's `value` will be returned
-                directly, otherwise a list of `NendoPluginData` will be returned.
             - Certain kinds of plugin data are actually stored as blobs
                 and the corresponding blob id is stored in the plugin data's value
                 field. Those will be automatically loaded from the blob into memory
@@ -591,16 +589,33 @@ class NendoTrack(NendoTrackBase):
             ):
                 # if we have a UUID, load the corresponding blob
                 if uuid_pattern.match(pd.value):
-                    pd_loaded = self.nendo_instance.library.load_blob(
+                    loaded_blob = self.nendo_instance.library.load_blob(
                         blob_id=uuid.UUID(pd.value),
                     )
-                    plugin_data.append(pd_loaded)
-                # otherwise it's "normal" (non-blobified) data, load directly
-                else:
-                    plugin_data.append(pd)
-        if len(plugin_data) == 1:
-            return plugin_data[0].value
+                    pd.value = loaded_blob
+                plugin_data.append(pd)
         return plugin_data
+
+    def get_plugin_value(
+        self,
+        key: str,
+    ) -> str:
+        """Return the value for a specific plugin_data key.
+
+        Args:
+            key (str): The key for which the plugin data value should
+                be returned.
+
+        Returns:
+            str: The plugin data value belonging to the given key.
+                If multiple plugin_data entries exist for the given key,
+                the first one is returned. If none exist, None is returned.
+        """
+        pd = self.get_plugin_data(key = key)
+        print(pd)
+        if len(pd) == 0:
+            return None
+        return pd[0].value
 
     def add_related_track(
         self,

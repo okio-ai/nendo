@@ -61,8 +61,23 @@ class PluginDataTest(unittest.TestCase):
         self.assertEqual(len(plugin_data), 2)
         self.assertEqual(type(plugin_data[0]), NendoPluginData)
         plugin_data_2 = track.get_plugin_data(plugin_name="test_plugin", key="test2")
-        self.assertEqual(type(plugin_data_2), str)
-        self.assertEqual(plugin_data_2, "value2")
+        self.assertEqual(type(plugin_data_2), list)
+        self.assertEqual(plugin_data_2[0].value, "value2")
+
+    def test_get_plugin_value(self):
+        nd.library.reset(force=True)
+        track = nd.library.add_track(file_path="tests/assets/test.mp3")
+        _ = nd.library.add_plugin_data(
+            track_id=track.id,
+            plugin_name="test_plugin",
+            plugin_version="1.0",
+            key="test",
+            value="value",
+        )
+        track = nd.library.get_track(track_id=track.id)
+        plugin_value = track.get_plugin_value("test")
+        self.assertEqual(type(plugin_value), str)
+        self.assertEqual(plugin_value, "value")
 
     def test_filter_random_track(self):
         """Test the retrieval of a random `NendoTrack` from the library."""
@@ -80,8 +95,8 @@ class PluginDataTest(unittest.TestCase):
             order_by="random",
             plugin_names=["test_plugin"],
         )[0].get_plugin_data(plugin_name="test_plugin")
-        self.assertEqual(type(example_data), str)
-        self.assertEqual(example_data, pd.value)
+        self.assertEqual(type(example_data), list)
+        self.assertEqual(example_data[0].value, pd.value)
 
     def test_filter_by_plugin_data_and_filename(self):
         """Test filtering by plugin data and track file name."""
@@ -100,8 +115,8 @@ class PluginDataTest(unittest.TestCase):
             order_by="random",
             plugin_names=["test_plugin"],
         )[0].get_plugin_data(plugin_name="test_plugin")
-        self.assertEqual(type(example_data), str)
-        self.assertEqual(example_data, pd.value)
+        self.assertEqual(type(example_data), list)
+        self.assertEqual(example_data[0].value, pd.value)
 
     def test_filter_tracks_by_plugin_data(self):
         """Test the filtering of `NendoTrack`s by plugin data."""
@@ -119,14 +134,14 @@ class PluginDataTest(unittest.TestCase):
             filters={"foo": "bar"},
             plugin_names=["test_plugin"],
         )[0].get_plugin_data(plugin_name="test_plugin")
-        self.assertEqual(type(example_data), str)
-        self.assertEqual(example_data, track.plugin_data[0].value)
+        self.assertEqual(type(example_data), list)
+        self.assertEqual(example_data[0].value, track.plugin_data[0].value)
         example_data = nd.library.filter_tracks(
             filters={"foo": ["bar", "baz"]},
             plugin_names=["test_plugin"],
         )[0].get_plugin_data(plugin_name="test_plugin")
-        self.assertEqual(type(example_data), str)
-        self.assertEqual(example_data, pd.value)
+        self.assertEqual(type(example_data), list)
+        self.assertEqual(example_data[0].value, pd.value)
         example_data = nd.library.filter_tracks(
             filters={"foo": ["bat", "baz"]},
             plugin_names=["test_plugin"],
@@ -144,14 +159,14 @@ class PluginDataTest(unittest.TestCase):
             filters={"number": (10.0, 20.0)},
             plugin_names=["test_plugin"],
         )[0].get_plugin_data(plugin_name="test_plugin", key="number")
-        self.assertEqual(type(example_data), str)
-        self.assertEqual(example_data, pd2.value)
+        self.assertEqual(type(example_data), list)
+        self.assertEqual(example_data[0].value, pd2.value)
         example_data = nd.library.filter_tracks(
             filters={"number": (10, 20)},
             plugin_names=["test_plugin"],
         )[0].get_plugin_data(plugin_name="test_plugin", key="number")
-        self.assertEqual(type(example_data), str)
-        self.assertEqual(example_data, pd2.value)
+        self.assertEqual(type(example_data), list)
+        self.assertEqual(example_data[0].value, pd2.value)
         example_data = nd.library.filter_tracks(
             filters={"number": (20.0, 30.0)},
             plugin_names=["test_plugin"],
