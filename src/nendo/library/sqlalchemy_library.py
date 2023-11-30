@@ -934,10 +934,10 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
     def add_plugin_data(
         self,
         track_id: Union[str, uuid.UUID],
-        plugin_name: str,
-        plugin_version: str,
         key: str,
         value: Any,
+        plugin_name: str,
+        plugin_version: Optional[str] = None,
         user_id: Optional[Union[str, uuid.UUID]] = None,
         replace: bool = False,
     ) -> schema.NendoPluginData:
@@ -946,10 +946,12 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         Args:
             track_id (Union[str, UUID]): ID of the track to which
                 the plugin data should be added.
-            plugin_name (str): Name of the plugin.
-            plugin_version (str): Version of the plugin.
             key (str): Key under which to save the data.
             value (Any): Data to save.
+            plugin_name (str): Name of the plugin.
+            plugin_version (str, optional): Version of the plugin. If none is given,
+                the currently loaded version of the plugin given by `plugin_name`
+                will be used.
             user_id (Union[str, UUID], optional): ID of user adding the plugin data.
             replace (bool, optional): Flag that determines whether
                 the last existing data point for the given plugin name and -version
@@ -961,6 +963,16 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         # create plugin data
         user_id = self._ensure_user_uuid(user_id)
         value_converted = self._convert_plugin_data(value=value, user_id=user_id)
+        if plugin_version is None:
+            try:
+                plugin = getattr(self.nendo_instance.plugins, plugin_name)
+            except AttributeError as e:
+                self.logger.error(
+                    f"Plugin with name {plugin_name} is not loaded. "
+                    "You have to manually specify the plugin_version parameter.",
+                )
+                return None
+            plugin_version = plugin.version
         plugin_data = schema.NendoPluginDataCreate(
             track_id=ensure_uuid(track_id),
             user_id=ensure_uuid(user_id),

@@ -515,20 +515,22 @@ class NendoTrack(NendoTrackBase):
 
     def add_plugin_data(
         self,
-        plugin_name: str,
-        plugin_version: str,
         key: str,
         value: str,
+        plugin_name: str,
+        plugin_version: Optional[str] = None,
         user_id: Optional[Union[str, uuid.UUID]] = None,
         replace: bool = True,
     ) -> NendoTrack:
         """Add plugin data to a NendoTrack and persist changes into the DB.
 
         Args:
-            plugin_name (str): Name of the plugin.
-            plugin_version (str): Version of the plugin.
             key (str): Key under which to save the data.
             value (Any): Data to save.
+            plugin_name (str): Name of the plugin.
+            plugin_version (str): Version of the plugin. If none is given,
+                the currently loaded version of the plugin given by `plugin_name`
+                will be used.
             user_id (Union[str, UUID], optional): ID of user adding the plugin data.
             replace (bool, optional): Flag that determines whether
                 the last existing data point for the given plugin name and -version

@@ -3,7 +3,7 @@
 
 import unittest
 
-from nendo import Nendo, NendoConfig, NendoPluginData
+from nendo import Nendo, NendoConfig, NendoPlugin, NendoPluginData
 
 nd = Nendo(
     config=NendoConfig(
@@ -36,6 +36,46 @@ class PluginDataTest(unittest.TestCase):
         track = nd.library.get_track(track_id=track.id)
         self.assertEqual(len(track.plugin_data), 1)
         self.assertEqual(track.plugin_data[0], pd)
+
+    def test_add_plugin_data_without_version(self):
+        """Test the adding of plugin data to a `NendoTrack`."""
+        nd.library.reset(force=True)
+        my_plugin = NendoPlugin(
+            nendo_instance=nd,
+            config=nd.config,
+            logger=nd.logger,
+            plugin_name="test_plugin",
+            plugin_version="1.0",
+        )
+        nd.plugins.add(
+            plugin_name="test_plugin",
+            version="1.0",
+            plugin_instance=my_plugin,
+        )
+        track = nd.library.add_track(file_path="tests/assets/test.mp3")
+        _ = nd.library.add_plugin_data(
+            track_id=track.id,
+            plugin_name="test_plugin",
+            key="test",
+            value="value",
+        )
+        track = nd.library.get_track(track_id=track.id)
+        self.assertEqual(len(track.plugin_data), 1)
+        self.assertEqual(track.plugin_data[0].plugin_version, "1.0")
+
+    def test_add_plugin_data_without_version_fails(self):
+        """Test the adding of plugin data to a `NendoTrack`."""
+        nd.library.reset(force=True)
+        track = nd.library.add_track(file_path="tests/assets/test.mp3")
+        pd = nd.library.add_plugin_data(
+            track_id=track.id,
+            plugin_name="test_plugin_2",
+            key="test",
+            value="value",
+        )
+        track = nd.library.get_track(track_id=track.id)
+        self.assertEqual(pd, None)
+        self.assertEqual(len(track.plugin_data), 0)
 
     def test_get_plugin_data(self):
         """Test the getting of plugin data from a `NendoTrack`."""
