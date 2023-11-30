@@ -295,6 +295,10 @@ Tracks in nendo have metadata attached to them, in the form of the `NendoTrack.m
 
 ### Working with plugin data
 
+??? info "Plugin data version"
+
+    Plugin data in Nendo Core is _versioned_, in accordance with the version of the plugin that was used to produce it. That means, that if a specific plugin is used to process a given track twice, it will only overwrite the previous data if the version of the plugin has not changed since the last run. This is to ensure proper traceability of results and to make the nendo library compatible with plugin upgrades.
+
 The `NendoTrack` object provides various functions for processing it with a `NendoPlugin` and for accessing the resulting `NendoPluginData`:
 
 === "Running a plugin"
@@ -334,22 +338,17 @@ The `NendoTrack` object provides various functions for processing it with a `Nen
         # ...
         ```
     
-    You can also provide the specific `key` you are interested in to further filter the `plugin_data` entries. In the example, only a single entry was found for the given combination of `plugin_name` and `key` and thus, the `value` of the `plugin_data` is returned directly.
+    If you are sure that for a specific key, only a single `plugin_data` entry exists, you can also use the `get_plugin_value()` method that will directly return the value for a given key. If the track has multiple `plugin_data` entries for the given key, the _first_ one is returned (and actually, in most cases, it would make sense to use the `get_plugin_data()` method instead to make sure you really retrieve the value what you want).
 
     !!! example
 
         ```pycon
-        >>> plugin_data = track.get_plugin_data(
-        ...   plugin_name="nendo_plugin_classify_core",
+        >>> plugin_data = track.get_plugin_value(
         ...   key = "duration",
         ... )
         >>> print(plugin_data)
         121.1
         ```
-
-    ??? info "Plugin data version"
-
-        Plugin data in Nendo Core is _versioned_, in accordance with the version of the plugin that was used to produce it. That means, that if a specific plugin is used to process a given track twice, it will only overwrite the previous data if the version of the plugin has not changed since the last run. This is to ensure proper traceability of results and to make the nendo library compatible with plugin upgrades.
 
 ### Working with collections
 
