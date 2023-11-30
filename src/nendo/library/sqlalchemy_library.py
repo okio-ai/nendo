@@ -932,7 +932,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             key (str): Key under which to save the data.
             value (Any): Data to save.
             plugin_name (str): Name of the plugin.
-            plugin_version (str, optional): Version of the plugin. If not specified,
+            plugin_version (str, optional): Version of the plugin. If none is given,
                 the currently loaded version of the plugin given by `plugin_name`
                 will be used.
             user_id (Union[str, UUID], optional): ID of user adding the plugin data.
@@ -947,7 +947,14 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         user_id = self._ensure_user_uuid(user_id)
         value_converted = self._convert_plugin_data(value=value, user_id=user_id)
         if plugin_version is None:
-            plugin = getattr(self.nendo_instance.plugins, plugin_name)
+            try:
+                plugin = getattr(self.nendo_instance.plugins, plugin_name)
+            except AttributeError as e:
+                self.logger.error(
+                    f"Plugin with name {plugin_name} is not loaded. "
+                    "You have to manually specify the plugin_version parameter.",
+                )
+                return None
             plugin_version = plugin.version
         plugin_data = schema.NendoPluginDataCreate(
             track_id=ensure_uuid(track_id),
