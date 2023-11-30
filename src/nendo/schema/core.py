@@ -20,7 +20,7 @@ from abc import ABC, abstractmethod
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from enum import Enum
-from typing import Any, ClassVar, Dict, List, Optional, Tuple, Union
+from typing import Any, ClassVar, Dict, Iterator, List, Optional, Tuple, Union
 
 import librosa
 import numpy as np
@@ -893,6 +893,9 @@ class NendoCollection(NendoCollectionBase):
     def __getitem__(self, index: int) -> NendoTrack:
         """Return the track at the specified index."""
         return self.tracks()[index]
+
+    def __iter__(self) -> Iterator:
+        return iter(self.tracks())
 
     def __len__(self):
         """Return the number of tracks in the collection."""
