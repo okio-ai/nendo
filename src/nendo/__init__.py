@@ -5,7 +5,17 @@
 from importlib import metadata
 
 from .config import NendoConfig
-from .library import SqlAlchemyNendoLibrary
+from .library import (
+    CollectionCollectionRelationshipDB,
+    NendoBlobDB,
+    NendoCollectionDB,
+    NendoLibraryVectorExtension,
+    NendoPluginDataDB,
+    NendoTrackDB,
+    SqlAlchemyNendoLibrary,
+    TrackCollectionRelationshipDB,
+    TrackTrackRelationshipDB,
+)
 from .main import Nendo
 from .schema import (
     NendoAnalysisPlugin,
@@ -14,6 +24,7 @@ from .schema import (
     NendoCollectionNotFoundError,
     NendoCollectionSlim,
     NendoEffectPlugin,
+    NendoEmbedding,
     NendoError,
     NendoFileFormatError,
     NendoGeneratePlugin,

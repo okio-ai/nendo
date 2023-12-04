@@ -76,9 +76,13 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         finally:
             session.close()
 
+    def __del__(self) -> None:
+        self._disconnect()
+
     def _disconnect(self):
-        """Close DuckDB."""
-        self.db.close()
+        """Close the connection to the database."""
+        if self.db:
+            self.db.close()
 
     def _ensure_user_uuid(self, user_id: Optional[Union[str, uuid.UUID]] = None):
         return ensure_uuid(user_id) if user_id is not None else self.user.id
@@ -169,7 +173,11 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             tags = TinyTag.get(file_path)
             meta.update(tags.as_dict())
         except KeyError as e:
-            logger.error("Failed extracting tags from file: %s, Error: %s", file_path, e)
+            logger.error(
+                "Failed extracting tags from file: %s, Error: %s",
+                file_path,
+                e,
+            )
 
         # convert and save to library
         copy_to_library = copy_to_library or self.config.copy_to_library
@@ -178,7 +186,11 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                 sr = None
                 if self.config.auto_convert:
                     if file_path.endswith(".mp3"):
-                        signal, sr = librosa.load(path=file_path, sr=None, mono=False)
+                        signal, sr = librosa.load(
+                            path=file_path,
+                            sr=None,
+                            mono=False,
+                        )
                     else:
                         signal, sr = sf.read(file=file_path)
                     # resample to default rate if required
@@ -287,7 +299,9 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             if self.config.auto_resample and sr != self.config.default_sr:
                 logger.info("Auto-converting to SR of %d", self.config.default_sr)
                 signal = librosa.resample(
-                    signal, orig_sr=sr, target_sr=self.config.default_sr
+                    signal,
+                    orig_sr=sr,
+                    target_sr=self.config.default_sr,
                 )
                 sr = self.config.default_sr
             target_file = self.storage_driver.save_signal(
@@ -301,7 +315,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             )
         except Exception as e:  # noqa: BLE001
             raise schema.NendoLibraryError(
-                f"Failed writing file {target_file} to the library. Error: {e}."
+                f"Failed writing file {target_file} to the library. Error: {e}.",
             ) from None
         resource = schema.NendoResource(
             file_path=self.storage_driver.get_file_path(
@@ -406,7 +420,9 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         )
 
     def _upsert_track_track_relationship(
-        self, relationship: schema.NendoRelationshipBase, session: Session,
+        self,
+        relationship: schema.NendoRelationshipBase,
+        session: Session,
     ) -> schema.NendoTrack:
         """Insert or replace a track-to-track relationship in the database.
 
@@ -436,7 +452,9 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         return db_rel
 
     def _upsert_track_db(
-        self, track: schema.NendoTrackBase, session: Session,
+        self,
+        track: schema.NendoTrackBase,
+        session: Session,
     ) -> model.NendoTrackDB:
         """Create track in DB or update if it exists.
 
@@ -470,7 +488,9 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         return db_track
 
     def _upsert_tracks_db(
-        self, tracks: List[schema.NendoTrackBase], session: Session,
+        self,
+        tracks: List[schema.NendoTrackBase],
+        session: Session,
     ) -> List[model.NendoTrackDB]:
         """Create multiple tracks in DB or update if it exists.
 
@@ -491,11 +511,20 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             else:
                 # update existing track
                 db_tracks.append(
-                    session.query(model.NendoTrackDB).filter_by(id=track.id).one_or_none()
+                    session.query(
+                        model.NendoTrackDB,
+                    )
+                    .filter_by(
+                        id=track.id,
+                    )
+                    .one_or_none(),
                 )
                 db_track = db_tracks[-1]
                 if db_track is None:
-                    raise schema.NendoTrackNotFoundError("Track not found", id=track.id)
+                    raise schema.NendoTrackNotFoundError(
+                        "Track not found",
+                        id=track.id,
+                    )
                 db_track.user_id = track.user_id
                 db_track.visibility = track.visibility
                 db_track.resource = track.resource.model_dump()
@@ -620,7 +649,9 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             )
 
     def _insert_plugin_data_db(
-        self, plugin_data: schema.NendoPluginDataCreate, session: Session,
+        self,
+        plugin_data: schema.NendoPluginDataCreate,
+        session: Session,
     ) -> model.NendoPluginDataDB:
         db_plugin_data = model.NendoPluginDataDB(**plugin_data.model_dump())
         session.add(db_plugin_data)
@@ -798,12 +829,14 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         with self.session_scope() as session:
             relationship_from = schema.NendoRelationship.model_validate(
                 self._upsert_track_track_relationship(
-                    relationship=relationship_from, session=session,
+                    relationship=relationship_from,
+                    session=session,
                 ),
             )
             _ = schema.NendoRelationship.model_validate(
                 self._upsert_track_track_relationship(
-                    relationship=relationship_to, session=session,
+                    relationship=relationship_to,
+                    session=session,
                 ),
             )
         # avoid redundancy; only append one direction
@@ -824,7 +857,10 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         user_id = self._ensure_user_uuid(user_id=user_id)
         related_track_id = ensure_uuid(related_track_id)
         track = self.add_track(
-            file_path=file_path, track_type=track_type, user_id=user_id, meta=track_meta,
+            file_path=file_path,
+            track_type=track_type,
+            user_id=user_id,
+            meta=track_meta,
         )
         # create bidirectional relationship
         relationship_from = schema.NendoRelationshipCreate(
@@ -842,12 +878,14 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         with self.session_scope() as session:
             relationship_from = schema.NendoRelationship.model_validate(
                 self._upsert_track_track_relationship(
-                    relationship=relationship_from, session=session,
+                    relationship=relationship_from,
+                    session=session,
                 ),
             )
             _ = schema.NendoRelationship.model_validate(
                 self._upsert_track_track_relationship(
-                    relationship=relationship_to, session=session,
+                    relationship=relationship_to,
+                    session=session,
                 ),
             )
         # avoid redundancy; only append one direction
@@ -869,7 +907,10 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         user_id = user_id or self.user.id
         related_track_id = ensure_uuid(related_track_id)
         track = self.add_track_from_signal(
-            signal=signal, sr=sr, track_type=track_type, meta=track_meta,
+            signal=signal,
+            sr=sr,
+            track_type=track_type,
+            meta=track_meta,
         )
         # create bidirectional relationship
         relationship_from = schema.NendoRelationshipCreate(
@@ -887,12 +928,14 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         with self.session_scope() as session:
             relationship_from = schema.NendoRelationship.model_validate(
                 self._upsert_track_track_relationship(
-                    relationship=relationship_from, session=session,
+                    relationship=relationship_from,
+                    session=session,
                 ),
             )
             _ = schema.NendoRelationship.model_validate(
                 self._upsert_track_track_relationship(
-                    relationship=relationship_to, session=session,
+                    relationship=relationship_to,
+                    session=session,
                 ),
             )
         # avoid redundancy; only append one direction
@@ -966,7 +1009,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         if plugin_version is None:
             try:
                 plugin = getattr(self.nendo_instance.plugins, plugin_name)
-            except AttributeError as e:
+            except AttributeError as e:  # noqa: F841
                 self.logger.error(
                     f"Plugin with name {plugin_name} is not loaded. "
                     "You have to manually specify the plugin_version parameter.",
@@ -999,11 +1042,13 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                     )
                 else:
                     db_plugin_data = self._insert_plugin_data_db(
-                        plugin_data=plugin_data, session=session,
+                        plugin_data=plugin_data,
+                        session=session,
                     )
             else:
                 db_plugin_data = self._insert_plugin_data_db(
-                    plugin_data=plugin_data, session=session,
+                    plugin_data=plugin_data,
+                    session=session,
                 )
             return schema.NendoPluginData.model_validate(db_plugin_data)
 
@@ -1016,7 +1061,9 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                 .one_or_none()
             )
             return (
-                schema.NendoTrack.model_validate(track_db) if track_db is not None else None
+                schema.NendoTrack.model_validate(track_db)
+                if track_db is not None
+                else None
             )
 
     @schema.NendoPlugin.stream_output
@@ -1344,7 +1391,9 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         track_id = ensure_uuid(track_id)
         with self.session_scope() as session:
             tracks_with_relations = self._get_related_tracks_query(
-                track_id=track_id, session=session, user_id=user_id,
+                track_id=track_id,
+                session=session,
+                user_id=user_id,
             ).all()
             collections_with_relations = (
                 session.query(model.NendoCollectionDB)
@@ -1357,7 +1406,8 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                 .all()
             )
             related_plugin_data = self._get_all_plugin_data_db(
-                track_id=track_id, session=session,
+                track_id=track_id,
+                session=session,
             )
             if len(related_plugin_data) > 0:
                 if remove_plugin_data:
@@ -1370,7 +1420,8 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                     logger.warning(
                         "Cannot remove due to %d existing "
                         "plugin data entries. Set `remove_plugin_data=True` "
-                        "to remove them.", len(related_plugin_data),
+                        "to remove them.",
+                        len(related_plugin_data),
                     )
                     return False
             n_rel = len(tracks_with_relations) + len(collections_with_relations)
@@ -1401,16 +1452,13 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             target = (
                 session.query(model.NendoTrackDB)
                 .filter(model.NendoTrackDB.id == track_id)
-                .first()
+                .one_or_none()
             )
             session.delete(target)
         # only delete if file has been copied to the library
         # ("original_filepath" is present)
         target_track = schema.NendoTrack.model_validate(target)
-        if (
-            remove_resources
-            and target_track.resource.location != "original"
-        ):
+        if remove_resources and target_track.resource.location != "original":
             logger.info("Removing resources associated with Track %s", str(track_id))
             return self.storage_driver.remove_file(
                 file_name=target.resource["file_name"],
@@ -1450,7 +1498,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                 original_filename = track.resource.file_name
             file_name = (
                 f"{original_filename}_nendo_"
-                f"{datetime.now().strftime('%Y%m%d%H%M%S')}" # noqa: DTZ005
+                f"{datetime.now().strftime('%Y%m%d%H%M%S')}"  # noqa: DTZ005
                 f".{file_format}"
             )
             file_path = os.path.join(file_path, file_name)
@@ -1473,7 +1521,8 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             )
         else:
             raise ValueError(
-                "Unsupported file format. Supported formats are 'wav', 'mp3', and 'ogg'.",
+                "Unsupported file format. "
+                "Supported formats are 'wav', 'mp3', and 'ogg'.",
             )
 
         # Clean up temporary file if used
@@ -1551,15 +1600,16 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         )
         if target_relationship is None:
             raise schema.NendoRelationshipNotFoundError(
-                "Relationship not found", track_id, collection_id,
+                "Relationship not found",
+                track_id,
+                collection_id,
             )
         session.delete(target_relationship)
         # Adjust positions of other states
         rel_db = model.TrackCollectionRelationshipDB
         session.query(model.TrackCollectionRelationshipDB).filter(
             rel_db.target_id == collection_id,
-            rel_db.relationship_position
-            > target_relationship.relationship_position,
+            rel_db.relationship_position > target_relationship.relationship_position,
         ).update({rel_db.relationship_position: rel_db.relationship_position - 1})
 
     def add_collection(
@@ -1681,7 +1731,8 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             # Check if the collection does not exist
             if not collection:
                 raise schema.NendoCollectionNotFoundError(
-                    "Collection not found", id=collection_id,
+                    "Collection not found",
+                    id=collection_id,
                 )
 
             # create bidirectional relationship
@@ -1745,11 +1796,13 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             track = session.query(model.NendoTrackDB).filter_by(id=track_id).first()
             if not collection:
                 raise schema.NendoCollectionNotFoundError(
-                    "The collection does not exist", collection_id,
+                    "The collection does not exist",
+                    collection_id,
                 )
             if not track:
                 raise schema.NendoCollectionNotFoundError(
-                    "The track does not exist", track_id,
+                    "The track does not exist",
+                    track_id,
                 )
 
             rc_rel_db = model.TrackCollectionRelationshipDB
@@ -1790,7 +1843,8 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             return schema.NendoCollection.model_validate(collection)
 
     def get_collection_tracks(
-        self, collection_id: uuid.UUID,
+        self,
+        collection_id: uuid.UUID,
     ) -> List[schema.NendoTrack]:
         """Get all tracks from a collection.
 
@@ -1820,7 +1874,9 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             )
 
     def get_collection(
-        self, collection_id: uuid.UUID, details: bool = True,
+        self,
+        collection_id: uuid.UUID,
+        details: bool = True,
     ) -> Union[schema.NendoCollection, schema.NendoCollectionSlim]:
         """Get a collection by its ID.
 
@@ -1891,7 +1947,13 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                 model.NendoCollectionDB.user_id == user_id,
             )
             return self._get_collections_db(
-                query, user_id, order_by, order, limit, offset, session,
+                query,
+                user_id,
+                order_by,
+                order,
+                limit,
+                offset,
+                session,
             )
 
     @schema.NendoPlugin.stream_output
@@ -1977,10 +2039,16 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                         # ),
                     ),
                     model.NendoCollectionDB.user_id == user_id,
-                )
+                ),
             )
             return self._get_collections_db(
-                query, user_id, order_by, order, limit, offset, session,
+                query,
+                user_id,
+                order_by,
+                order,
+                limit,
+                offset,
+                session,
             )
 
     def get_related_collections(
@@ -1998,9 +2066,11 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             collection_id (str): ID of the collection to be searched for.
             user_id (Union[str, UUID], optional): The user ID to filter for.
             order_by (Optional[str]): Key used for ordering the results.
-            order (Optional[str]): Order in which to retrieve results ("asc" or "desc").
+            order (Optional[str]): Order in which to retrieve results
+                ("asc" or "desc").
             limit (Optional[int]): Limit the number of returned results.
-            offset (Optional[int]): Offset into the paginated results (requires limit).
+            offset (Optional[int]): Offset into the paginated results
+                (requires limit).
 
         Returns:
             Union[List, Iterator]: List or generator of collections, depending on the
@@ -2013,7 +2083,9 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                 session=session,
                 user_id=user_id,
             )
-            return self._get_collections_db(query, order_by, order, limit, offset, session)
+            return self._get_collections_db(
+                query, order_by, order, limit, offset, session
+            )
 
     def remove_track_from_collection(
         self,
@@ -2047,7 +2119,9 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
 
             # Remove the relationship from the track to the collection
             return self._remove_track_from_collection_db(
-                track_id=track_id, collection_id=collection_id, session=session,
+                track_id=track_id,
+                collection_id=collection_id,
+                session=session,
             )
 
     def update_collection(
@@ -2075,7 +2149,8 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
 
             if collection_db is None:
                 raise schema.NendoCollectionNotFoundError(
-                    "Collection not found", collection.id,
+                    "Collection not found",
+                    collection.id,
                 )
 
             collection_db.name = collection.name
@@ -2182,7 +2257,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             List[str]: A list with all full paths to the exported files.
         """
         collection_tracks = self.get_collection_tracks(collection_id)
-        now = datetime.now().strftime("%Y%m%d%H%M%S") # noqa: DTZ005
+        now = datetime.now().strftime("%Y%m%d%H%M%S")  # noqa: DTZ005
         if not os.path.isdir(export_path):
             logger.info(
                 f"Export path {export_path} does not exist, creating now.",
@@ -2197,9 +2272,9 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             file_name = f"{original_filename}_{filename_suffix}_{now}.{file_format}"
             file_path = os.path.join(export_path, file_name)
             track_file_path = self.export_track(
-                track_id = track.id,
-                file_path = file_path,
-                file_format = file_format,
+                track_id=track.id,
+                file_path=file_path,
+                file_format=file_format,
             )
             track_file_paths.append(track_file_path)
         return track_file_paths
@@ -2211,7 +2286,9 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
     # =========================
 
     def _upsert_blob_db(
-        self, blob: schema.NendoBlobBase, session: Session,
+        self,
+        blob: schema.NendoBlobBase,
+        session: Session,
     ) -> model.NendoBlobDB:
         """Create blob in DB or update if it exists.
 
@@ -2270,7 +2347,9 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             location=self.storage_driver.get_driver_location(),
             meta={},
         )
-        return schema.NendoBlobCreate(resource=resource.model_dump(), user_id=self.user.id)
+        return schema.NendoBlobCreate(
+            resource=resource.model_dump(), user_id=self.user.id
+        )
 
     def _create_blob_from_file(
         self,
@@ -2321,10 +2400,14 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             location=location,
             meta=meta or {},
         )
-        return schema.NendoBlobCreate(resource=resource.model_dump(), user_id=self.user.id)
+        return schema.NendoBlobCreate(
+            resource=resource.model_dump(), user_id=self.user.id
+        )
 
     def load_blob(
-        self, blob_id: uuid.UUID, user_id: Optional[Union[str, uuid.UUID]] = None,
+        self,
+        blob_id: uuid.UUID,
+        user_id: Optional[Union[str, uuid.UUID]] = None,
     ) -> schema.NendoBlob:
         """Loads a blob of data into memory.
 
@@ -2368,7 +2451,9 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         return blob
 
     def store_blob(
-        self, file_path: Union[str, FilePath], user_id: Optional[Union[str, uuid.UUID]] = None
+        self,
+        file_path: Union[str, FilePath],
+        user_id: Optional[Union[str, uuid.UUID]] = None,
     ) -> schema.NendoBlob:
         """Stores a blob of data.
 
@@ -2444,7 +2529,9 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                     user_id=user_id,
                 )
             except Exception as e:  # noqa: BLE001
-                logger.error("Removing %s failed: %s", target.resource.model_dump().src, e)
+                logger.error(
+                    "Removing %s failed: %s", target.resource.model_dump().src, e
+                )
         return True
 
     # ==================================
@@ -2454,7 +2541,9 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
     # ==================================
 
     def reset(
-        self, force: bool = False, user_id: Optional[Union[str, uuid.UUID]] = None,
+        self,
+        force: bool = False,
+        user_id: Optional[Union[str, uuid.UUID]] = None,
     ) -> None:
         """Reset the nendo library.
 

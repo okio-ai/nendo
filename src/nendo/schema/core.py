@@ -228,11 +228,9 @@ class NendoPluginData(NendoPluginDataBase):
     updated_at: datetime = Field(default_factory=datetime.now)
 
     def __str__(self):
-        # output = f"id: {self.id}"
         output = "----------------"
         output += f"\nplugin name: {self.plugin_name}"
         output += f"\nplugin version: {self.plugin_version}"
-        # output += f"\nuser id: {self.user_id}"
         output += f"\nkey: {self.key}"
         output += f"\nvalue: {self.value}"
         return output
@@ -613,8 +611,7 @@ class NendoTrack(NendoTrackBase):
                 If multiple plugin_data entries exist for the given key,
                 the first one is returned. If none exist, None is returned.
         """
-        pd = self.get_plugin_data(key = key)
-        print(pd)
+        pd = self.get_plugin_data(key=key)
         if len(pd) == 0:
             return None
         return pd[0].value
@@ -647,7 +644,7 @@ class NendoTrack(NendoTrackBase):
             file_path=file_path,
             related_track_id=self.id,
             track_type=track_type,
-            user_id=user_id or self.user_id,
+            user_id=user_id,
             track_meta=track_meta,
             relationship_type=relationship_type,
             meta=meta,
@@ -896,7 +893,6 @@ class NendoCollection(NendoCollectionBase):
         output = f"id: {self.id}"
         output += f"\ntype: {self.collection_type}"
         output += f"\ndescription: {self.description}"
-        output += f"\nuser id: {self.user_id}"
         output += f"\nvisibility: {self.visibility}"
         output += f"{pretty_print(self.meta)}"
         return output
@@ -1820,6 +1816,9 @@ class NendoPluginRegistry:
             return self._plugins[f"nendo_plugin_{plugin_name}"]
         raise AttributeError(f"Plugin '{plugin_name}' not found")
 
+    def __iter__(self):
+        return iter(self._plugins.values())
+
     def __str__(self):
         output = ""
         if not self._plugins:
@@ -1871,3 +1870,28 @@ class NendoPluginRegistry:
             plugin_name (str): Name of the plugin to remove.
         """
         del self._plugins[plugin_name]
+
+
+class NendoEmbeddingBase(BaseModel, ABC):  # noqa: D101
+    model_config = ConfigDict(
+        from_attributes=True,
+    )
+
+    track_id: uuid.UUID
+    user_id: Optional[uuid.UUID] = None
+    plugin_name: str
+    plugin_version: str
+    text: str
+    embedding: np.array
+
+
+class NendoEmbedding(NendoEmbeddingBase):
+    """Class representing basic plugin data attached to a track."""
+
+    id: uuid.UUID = Field(default_factory=uuid.uuid4)  # noqa: A003
+    created_at: datetime = Field(default_factory=datetime.now)
+    updated_at: datetime = Field(default_factory=datetime.now)
+
+
+class NendoEmbeddingCreate(NendoEmbeddingBase):  # noqa: D101
+    pass
