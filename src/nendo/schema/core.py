@@ -1883,7 +1883,7 @@ class NendoEmbeddingBase(BaseModel, ABC):  # noqa: D101
     plugin_name: str
     plugin_version: str
     text: str
-    embedding: np.array
+    embedding: np.ndarray
 
 
 class NendoEmbedding(NendoEmbeddingBase):
