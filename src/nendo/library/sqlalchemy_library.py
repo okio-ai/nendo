@@ -82,7 +82,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
     def _disconnect(self):
         """Close the connection to the database."""
         if self.db:
-            self.db.close()
+            self.db.dispose()
 
     def _ensure_user_uuid(self, user_id: Optional[Union[str, uuid.UUID]] = None):
         return ensure_uuid(user_id) if user_id is not None else self.user.id
