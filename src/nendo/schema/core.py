@@ -1875,6 +1875,7 @@ class NendoPluginRegistry:
 class NendoEmbeddingBase(BaseModel, ABC):  # noqa: D101
     model_config = ConfigDict(
         from_attributes=True,
+        arbitrary_types_allowed=True,
     )
 
     track_id: uuid.UUID
