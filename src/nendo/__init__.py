@@ -7,6 +7,7 @@ from importlib import metadata
 from .config import NendoConfig
 from .library import (
     CollectionCollectionRelationshipDB,
+    DistanceMetric,
     NendoBlobDB,
     NendoCollectionDB,
     NendoLibraryVectorExtension,
@@ -25,6 +26,8 @@ from .schema import (
     NendoCollectionSlim,
     NendoEffectPlugin,
     NendoEmbedding,
+    NendoEmbeddingBase,
+    NendoEmbeddingCreate,
     NendoError,
     NendoFileFormatError,
     NendoGeneratePlugin,
