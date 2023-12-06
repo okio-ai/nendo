@@ -3,12 +3,13 @@
 from __future__ import annotations
 
 import uuid
-from abc import ABCMeta, abstractmethod
+from abc import abstractmethod
 from enum import Enum
 from typing import List, Optional, Tuple
 
 import numpy as np
 import numpy.typing as npt
+from pydantic import BaseModel
 
 from nendo.schema.core import (
     NendoCollection,
@@ -28,8 +29,9 @@ class DistanceMetric(str, Enum):
     max_inner_product: str = "inner"
 
 
-class NendoLibraryVectorExtension(metaclass=ABCMeta):
+class NendoLibraryVectorExtension(BaseModel):
     """Extension class to implement library plugins with vector support."""
+    embedding_plugin: Optional[NendoEmbeddingPlugin] = None
 
     def __init__(
         self,
@@ -132,8 +134,8 @@ class NendoLibraryVectorExtension(metaclass=ABCMeta):
 
     # Embedding management functions
 
-    def embed_text(self, text: str) -> NendoEmbedding:
-        return self.embed_text(text=text)
+    def embed_text(self, text: str) -> npt.ArrayLike:
+        return self.embedding_plugin(text=text)
 
     def embed_track(self, track: NendoTrack) -> NendoEmbedding:
         return self.embedding_plugin(track=track)
@@ -175,14 +177,22 @@ class NendoLibraryVectorExtension(metaclass=ABCMeta):
         n: int = 5,
         distance_metric: Optional[DistanceMetric] = None,
     ) -> List[Tuple[NendoTrack, float]]:
-        track_embedding = self.get_embedding_by_track_id(track.id)
-        if track_embedding is None:
+        track_embeddings = self.get_embeddings(
+            track_id=track.id,
+            plugin_name=self.embedding_plugin.plugin_name,
+            plugin_version=self.embedding_plugin.plugin_version
+        )
+        if len(track_embeddings) < 1:
             track_embedding = self.embed_track(track)
-        return self.nearest_by_vector_with_score(
+        else:
+            track_embedding = track_embeddings[0]
+
+        nearest = self.nearest_by_vector_with_score(
             vec=track_embedding.embedding,
             n=n,
             distance_metric=distance_metric,
         )
+        return nearest[1:]
 
     def nearest_by_query(
         self,
@@ -205,7 +215,7 @@ class NendoLibraryVectorExtension(metaclass=ABCMeta):
     ) -> List[Tuple[NendoTrack, float]]:
         query_embedding = self.embed_text(query)
         return self.nearest_by_vector_with_score(
-            vec=query_embedding.embedding,
+            vec=query_embedding,
             n=n,
             distance_metric=distance_metric,
         )

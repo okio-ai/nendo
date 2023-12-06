@@ -555,7 +555,7 @@ class NendoEmbeddingPlugin(NendoPlugin):
         text = ""
         for pd in track.get_plugin_data():
             text += f"{pd.key}: {pd.value}; "
-        for k, v in track.meta:
+        for k, v in track.meta.items():
             # TODO add support for list, dict?
             if isinstance(v, (str, float, int, bool)):
                 text += f"{k}: {v}; "

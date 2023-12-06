@@ -599,7 +599,7 @@ class NendoTrack(NendoTrackBase):
     def get_plugin_value(
         self,
         key: str,
-    ) -> str:
+    ) -> Optional[str]:
         """Return the value for a specific plugin_data key.
 
         Args:
