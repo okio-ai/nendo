@@ -40,17 +40,18 @@ class NendoLibraryVectorExtension(BaseModel):
         **kwargs,
     ):
         super().__init__(**kwargs)
+        print(embedding_plugin)
         if embedding_plugin is not None:
             try:
                 self.embedding_plugin = getattr(
-                    self.nendo_instance.plugins, embedding_plugin
+                    self.nendo_instance.plugins, embedding_plugin,
                 )
             except AttributeError as e:
                 self.logger.error(e)
                 raise NendoPluginLoadingError(
-                    f"Plugin with name {embedding_plugin} has been configured for the "
-                    "NendoLibraryVectorExtension but is not loaded. Please load the plugin "
-                    "or change the library configuration.",
+                    f"Plugin with name {embedding_plugin} has been configured "
+                    "for the NendoLibraryVectorExtension but is not loaded. "
+                    "Please load the plugin or change the library configuration.",
                 ) from None
         else:
             # try to auto-detect an embedding plugin from the registry
@@ -71,7 +72,7 @@ class NendoLibraryVectorExtension(BaseModel):
             if isinstance(plugin, NendoEmbeddingPlugin):
                 self.logger.info(
                     f"Using {registered_plugin.name} as embedding plugin "
-                    "for the NendoLibraryVectorExtension."
+                    "for the NendoLibraryVectorExtension.",
                 )
                 return plugin
         return None
@@ -115,7 +116,10 @@ class NendoLibraryVectorExtension(BaseModel):
         dot_product = np.dot(vec1, vec2)
         norm_arr1 = np.linalg.norm(vec1)
         norm_arr2 = np.linalg.norm(vec2)
-        return dot_product / (norm_arr1 * norm_arr2)
+        norm_mult = (norm_arr1 * norm_arr2)
+        if norm_mult == 0.0:  # noqa: PLR2004
+            raise ValueError("Division by zero in cosine similarity detected.")
+        return dot_product / norm_mult
 
     def euclidean_distance(
         self,
@@ -189,7 +193,7 @@ class NendoLibraryVectorExtension(BaseModel):
 
         nearest = self.nearest_by_vector_with_score(
             vec=track_embedding.embedding,
-            n=n,
+            n=n+1,
             distance_metric=distance_metric,
         )
         return nearest[1:]
