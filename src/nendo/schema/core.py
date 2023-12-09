@@ -1887,9 +1887,9 @@ class NendoEmbeddingBase(BaseModel, ABC):  # noqa: D101
 
 
 class NendoEmbedding(NendoEmbeddingBase):
-    """Class representing basic plugin data attached to a track."""
+    """Class representing an embedding of a NendoTrack into a vector space."""
 
-    id: uuid.UUID = Field(default_factory=uuid.uuid4)  # noqa: A003
+    id: uuid.UUID = Field(default_factory=uuid.uuid4)
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)
 

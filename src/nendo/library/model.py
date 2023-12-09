@@ -34,9 +34,9 @@ def convert(obj):
         return convert(list(obj))
     if isinstance(obj, np.float32):
         return float(obj)
-    if isinstance(obj, NestedMutableList) or isinstance(obj, list):
+    if isinstance(obj, (NestedMutableList, list)):
         return [convert(x) for x in obj]
-    if isinstance(obj, NestedMutableDict) or isinstance(obj, dict):
+    if isinstance(obj, (NestedMutableDict, dict)):
         return {k: convert(v) for k, v in obj.items()}
     return obj
 
@@ -44,12 +44,13 @@ def convert(obj):
 class JSONEncodedDict(TypeDecorator):
     impl = JSON
 
-    def process_bind_param(self, value, dialect):
+    def process_bind_param(self, value, dialect):  # noqa: ARG002
         return json.dumps(convert(value))
 
-    def process_result_value(self, value, dialect):
+    def process_result_value(self, value, dialect):  # noqa: ARG002
         if value is not None:
             return json.loads(value)
+        return None
 
 
 class TrackTrackRelationshipDB(Base):
@@ -59,7 +60,7 @@ class TrackTrackRelationshipDB(Base):
     target_id = Column(UUID(as_uuid=True), ForeignKey("tracks.id"))
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(
-        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now(),
     )
     relationship_type = Column(String)
     meta = Column(mutable_json_type(dbtype=JSONEncodedDict, nested=True))
@@ -141,7 +142,7 @@ class NendoTrackDB(Base):
     track_type = Column(String, default="track")
     visibility = Column(ENUM(schema.Visibility), default="private")
     updated_at = Column(
-        DateTime(timezone=True), default=func.now(), onupdate=func.now()
+        DateTime(timezone=True), default=func.now(), onupdate=func.now(),
     )
     created_at = Column(DateTime(timezone=True), default=func.now())
     images = Column(mutable_json_type(dbtype=JSONEncodedDict, nested=True))

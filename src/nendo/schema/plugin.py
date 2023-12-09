@@ -18,7 +18,6 @@ from typing import (
     Union,
 )
 
-import numpy.typing as npt
 from pydantic import ConfigDict, DirectoryPath, FilePath
 
 from nendo.schema.core import (
@@ -38,6 +37,7 @@ if TYPE_CHECKING:
     import uuid
 
     import numpy as np
+    import numpy.typing as npt
 
 
 class NendoAnalysisPlugin(NendoPlugin):
@@ -552,6 +552,17 @@ class NendoEmbeddingPlugin(NendoPlugin):
     """
 
     def track_to_text(self, track: NendoTrack) -> str:
+        """Convert the given track into a string.
+
+        Can be used by embedding plugins to avoid implementing their own
+        track-to-string conversion.
+
+        Args:
+            track (NendoTrack): The track to be converted.
+
+        Returns:
+            str: The string representation of the given track.
+        """
         text = ""
         for pd in track.get_plugin_data():
             text += f"{pd.key}: {pd.value}; "
@@ -568,7 +579,7 @@ class NendoEmbeddingPlugin(NendoPlugin):
         raise NotImplementedError
 
     def embed_signal_and_text(
-        self, signal: np.array, text: str
+        self, signal: np.array, text: str,
     ) -> Tuple[str, npt.ArrayLike]:
         raise NotImplementedError
 
@@ -576,12 +587,12 @@ class NendoEmbeddingPlugin(NendoPlugin):
         raise NotImplementedError
 
     def embed_collection(
-        self, collection: NendoCollection
+        self, collection: NendoCollection,
     ) -> Tuple[str, npt.ArrayLike]:
         raise NotImplementedError
 
     def __call__(
-        self, **kwargs: Any
+        self, **kwargs: Any,
     ) -> Optional[
         Union[
             NendoEmbedding,
@@ -635,7 +646,7 @@ class NendoEmbeddingPlugin(NendoPlugin):
             if embedding_vector is None:
                 with contextlib.suppress(NotImplementedError):
                     text, embedding_vector = self.embed_text(
-                        text=self.track_to_text(track=track_or_collection)
+                        text=self.track_to_text(track=track_or_collection),
                     )
             embedding = NendoEmbedding(
                 track_id=track_or_collection.id,
@@ -649,7 +660,7 @@ class NendoEmbeddingPlugin(NendoPlugin):
                 embedding = self.nendo_instance.library.add_embedding(
                     embedding=embedding,
                 )
-            except AttributeError as e:
+            except AttributeError as e:  # noqa: F841
                 self.logger.error(library_vector_support_error)
             return embedding
         if isinstance(track_or_collection, NendoCollection):
