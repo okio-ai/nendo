@@ -25,13 +25,14 @@ from nendo.schema.core import (
     NendoCollection,
     NendoCollectionSlim,
     NendoEmbedding,
+    NendoEmbeddingBase,
     NendoPlugin,
     NendoPluginData,
     NendoStorage,
     NendoTrack,
 )
 from nendo.schema.exception import NendoError, NendoPluginRuntimeError
-from nendo.utils import ensure_uuid
+from nendo.utils import ensure_uuid, get_wrapped_methods
 
 if TYPE_CHECKING:
     import uuid
@@ -76,6 +77,11 @@ class NendoAnalysisPlugin(NendoPlugin):
         ```
     """
 
+    @property
+    def plugin_type(self) -> str:
+        """Return type of plugin."""
+        return "AnalysisPlugin"
+
     # decorators
     # ----------
     @staticmethod
@@ -109,13 +115,6 @@ class NendoAnalysisPlugin(NendoPlugin):
             return f_result
 
         return wrapper
-
-    # ----------
-
-    @property
-    def plugin_type(self) -> str:
-        """Return type of plugin."""
-        return "AnalysisPlugin"
 
     @staticmethod
     def run_collection(
@@ -185,8 +184,8 @@ class NendoAnalysisPlugin(NendoPlugin):
 class NendoGeneratePlugin(NendoPlugin):
     """Basic class for nendo generate plugins.
 
-    Generate plugins are plugins that generate new tracks or collections, either from scratch or
-    based on existing tracks or collections.
+    Generate plugins are plugins that generate new tracks or collections,
+    either from scratch or based on existing tracks or collections.
     Decorate your methods with `@NendoGeneratePlugin.run_track` to run your method
     on a track, use `@NendoGeneratePlugin.run_collection` to run your method on
     a collection and use `@NendoGeneratePlugin.run_signal` to run your method on
@@ -572,24 +571,178 @@ class NendoEmbeddingPlugin(NendoPlugin):
                 text += f"{k}: {v}; "
         return text
 
-    # TODO "convert" to decorators
+    @staticmethod
+    def run_text(
+        func: Callable[[NendoPlugin, str, Any], None],
+    ) -> Callable[[NendoPlugin, Any], Union[[str, npt.ArrayLike], List[Tuple[str, npt.ArrayLike]]]]:
+        """Decorator to register a function that embeds a given text string into a vector space.
 
-    @abstractmethod
-    def embed_text(self, text: str) -> npt.ArrayLike:
-        raise NotImplementedError
+        This decorator wraps the function and allows a plugin user to call the plugin with either a text, a track, or a collection.
 
-    def embed_signal_and_text(
-        self, signal: np.array, text: str,
-    ) -> Tuple[str, npt.ArrayLike]:
-        raise NotImplementedError
+        Args:
+            func: Callable[[NendoPlugin, str, Any], None]: The function to register.
 
-    def embed_track(self, track: NendoTrack) -> Tuple[str, npt.ArrayLike]:
-        raise NotImplementedError
+        Returns:
+            Callable[[NendoPlugin, Any], Union[[str, npt.ArrayLike], List[Tuple[str, npt.ArrayLike]]]]: The wrapped function.
+        """
 
-    def embed_collection(
-        self, collection: NendoCollection,
-    ) -> Tuple[str, npt.ArrayLike]:
-        raise NotImplementedError
+        @functools.wraps(func)
+        def wrapper(self, **kwargs: Any) -> Union[[str, npt.ArrayLike], Tuple[str, npt.ArrayLike]]:
+            track_or_collection, kwargs = self._get_track_or_collection_from_args(
+                **kwargs,
+            )
+            if track_or_collection is None:
+                text, embedding_vector = func(self, **kwargs)
+                return text, embedding_vector
+            if isinstance(track_or_collection, NendoTrack):
+                text, embedding_vector = func(
+                    text=self.track_to_text(track=track_or_collection),
+                )
+                return text, embedding_vector
+            processed_tracks = []
+            for track in track_or_collection.tracks():
+                text, embedding_vector = func(
+                    text=self.track_to_text(track=track),
+                )
+                processed_tracks.append(
+                    (text, embedding_vector),
+                )
+            return processed_tracks
+
+        return wrapper
+
+    @staticmethod
+    def run_signal_and_text(
+        func: Callable[[NendoPlugin, np.array, int, str, Any], None],
+    ) -> Callable[[NendoPlugin, Any], Union[NendoEmbedding, List[NendoEmbedding]]]:
+        """Decorator to register a function as a function to create a `NendoEmbedding` from a given signal, sr, and text.
+
+        This decorator wraps the function and allows a plugin user to call the plugin with either a set of (signal, sr, text), a track or a collection.
+
+        Args:
+            func: Callable[[NendoPlugin, np.array, int, str, Any], None]: The function to register.
+
+        Returns:
+            Callable[[NendoPlugin, Any], Union[NendoEmbedding, List[NendoEmbedding]]]: The wrapped function.
+        """
+
+        @functools.wraps(func)
+        def wrapper(self, **kwargs: Any) -> Union[NendoEmbedding, List[NendoEmbedding]]:
+            track_or_collection, kwargs = self._get_track_or_collection_from_args(
+                **kwargs,
+            )
+            if track_or_collection is None:
+                signal = kwargs.get("signal", None)
+                sr = kwargs.get("sr", None)
+                text = kwargs.get("text", None)
+                text, embedding_vector = func(self, **kwargs)
+                new_track = self.nendo_instance.library.add_track_from_signal(
+                    signal=signal,
+                    sr=sr,
+                )
+                embedding = NendoEmbeddingBase(
+                    track_id=new_track.id,
+                    user_id=self.nendo_instance.library.user.id,
+                    plugin_name=self.plugin_name,
+                    plugin_version=self.plugin_version,
+                    text=text,
+                    embedding=embedding_vector,
+                )
+                return self.nendo_instance.library.add_embedding(
+                    embedding=embedding,
+                )
+            if isinstance(track_or_collection, NendoTrack):
+                kwargs["signal"] = track_or_collection.signal
+                kwargs["sr"] = track_or_collection.sr
+                kwargs["text"] = self.track_to_text(track=track_or_collection)
+                text, embedding_vector = func(self, **kwargs)
+                embedding = NendoEmbeddingBase(
+                    track_id=track_or_collection.id,
+                    user_id=self.nendo_instance.library.user.id,
+                    plugin_name=self.plugin_name,
+                    plugin_version=self.plugin_version,
+                    text=text,
+                    embedding=embedding_vector,
+                )
+                return self.nendo_instance.library.add_embedding(
+                    embedding=embedding,
+                )
+            embeddings = []
+            for track in track_or_collection.tracks():
+                kwargs["signal"] = track.signal
+                kwargs["sr"] = track.sr
+                kwargs["text"] = self.track_to_text(track=track)
+                text, embedding_vector = func(self, **kwargs)
+                embedding = NendoEmbeddingBase(
+                    track_id=track.id,
+                    user_id=self.nendo_instance.library.user.id,
+                    plugin_name=self.plugin_name,
+                    plugin_version=self.plugin_version,
+                    text=text,
+                    embedding=embedding_vector,
+                )
+                new_embedding = self.nendo_instance.library.add_embedding(
+                    embedding=embedding,
+                )
+                embeddings.append(new_embedding)
+            return embeddings
+
+    @staticmethod
+    def run_track(
+        func: Callable[[NendoPlugin, NendoTrack, Any], None],
+    ) -> Callable[[NendoPlugin, Any], Union[NendoEmbedding, List[NendoEmbedding]]]:
+        """Decorator to register a function to create a `NendoEmbedding` from a track.
+
+        This decorator wraps the function and allows a plugin user to call the plugin with either a set of (signal, sr, text), a track or a collection.
+
+        Args:
+            func: Callable[[NendoPlugin, np.array, int, str, Any], None]: The function to register.
+
+        Returns:
+            Callable[[NendoPlugin, Any], Union[NendoEmbedding, List[NendoEmbedding]]]: The wrapped function.
+        """
+
+        @functools.wraps(func)
+        def wrapper(self, **kwargs: Any) -> Union[NendoEmbedding, List[NendoEmbedding]]:
+            track_or_collection, kwargs = self._get_track_or_collection_from_args(
+                **kwargs,
+            )
+            if isinstance(track_or_collection, NendoTrack):
+                return func(self, track_or_collection, **kwargs)
+
+            return [
+                func(self, track, **kwargs) for track in track_or_collection.tracks()
+            ]
+
+    @staticmethod
+    def run_collection(
+        func: Callable[[NendoPlugin, NendoCollection, Any], None],
+    ) -> Callable[[NendoPlugin, Any], Union[NendoEmbedding, List[NendoEmbedding]]]:
+        """Decorator to register a function to create a `NendoEmbedding` from a collection.
+
+        This decorator wraps the function and allows a plugin user to call the plugin with either a set of (signal, sr, text), a track or a collection.
+
+        Args:
+            func: Callable[[NendoPlugin, np.array, int, str, Any], None]: The function to register.
+
+        Returns:
+            Callable[[NendoPlugin, Any], Union[NendoEmbedding, List[NendoEmbedding]]]: The wrapped function.
+        """
+
+        @functools.wraps(func)
+        def wrapper(self, **kwargs: Any) -> Union[NendoEmbedding, List[NendoEmbedding]]:
+            track_or_collection, kwargs = self._get_track_or_collection_from_args(
+                **kwargs,
+            )
+            if isinstance(track_or_collection, NendoCollection):
+                return func(self, track_or_collection, **kwargs)
+
+            tmp_collection = self.nendo_instance.library.add_collection(
+                name="tmp",
+                track_ids=[track_or_collection.id],
+                collection_type="temp",
+            )
+            return func(self, tmp_collection, **kwargs)
 
     def __call__(
         self, **kwargs: Any,
@@ -606,82 +759,45 @@ class NendoEmbeddingPlugin(NendoPlugin):
             "Please use a library plugin with vector support to "
             "enable automatic storing of embeddings."
         )
+        wrapped_methods = get_wrapped_methods(self)
 
-        # deprecated for the moment, as it's not clear whether we actually need that
-        # text = kwargs.pop("text", None)
-        # if text is not None:
-        #     embedding_vector = self.embed_text(text=text)
-        #     embedding = NendoEmbedding(
-        #         track_id = None,
-        #         user_id = self.nendo_instance.library.user.id,
-        #         plugin_name = self.plugin_name,
-        #         plugin_version = self.plugin_version,
-        #         text = text,
-        #         embedding = embedding_vector,
-        #     )
-        #     try:
-        #         embedding = self.nendo_instance.library.add_embedding(
-        #             embedding=embedding,
-        #         )
-        #     except AttributeError as e:
-        #         self.logger.error(library_vector_support_error)
-        #         return embedding_vector
-        #     return embedding
-
-        track_or_collection, kwargs = self._get_track_or_collection_from_args(
-            **kwargs,
-        )
-        if isinstance(track_or_collection, NendoTrack):
-            embedding_vector = None
-            # first, try to call the custom track embedding function
-            with contextlib.suppress(NotImplementedError):
-                text, embedding_vector = self.embed_track(track=track_or_collection)
-            # alternatively, use default track to text conversion and call embed_text
-            if embedding_vector is None:
-                with contextlib.suppress(NotImplementedError):
-                    text, embedding_vector = self.embed_signal_and_text(
-                        signal=track_or_collection.signal,
-                        text=self.track_to_text(track=track_or_collection),
-                    )
-            if embedding_vector is None:
-                with contextlib.suppress(NotImplementedError):
-                    text, embedding_vector = self.embed_text(
-                        text=self.track_to_text(track=track_or_collection),
-                    )
-            embedding = NendoEmbedding(
-                track_id=track_or_collection.id,
-                user_id=self.nendo_instance.library.user.id,
-                plugin_name=self.plugin_name,
-                plugin_version=self.plugin_version,
-                text=text,
-                embedding=embedding_vector,
+        if len(wrapped_methods) > 1:
+            track_or_collection, kwargs = self._get_track_or_collection_from_args(
+                **kwargs,
             )
-            try:
-                embedding = self.nendo_instance.library.add_embedding(
-                    embedding=embedding,
-                )
-            except AttributeError as e:  # noqa: F841
-                self.logger.error(library_vector_support_error)
-            return embedding
-        if isinstance(track_or_collection, NendoCollection):
-            with contextlib.suppress(NotImplementedError):
-                text, embedding_vector = self.embed_collection(
-                    collection=track_or_collection,
-                )
-                # can't be saved for now as we don't have a table
-                return text, embedding_vector
-            # avoid
-            if not hasattr(self.nendo_instance.library, "add_embedding"):
-                self.logger.error(library_vector_support_error)
-                return track_or_collection
-            all_embeddings = []
-            for track in track_or_collection:
-                embedding = self.__call__(track=track)
-                all_embeddings.append(embedding)
-            return all_embeddings
-        raise TypeError(
-            f"Embedding objects of type {type(track_or_collection)} not supported.",
-        )
+            if isinstance(track_or_collection, NendoCollection):
+                # first, try to find a `@run_collection` wrapped method
+                for wrapped_method in wrapped_methods:
+                    if wrapped_method.__wrapped__.__name__ == "run_collection":
+                        return wrapped_method(self, **kwargs)
+                # second, try to find a `@run_track` wrapped method
+                for wrapped_method in wrapped_methods:
+                    if wrapped_method.__wrapped__.__name__ == "run_track":
+                        return wrapped_method(self, **kwargs)
+            if isinstance(track_or_collection, NendoTrack):
+                # first, try to find a `@run_collection` wrapped method
+                for wrapped_method in wrapped_methods:
+                    if wrapped_method.__wrapped__.__name__ == "run_track":
+                        return wrapped_method(self, **kwargs)
+                # second, try to find a `@run_track` wrapped method
+                for wrapped_method in wrapped_methods:
+                    if wrapped_method.__wrapped__.__name__ == "run_collection":
+                        return wrapped_method(self, **kwargs)
+            # third, try to find a `@run_signal_and_text` wrapped method
+            for wrapped_method in wrapped_methods:
+                if wrapped_method.__wrapped__.__name__ == "run_signal_and_text":
+                    return wrapped_method(self, **kwargs)
+            # finally, try to find a `@run_text` wrapped method
+            for wrapped_method in wrapped_methods:
+                if wrapped_method.__wrapped__.__name__ == "run_text":
+                    return wrapped_method(self, **kwargs)
+            raise NendoPluginRuntimeError(
+                "No wrapped embedding plugin function found. "
+                "Please implement at least a function with the "
+                "`@run_text` wrapper.",
+            )
+        run_func = wrapped_methods[0]
+        return run_func(self, **kwargs)
 
 
 class NendoLibraryPlugin(NendoPlugin):
