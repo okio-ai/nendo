@@ -106,260 +106,260 @@ class ExampleGeneratePlugin(NendoGeneratePlugin):
 class ExampleEmbeddingPlugin(NendoEmbeddingPlugin):
     """Example plugin for testing the NendoEmbeddingPlugin class."""
 
-    # @NendoEmbeddingPlugin.run_text
-    # def text_function(self, text=None):
-    #     """Example text function."""
-    #     return (text or "test"), np.zeros(5)
+    @NendoEmbeddingPlugin.run_text
+    def text_function(self, text=None):
+        """Example text function."""
+        return (text or "test"), np.zeros(5)
 
-    # @NendoEmbeddingPlugin.run_signal_and_text
-    # def signal_function(self, signal=None, sr=None, text=None):
-    #     """Example signal and text function."""
-    #     return (text or "test"), np.zeros(5)
+    @NendoEmbeddingPlugin.run_signal_and_text
+    def signal_function(self, signal=None, sr=None, text=None):
+        """Example signal and text function."""
+        return (text or "test"), np.zeros(5)
 
     @NendoEmbeddingPlugin.run_track
     def track_function(self, track=None):
         """Example track function."""
         return "test", np.zeros(5)
 
-    # @NendoEmbeddingPlugin.run_collection
-    # def collection_function(self, collection=None):
-    #     """Example collection function."""
-    #     return "test", np.zeros(5)
+    @NendoEmbeddingPlugin.run_collection
+    def collection_function(self, collection=None):
+        """Example collection function."""
+        return "test", np.zeros(5)
 
 
-# class NendoAnalysisPluginTest(unittest.TestCase):
-#     """Unit test class for testing the NendoAnalysisPlugin class."""
+class NendoAnalysisPluginTest(unittest.TestCase):
+    """Unit test class for testing the NendoAnalysisPlugin class."""
 
-#     def test_run_track_decorator_with_track(self):
-#         """Test the `NendoAnalysisPlugin.run_track` decorator with a `NendoTrack`."""
-#         nd.library.reset(force=True)
-#         plug = init_plugin(ExampleAnalysisPlugin)
-#         track = nd.library.add_track(file_path="tests/assets/test.wav")
+    def test_run_track_decorator_with_track(self):
+        """Test the `NendoAnalysisPlugin.run_track` decorator with a `NendoTrack`."""
+        nd.library.reset(force=True)
+        plug = init_plugin(ExampleAnalysisPlugin)
+        track = nd.library.add_track(file_path="tests/assets/test.wav")
 
-#         result = plug.track_function(track=track)
-#         self.assertEqual(type(result), NendoTrack)
-#         self.assertEqual(result.id, track.id)
+        result = plug.track_function(track=track)
+        self.assertEqual(type(result), NendoTrack)
+        self.assertEqual(result.id, track.id)
 
-#     def test_run_track_decorator_with_collection(self):
-#         """Test the `NendoAnalysisPlugin.run_track` decorator with a `NendoCollection`."""
-#         nd.library.reset(force=True)
-#         plug = init_plugin(ExampleAnalysisPlugin)
-#         track = nd.library.add_track(file_path="tests/assets/test.wav")
-#         coll = nd.library.add_collection(name="test_collection", track_ids=[track.id])
+    def test_run_track_decorator_with_collection(self):
+        """Test the `NendoAnalysisPlugin.run_track` decorator with a `NendoCollection`."""
+        nd.library.reset(force=True)
+        plug = init_plugin(ExampleAnalysisPlugin)
+        track = nd.library.add_track(file_path="tests/assets/test.wav")
+        coll = nd.library.add_collection(name="test_collection", track_ids=[track.id])
 
-#         result = plug.track_function(collection=coll)
-#         self.assertEqual(type(result), NendoCollection)
-#         self.assertEqual(len(result), 1)
-#         self.assertEqual(result[0].id, track.id)
+        result = plug.track_function(collection=coll)
+        self.assertEqual(type(result), NendoCollection)
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0].id, track.id)
 
-#     def test_run_collection_decorator_with_track(self):
-#         """Test the `NendoAnalysisPlugin.run_collection` decorator with a `NendoTrack`."""
-#         nd.library.reset(force=True)
-#         plug = init_plugin(ExampleAnalysisPlugin)
-#         track = nd.library.add_track(file_path="tests/assets/test.wav")
+    def test_run_collection_decorator_with_track(self):
+        """Test the `NendoAnalysisPlugin.run_collection` decorator with a `NendoTrack`."""
+        nd.library.reset(force=True)
+        plug = init_plugin(ExampleAnalysisPlugin)
+        track = nd.library.add_track(file_path="tests/assets/test.wav")
 
-#         result = plug.collection_function(track=track)
-#         self.assertEqual(type(result), NendoTrack)
-#         self.assertEqual(result.id, track.id)
+        result = plug.collection_function(track=track)
+        self.assertEqual(type(result), NendoTrack)
+        self.assertEqual(result.id, track.id)
 
-#     def test_run_collection_decorator_with_collection(self):
-#         """Test the `NendoAnalysisPlugin.run_collection` decorator with a `NendoCollection`."""
-#         nd.library.reset(force=True)
-#         plug = init_plugin(ExampleAnalysisPlugin)
-#         track = nd.library.add_track(file_path="tests/assets/test.wav")
-#         coll = nd.library.add_collection(name="test_collection", track_ids=[track.id])
+    def test_run_collection_decorator_with_collection(self):
+        """Test the `NendoAnalysisPlugin.run_collection` decorator with a `NendoCollection`."""
+        nd.library.reset(force=True)
+        plug = init_plugin(ExampleAnalysisPlugin)
+        track = nd.library.add_track(file_path="tests/assets/test.wav")
+        coll = nd.library.add_collection(name="test_collection", track_ids=[track.id])
 
-#         result = plug.collection_function(collection=coll)
-#         self.assertEqual(type(result), NendoCollection)
-#         self.assertEqual(len(result), 1)
-#         self.assertEqual(result[0].id, track.id)
-
-
-# class NendoGeneratePluginTest(unittest.TestCase):
-#     """Unit test class for testing the NendoGeneratePlugin class."""
-
-#     def test_run_track_decorator_with_track(self):
-#         """Test the `NendoGeneratePlugin.run_track` decorator with a `NendoTrack`."""
-#         nd.library.reset(force=True)
-#         plug = init_plugin(ExampleGeneratePlugin)
-#         track = nd.library.add_track(file_path="tests/assets/test.wav")
-
-#         result = plug.track_function(track=track)
-#         self.assertEqual(type(result), NendoTrack)
-#         self.assertEqual(result.id, track.id)
-
-#     def test_run_track_decorator_with_none(self):
-#         """Test the `NendoGeneratePlugin.run_track` decorator with a `None`."""
-#         nd.library.reset(force=True)
-#         plug = init_plugin(ExampleGeneratePlugin)
-
-#         result = plug.track_function()
-#         self.assertEqual(type(result), NendoTrack)
-
-#     def test_run_track_decorator_with_collection(self):
-#         """Test the `NendoGeneratePlugin.run_track` decorator with a `NendoCollection`."""
-#         nd.library.reset(force=True)
-#         plug = init_plugin(ExampleGeneratePlugin)
-#         track = nd.library.add_track(file_path="tests/assets/test.wav")
-#         coll = nd.library.add_collection(name="test_collection", track_ids=[track.id])
-
-#         result = plug.track_function(collection=coll)
-#         self.assertEqual(type(result), NendoCollection)
-#         self.assertEqual(len(result), 1)
-
-#     def test_run_track_list_decorator_with_track(self):
-#         """Test the `NendoGeneratePlugin.run_track_list` decorator with a `NendoTrack`."""
-#         nd.library.reset(force=True)
-#         plug = init_plugin(ExampleGeneratePlugin)
-#         track = nd.library.add_track(file_path="tests/assets/test.wav")
-
-#         result = plug.track_list_function(track=track)
-#         self.assertEqual(type(result), NendoCollection)
-#         self.assertEqual(len(result), 2)
-
-#     def test_run_track_list_decorator_with_collection(self):
-#         """Test the `NendoGeneratePlugin.run_track_list` decorator with a `NendoCollection`."""
-#         nd.library.reset(force=True)
-#         plug = init_plugin(ExampleGeneratePlugin)
-#         track = nd.library.add_track(file_path="tests/assets/test.wav")
-#         coll = nd.library.add_collection(name="test_collection", track_ids=[track.id])
-
-#         result = plug.track_list_function(collection=coll)
-#         self.assertEqual(type(result), NendoCollection)
-#         self.assertEqual(len(result), 2)
-
-#     def test_run_track_list_decorator_with_none(self):
-#         """Test the `NendoGeneratePlugin.run_track_list` decorator with a `None`."""
-#         nd.library.reset(force=True)
-#         plug = init_plugin(ExampleGeneratePlugin)
-
-#         result = plug.track_list_function()
-#         self.assertEqual(type(result), NendoCollection)
-#         self.assertEqual(len(result), 2)
-
-#     def test_run_collection_decorator_with_track(self):
-#         """Test the `NendoGeneratePlugin.run_collection` decorator with a `NendoTrack`."""
-#         nd.library.reset(force=True)
-#         plug = init_plugin(ExampleGeneratePlugin)
-#         track = nd.library.add_track(file_path="tests/assets/test.wav")
-
-#         result = plug.collection_function(track=track)
-#         self.assertEqual(type(result), NendoCollection)
-#         self.assertEqual(len(result), 1)
-
-#     def test_run_collection_decorator_with_collection(self):
-#         """Test the `NendoGeneratePlugin.run_collection` decorator with a `NendoCollection`."""
-#         nd.library.reset(force=True)
-#         plug = init_plugin(ExampleGeneratePlugin)
-#         track = nd.library.add_track(file_path="tests/assets/test.wav")
-#         coll = nd.library.add_collection(name="test_collection", track_ids=[track.id])
-
-#         result = plug.collection_function(collection=coll)
-#         self.assertEqual(type(result), NendoCollection)
-#         self.assertEqual(len(result), 1)
-
-#     def test_run_collection_decorator_with_none(self):
-#         """Test the `NendoGeneratePlugin.run_collection` decorator with a `None`."""
-#         nd.library.reset(force=True)
-#         plug = init_plugin(ExampleGeneratePlugin)
-
-#         result = plug.collection_function()
-#         self.assertEqual(type(result), NendoCollection)
-#         self.assertEqual(len(result), 1)
-
-#     def test_run_signal_decorator_with_track(self):
-#         """Test the `NendoGeneratePlugin.run_signal` decorator with a `NendoTrack`."""
-#         nd.library.reset(force=True)
-#         plug = init_plugin(ExampleGeneratePlugin)
-#         track = nd.library.add_track(file_path="tests/assets/test.wav")
-
-#         result = plug.signal_function(track=track)
-#         self.assertEqual(type(result), NendoTrack)
-
-#     def test_run_signal_decorator_with_collection(self):
-#         """Test the `NendoGeneratePlugin.run_signal` decorator with a `NendoCollection`."""
-#         nd.library.reset(force=True)
-#         plug = init_plugin(ExampleGeneratePlugin)
-#         track = nd.library.add_track(file_path="tests/assets/test.wav")
-#         coll = nd.library.add_collection(name="test_collection", track_ids=[track.id])
-
-#         result = plug.signal_function(collection=coll)
-#         self.assertEqual(type(result), NendoCollection)
-#         self.assertEqual(len(result), 1)
-
-#     def test_run_signal_decorator_with_none(self):
-#         """Test the `NendoGeneratePlugin.run_signal` decorator with a `None`."""
-#         nd.library.reset(force=True)
-#         plug = init_plugin(ExampleGeneratePlugin)
-
-#         result = plug.signal_function()
-#         self.assertEqual(type(result), NendoTrack)
+        result = plug.collection_function(collection=coll)
+        self.assertEqual(type(result), NendoCollection)
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0].id, track.id)
 
 
-# class NendoEffectPluginTest(unittest.TestCase):
-#     """Unit test class for testing the NendoEffectPlugin class."""
+class NendoGeneratePluginTest(unittest.TestCase):
+    """Unit test class for testing the NendoGeneratePlugin class."""
 
-#     def test_run_track_decorator_with_track(self):
-#         """Test the `NendoEffectPlugin.run_track` decorator with a `NendoTrack`."""
-#         nd.library.reset(force=True)
-#         plug = init_plugin(ExampleEffectPlugin)
-#         track = nd.library.add_track(file_path="tests/assets/test.wav")
+    def test_run_track_decorator_with_track(self):
+        """Test the `NendoGeneratePlugin.run_track` decorator with a `NendoTrack`."""
+        nd.library.reset(force=True)
+        plug = init_plugin(ExampleGeneratePlugin)
+        track = nd.library.add_track(file_path="tests/assets/test.wav")
 
-#         result = plug.track_function(track=track)
-#         self.assertEqual(type(result), NendoTrack)
-#         self.assertEqual(result.id, track.id)
+        result = plug.track_function(track=track)
+        self.assertEqual(type(result), NendoTrack)
+        self.assertEqual(result.id, track.id)
 
-#     def test_run_track_decorator_with_collection(self):
-#         """Test the `NendoEffectPlugin.run_track` decorator with a `NendoCollection`."""
-#         nd.library.reset(force=True)
-#         plug = init_plugin(ExampleEffectPlugin)
-#         track = nd.library.add_track(file_path="tests/assets/test.wav")
-#         coll = nd.library.add_collection(name="test_collection", track_ids=[track.id])
+    def test_run_track_decorator_with_none(self):
+        """Test the `NendoGeneratePlugin.run_track` decorator with a `None`."""
+        nd.library.reset(force=True)
+        plug = init_plugin(ExampleGeneratePlugin)
 
-#         result = plug.track_function(collection=coll)
-#         self.assertEqual(type(result), NendoCollection)
-#         self.assertEqual(len(result), 1)
+        result = plug.track_function()
+        self.assertEqual(type(result), NendoTrack)
 
-#     def test_run_collection_decorator_with_track(self):
-#         """Test the `NendoEffectPlugin.run_collection` decorator with a `NendoTrack`."""
-#         nd.library.reset(force=True)
-#         plug = init_plugin(ExampleEffectPlugin)
-#         track = nd.library.add_track(file_path="tests/assets/test.wav")
+    def test_run_track_decorator_with_collection(self):
+        """Test the `NendoGeneratePlugin.run_track` decorator with a `NendoCollection`."""
+        nd.library.reset(force=True)
+        plug = init_plugin(ExampleGeneratePlugin)
+        track = nd.library.add_track(file_path="tests/assets/test.wav")
+        coll = nd.library.add_collection(name="test_collection", track_ids=[track.id])
 
-#         result = plug.collection_function(track=track)
-#         self.assertEqual(type(result), NendoCollection)
-#         self.assertEqual(len(result), 1)
+        result = plug.track_function(collection=coll)
+        self.assertEqual(type(result), NendoCollection)
+        self.assertEqual(len(result), 1)
 
-#     def test_run_collection_decorator_with_collection(self):
-#         """Test the `NendoEffectPlugin.run_collection` decorator with a `NendoCollection`."""
-#         nd.library.reset(force=True)
-#         plug = init_plugin(ExampleEffectPlugin)
-#         track = nd.library.add_track(file_path="tests/assets/test.wav")
-#         coll = nd.library.add_collection(name="test_collection", track_ids=[track.id])
+    def test_run_track_list_decorator_with_track(self):
+        """Test the `NendoGeneratePlugin.run_track_list` decorator with a `NendoTrack`."""
+        nd.library.reset(force=True)
+        plug = init_plugin(ExampleGeneratePlugin)
+        track = nd.library.add_track(file_path="tests/assets/test.wav")
 
-#         result = plug.collection_function(collection=coll)
-#         self.assertEqual(type(result), NendoCollection)
-#         self.assertEqual(len(result), 1)
+        result = plug.track_list_function(track=track)
+        self.assertEqual(type(result), NendoCollection)
+        self.assertEqual(len(result), 2)
 
-#     def test_run_signal_decorator_with_track(self):
-#         """Test the `NendoEffectPlugin.run_signal` decorator with a `NendoTrack`."""
-#         nd.library.reset(force=True)
-#         plug = init_plugin(ExampleEffectPlugin)
-#         track = nd.library.add_track(file_path="tests/assets/test.wav")
+    def test_run_track_list_decorator_with_collection(self):
+        """Test the `NendoGeneratePlugin.run_track_list` decorator with a `NendoCollection`."""
+        nd.library.reset(force=True)
+        plug = init_plugin(ExampleGeneratePlugin)
+        track = nd.library.add_track(file_path="tests/assets/test.wav")
+        coll = nd.library.add_collection(name="test_collection", track_ids=[track.id])
 
-#         result = plug.signal_function(track=track)
-#         self.assertEqual(type(result), NendoTrack)
+        result = plug.track_list_function(collection=coll)
+        self.assertEqual(type(result), NendoCollection)
+        self.assertEqual(len(result), 2)
 
-#     def test_run_signal_decorator_with_collection(self):
-#         """Test the `NendoEffectPlugin.run_signal` decorator with a `NendoCollection`."""
-#         nd.library.reset(force=True)
-#         plug = init_plugin(ExampleEffectPlugin)
-#         track = nd.library.add_track(file_path="tests/assets/test.wav")
-#         coll = nd.library.add_collection(name="test_collection", track_ids=[track.id])
+    def test_run_track_list_decorator_with_none(self):
+        """Test the `NendoGeneratePlugin.run_track_list` decorator with a `None`."""
+        nd.library.reset(force=True)
+        plug = init_plugin(ExampleGeneratePlugin)
 
-#         result = plug.signal_function(collection=coll)
-#         self.assertEqual(type(result), NendoCollection)
-#         self.assertEqual(len(result), 1)
+        result = plug.track_list_function()
+        self.assertEqual(type(result), NendoCollection)
+        self.assertEqual(len(result), 2)
+
+    def test_run_collection_decorator_with_track(self):
+        """Test the `NendoGeneratePlugin.run_collection` decorator with a `NendoTrack`."""
+        nd.library.reset(force=True)
+        plug = init_plugin(ExampleGeneratePlugin)
+        track = nd.library.add_track(file_path="tests/assets/test.wav")
+
+        result = plug.collection_function(track=track)
+        self.assertEqual(type(result), NendoCollection)
+        self.assertEqual(len(result), 1)
+
+    def test_run_collection_decorator_with_collection(self):
+        """Test the `NendoGeneratePlugin.run_collection` decorator with a `NendoCollection`."""
+        nd.library.reset(force=True)
+        plug = init_plugin(ExampleGeneratePlugin)
+        track = nd.library.add_track(file_path="tests/assets/test.wav")
+        coll = nd.library.add_collection(name="test_collection", track_ids=[track.id])
+
+        result = plug.collection_function(collection=coll)
+        self.assertEqual(type(result), NendoCollection)
+        self.assertEqual(len(result), 1)
+
+    def test_run_collection_decorator_with_none(self):
+        """Test the `NendoGeneratePlugin.run_collection` decorator with a `None`."""
+        nd.library.reset(force=True)
+        plug = init_plugin(ExampleGeneratePlugin)
+
+        result = plug.collection_function()
+        self.assertEqual(type(result), NendoCollection)
+        self.assertEqual(len(result), 1)
+
+    def test_run_signal_decorator_with_track(self):
+        """Test the `NendoGeneratePlugin.run_signal` decorator with a `NendoTrack`."""
+        nd.library.reset(force=True)
+        plug = init_plugin(ExampleGeneratePlugin)
+        track = nd.library.add_track(file_path="tests/assets/test.wav")
+
+        result = plug.signal_function(track=track)
+        self.assertEqual(type(result), NendoTrack)
+
+    def test_run_signal_decorator_with_collection(self):
+        """Test the `NendoGeneratePlugin.run_signal` decorator with a `NendoCollection`."""
+        nd.library.reset(force=True)
+        plug = init_plugin(ExampleGeneratePlugin)
+        track = nd.library.add_track(file_path="tests/assets/test.wav")
+        coll = nd.library.add_collection(name="test_collection", track_ids=[track.id])
+
+        result = plug.signal_function(collection=coll)
+        self.assertEqual(type(result), NendoCollection)
+        self.assertEqual(len(result), 1)
+
+    def test_run_signal_decorator_with_none(self):
+        """Test the `NendoGeneratePlugin.run_signal` decorator with a `None`."""
+        nd.library.reset(force=True)
+        plug = init_plugin(ExampleGeneratePlugin)
+
+        result = plug.signal_function()
+        self.assertEqual(type(result), NendoTrack)
+
+
+class NendoEffectPluginTest(unittest.TestCase):
+    """Unit test class for testing the NendoEffectPlugin class."""
+
+    def test_run_track_decorator_with_track(self):
+        """Test the `NendoEffectPlugin.run_track` decorator with a `NendoTrack`."""
+        nd.library.reset(force=True)
+        plug = init_plugin(ExampleEffectPlugin)
+        track = nd.library.add_track(file_path="tests/assets/test.wav")
+
+        result = plug.track_function(track=track)
+        self.assertEqual(type(result), NendoTrack)
+        self.assertEqual(result.id, track.id)
+
+    def test_run_track_decorator_with_collection(self):
+        """Test the `NendoEffectPlugin.run_track` decorator with a `NendoCollection`."""
+        nd.library.reset(force=True)
+        plug = init_plugin(ExampleEffectPlugin)
+        track = nd.library.add_track(file_path="tests/assets/test.wav")
+        coll = nd.library.add_collection(name="test_collection", track_ids=[track.id])
+
+        result = plug.track_function(collection=coll)
+        self.assertEqual(type(result), NendoCollection)
+        self.assertEqual(len(result), 1)
+
+    def test_run_collection_decorator_with_track(self):
+        """Test the `NendoEffectPlugin.run_collection` decorator with a `NendoTrack`."""
+        nd.library.reset(force=True)
+        plug = init_plugin(ExampleEffectPlugin)
+        track = nd.library.add_track(file_path="tests/assets/test.wav")
+
+        result = plug.collection_function(track=track)
+        self.assertEqual(type(result), NendoCollection)
+        self.assertEqual(len(result), 1)
+
+    def test_run_collection_decorator_with_collection(self):
+        """Test the `NendoEffectPlugin.run_collection` decorator with a `NendoCollection`."""
+        nd.library.reset(force=True)
+        plug = init_plugin(ExampleEffectPlugin)
+        track = nd.library.add_track(file_path="tests/assets/test.wav")
+        coll = nd.library.add_collection(name="test_collection", track_ids=[track.id])
+
+        result = plug.collection_function(collection=coll)
+        self.assertEqual(type(result), NendoCollection)
+        self.assertEqual(len(result), 1)
+
+    def test_run_signal_decorator_with_track(self):
+        """Test the `NendoEffectPlugin.run_signal` decorator with a `NendoTrack`."""
+        nd.library.reset(force=True)
+        plug = init_plugin(ExampleEffectPlugin)
+        track = nd.library.add_track(file_path="tests/assets/test.wav")
+
+        result = plug.signal_function(track=track)
+        self.assertEqual(type(result), NendoTrack)
+
+    def test_run_signal_decorator_with_collection(self):
+        """Test the `NendoEffectPlugin.run_signal` decorator with a `NendoCollection`."""
+        nd.library.reset(force=True)
+        plug = init_plugin(ExampleEffectPlugin)
+        track = nd.library.add_track(file_path="tests/assets/test.wav")
+        coll = nd.library.add_collection(name="test_collection", track_ids=[track.id])
+
+        result = plug.signal_function(collection=coll)
+        self.assertEqual(type(result), NendoCollection)
+        self.assertEqual(len(result), 1)
 
 class NendoEmbeddingPluginTest(unittest.TestCase):
     """Unit test class for testing the NendoEffectPlugin class."""
@@ -374,54 +374,54 @@ class NendoEmbeddingPluginTest(unittest.TestCase):
         self.assertEqual(type(result), NendoTrack)
         self.assertEqual(result.id, track.id)
 
-    # def test_run_track_decorator_with_collection(self):
-    #     """Test the `NendoEmbeddingPlugin.run_track` decorator with a `NendoCollection`."""
-    #     nd.library.reset(force=True)
-    #     plug = init_plugin(ExampleEmbeddingPlugin)
-    #     track = nd.library.add_track(file_path="tests/assets/test.wav")
-    #     coll = nd.library.add_collection(name="test_collection", track_ids=[track.id])
+    def test_run_track_decorator_with_collection(self):
+        """Test the `NendoEmbeddingPlugin.run_track` decorator with a `NendoCollection`."""
+        nd.library.reset(force=True)
+        plug = init_plugin(ExampleEmbeddingPlugin)
+        track = nd.library.add_track(file_path="tests/assets/test.wav")
+        coll = nd.library.add_collection(name="test_collection", track_ids=[track.id])
 
-    #     result = plug.track_function(collection=coll)
-    #     self.assertEqual(type(result), NendoCollection)
-    #     self.assertEqual(len(result), 1)
+        result = plug.track_function(collection=coll)
+        self.assertEqual(type(result), NendoCollection)
+        self.assertEqual(len(result), 1)
 
-    # def test_run_collection_decorator_with_track(self):
-    #     """Test the `NendoEmbeddingPlugin.run_collection` decorator with a `NendoTrack`."""
-    #     nd.library.reset(force=True)
-    #     plug = init_plugin(ExampleEmbeddingPlugin)
-    #     track = nd.library.add_track(file_path="tests/assets/test.wav")
+    def test_run_collection_decorator_with_track(self):
+        """Test the `NendoEmbeddingPlugin.run_collection` decorator with a `NendoTrack`."""
+        nd.library.reset(force=True)
+        plug = init_plugin(ExampleEmbeddingPlugin)
+        track = nd.library.add_track(file_path="tests/assets/test.wav")
 
-    #     result = plug.collection_function(track=track)
-    #     self.assertEqual(type(result), NendoCollection)
-    #     self.assertEqual(len(result), 1)
+        result = plug.collection_function(track=track)
+        self.assertEqual(type(result), NendoCollection)
+        self.assertEqual(len(result), 1)
 
-    # def test_run_collection_decorator_with_collection(self):
-    #     """Test the `NendoEmbeddingPlugin.run_collection` decorator with a `NendoCollection`."""
-    #     nd.library.reset(force=True)
-    #     plug = init_plugin(ExampleEmbeddingPlugin)
-    #     track = nd.library.add_track(file_path="tests/assets/test.wav")
-    #     coll = nd.library.add_collection(name="test_collection", track_ids=[track.id])
+    def test_run_collection_decorator_with_collection(self):
+        """Test the `NendoEmbeddingPlugin.run_collection` decorator with a `NendoCollection`."""
+        nd.library.reset(force=True)
+        plug = init_plugin(ExampleEmbeddingPlugin)
+        track = nd.library.add_track(file_path="tests/assets/test.wav")
+        coll = nd.library.add_collection(name="test_collection", track_ids=[track.id])
 
-    #     result = plug.collection_function(collection=coll)
-    #     self.assertEqual(type(result), NendoCollection)
-    #     self.assertEqual(len(result), 1)
+        result = plug.collection_function(collection=coll)
+        self.assertEqual(type(result), NendoCollection)
+        self.assertEqual(len(result), 1)
 
-    # def test_run_signal_decorator_with_track(self):
-    #     """Test the `NendoEmbeddingPlugin.run_signal` decorator with a `NendoTrack`."""
-    #     nd.library.reset(force=True)
-    #     plug = init_plugin(ExampleEmbeddingPlugin)
-    #     track = nd.library.add_track(file_path="tests/assets/test.wav")
+    def test_run_signal_decorator_with_track(self):
+        """Test the `NendoEmbeddingPlugin.run_signal` decorator with a `NendoTrack`."""
+        nd.library.reset(force=True)
+        plug = init_plugin(ExampleEmbeddingPlugin)
+        track = nd.library.add_track(file_path="tests/assets/test.wav")
 
-    #     result = plug.signal_function(track=track)
-    #     self.assertEqual(type(result), NendoTrack)
+        result = plug.signal_function(track=track)
+        self.assertEqual(type(result), NendoTrack)
 
-    # def test_run_signal_decorator_with_collection(self):
-    #     """Test the `NendoEmbeddingPlugin.run_signal` decorator with a `NendoCollection`."""
-    #     nd.library.reset(force=True)
-    #     plug = init_plugin(ExampleEmbeddingPlugin)
-    #     track = nd.library.add_track(file_path="tests/assets/test.wav")
-    #     coll = nd.library.add_collection(name="test_collection", track_ids=[track.id])
+    def test_run_signal_decorator_with_collection(self):
+        """Test the `NendoEmbeddingPlugin.run_signal` decorator with a `NendoCollection`."""
+        nd.library.reset(force=True)
+        plug = init_plugin(ExampleEmbeddingPlugin)
+        track = nd.library.add_track(file_path="tests/assets/test.wav")
+        coll = nd.library.add_collection(name="test_collection", track_ids=[track.id])
 
-    #     result = plug.signal_function(collection=coll)
-    #     self.assertEqual(type(result), NendoCollection)
-    #     self.assertEqual(len(result), 1)
+        result = plug.signal_function(collection=coll)
+        self.assertEqual(type(result), NendoCollection)
+        self.assertEqual(len(result), 1)
