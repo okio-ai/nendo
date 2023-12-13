@@ -8,6 +8,7 @@ from .config import NendoConfig
 from .library import (
     CollectionCollectionRelationshipDB,
     DistanceMetric,
+    DuckDBLibrary,
     NendoBlobDB,
     NendoCollectionDB,
     NendoLibraryVectorExtension,
