@@ -2084,7 +2084,12 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                 user_id=user_id,
             )
             return self._get_collections_db(
-                query, order_by, order, limit, offset, session,
+                query,
+                order_by,
+                order,
+                limit,
+                offset,
+                session,
             )
 
     def remove_track_from_collection(
@@ -2348,7 +2353,8 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             meta={},
         )
         return schema.NendoBlobCreate(
-            resource=resource.model_dump(), user_id=self.user.id,
+            resource=resource.model_dump(),
+            user_id=self.user.id,
         )
 
     def _create_blob_from_file(
@@ -2401,7 +2407,8 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             meta=meta or {},
         )
         return schema.NendoBlobCreate(
-            resource=resource.model_dump(), user_id=self.user.id,
+            resource=resource.model_dump(),
+            user_id=self.user.id,
         )
 
     def load_blob(
@@ -2530,7 +2537,9 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                 )
             except Exception as e:  # noqa: BLE001
                 logger.error(
-                    "Removing %s failed: %s", target.resource.model_dump().src, e,
+                    "Removing %s failed: %s",
+                    target.resource.model_dump().src,
+                    e,
                 )
         return True
 

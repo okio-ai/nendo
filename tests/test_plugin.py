@@ -16,7 +16,8 @@ from nendo import (
     NendoGeneratePlugin,
     NendoTrack,
 )
-with patch.object(DuckDBLibrary, 'add_embedding', Mock(), create=True) as mock_method:
+
+with patch.object(DuckDBLibrary, "add_embedding", Mock(), create=True) as mock_method:
     nd = Nendo(
         config=NendoConfig(
             log_level="DEBUG",
@@ -25,6 +26,7 @@ with patch.object(DuckDBLibrary, 'add_embedding', Mock(), create=True) as mock_m
             copy_to_library=False,
         ),
     )
+
 
 def init_plugin(clazz):
     """Helper function to initialize a plugin for tests."""
@@ -103,6 +105,7 @@ class ExampleGeneratePlugin(NendoGeneratePlugin):
         if signal is None:
             signal, sr = np.zeros([2, 23000]), 44100
         return signal, sr
+
 
 class ExampleEmbeddingPlugin(NendoEmbeddingPlugin):
     """Example plugin for testing the NendoEmbeddingPlugin class."""
@@ -362,6 +365,7 @@ class NendoEffectPluginTest(unittest.TestCase):
         self.assertEqual(type(result), NendoCollection)
         self.assertEqual(len(result), 1)
 
+
 class NendoEmbeddingPluginTest(unittest.TestCase):
     """Unit test class for testing the NendoEffectPlugin class."""
 
@@ -384,9 +388,10 @@ class NendoEmbeddingPluginTest(unittest.TestCase):
         coll = nd.library.add_collection(name="test_collection", track_ids=[track.id])
 
         result = plug.track_function(collection=coll)
-        self.assertEqual(type(result), NendoEmbedding)
-        self.assertEqual(result.text, "track_function")
-        self.assertTrue(np.all(result.embedding == np.zeros(5)))
+        self.assertEqual(type(result), list)
+        self.assertEqual(type(result[0]), NendoEmbedding)
+        self.assertEqual(result[0].text, "track_function")
+        self.assertTrue(np.all(result[0].embedding == np.zeros(5)))
 
     def test_run_track_decorator_with_text(self):
         """Test the `NendoEmbeddingPlugin.run_track` decorator with a `NendoTrack`."""

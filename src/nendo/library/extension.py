@@ -199,7 +199,8 @@ class NendoLibraryVectorExtension(BaseModel):
         Returns:
             npt.ArrayLike: The embedding vector corresponding to the text.
         """
-        return self.embedding_plugin(text=text)
+        _, emb = self.embedding_plugin(text=text)
+        return emb
 
     def embed_track(self, track: NendoTrack) -> NendoEmbedding:
         """Embed the given track using the library's default embedding plugin.

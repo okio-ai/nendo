@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import functools
+import inspect
 import os
 from abc import abstractmethod
 from typing import (
@@ -129,7 +130,7 @@ class NendoAnalysisPlugin(NendoPlugin):
 
         @functools.wraps(func)
         def wrapper(self, **kwargs: Any) -> NendoCollection:
-            track_or_collection, kwargs = self._get_track_or_collection_from_args(
+            track_or_collection, kwargs = self._pop_track_or_collection_from_args(
                 **kwargs,
             )
             if isinstance(track_or_collection, NendoCollection):
@@ -165,7 +166,7 @@ class NendoAnalysisPlugin(NendoPlugin):
 
         @functools.wraps(func)
         def wrapper(self, **kwargs: Any) -> Union[NendoTrack, NendoCollection]:
-            track_or_collection, kwargs = self._get_track_or_collection_from_args(
+            track_or_collection, kwargs = self._pop_track_or_collection_from_args(
                 **kwargs,
             )
             if isinstance(track_or_collection, NendoTrack):
@@ -229,7 +230,7 @@ class NendoGeneratePlugin(NendoPlugin):
 
         @functools.wraps(func)
         def wrapper(self, **kwargs: Any) -> NendoCollection:
-            track_or_collection, kwargs = self._get_track_or_collection_from_args(
+            track_or_collection, kwargs = self._pop_track_or_collection_from_args(
                 **kwargs,
             )
             if track_or_collection is None:
@@ -267,7 +268,7 @@ class NendoGeneratePlugin(NendoPlugin):
 
         @functools.wraps(func)
         def wrapper(self, **kwargs: Any) -> Union[NendoTrack, NendoCollection]:
-            track_or_collection, kwargs = self._get_track_or_collection_from_args(
+            track_or_collection, kwargs = self._pop_track_or_collection_from_args(
                 **kwargs,
             )
             if track_or_collection is None:
@@ -327,7 +328,7 @@ class NendoGeneratePlugin(NendoPlugin):
 
         @functools.wraps(func)
         def wrapper(self, **kwargs: Any) -> Union[NendoTrack, NendoCollection]:
-            track_or_collection, kwargs = self._get_track_or_collection_from_args(
+            track_or_collection, kwargs = self._pop_track_or_collection_from_args(
                 **kwargs,
             )
             processed_tracks = []
@@ -411,7 +412,7 @@ class NendoEffectPlugin(NendoPlugin):
 
         @functools.wraps(func)
         def wrapper(self, **kwargs: Any) -> NendoCollection:
-            track_or_collection, kwargs = self._get_track_or_collection_from_args(
+            track_or_collection, kwargs = self._pop_track_or_collection_from_args(
                 **kwargs,
             )
             if isinstance(track_or_collection, NendoCollection):
@@ -443,7 +444,7 @@ class NendoEffectPlugin(NendoPlugin):
 
         @functools.wraps(func)
         def wrapper(self, **kwargs: Any) -> Union[NendoTrack, NendoCollection]:
-            track_or_collection, kwargs = self._get_track_or_collection_from_args(
+            track_or_collection, kwargs = self._pop_track_or_collection_from_args(
                 **kwargs,
             )
             processed_tracks = []
@@ -503,7 +504,7 @@ class NendoEffectPlugin(NendoPlugin):
 
         @functools.wraps(func)
         def wrapper(self, **kwargs: Any) -> Union[NendoTrack, NendoCollection]:
-            track_or_collection, kwargs = self._get_track_or_collection_from_args(
+            track_or_collection, kwargs = self._pop_track_or_collection_from_args(
                 **kwargs,
             )
             if isinstance(track_or_collection, NendoTrack):
@@ -549,27 +550,26 @@ class NendoEmbeddingPlugin(NendoPlugin):
             text += f"{pd.key}: {pd.value}; "
         for k, v in track.meta.items():
             # TODO add support for list, dict?
-            if (isinstance(v, (str, float, int, bool)) and
-                k not in [
-                    "original_filename",
-                    "original_filepath",
-                    "original_size",
-                    "original_checksum",
-                    "filesize",
-                    "audio_offset",
-                    "bitrate",
-                    "channels",
-                    "duration",
-                    "samplerate",
-                    "bitdepth",
-                    "sr",
-                ]):
+            if isinstance(v, (str, float, int, bool)) and k not in [
+                "original_filename",
+                "original_filepath",
+                "original_size",
+                "original_checksum",
+                "filesize",
+                "audio_offset",
+                "bitrate",
+                "channels",
+                "duration",
+                "samplerate",
+                "bitdepth",
+                "sr",
+            ]:
                 text += f"{k}: {v}; "
         return text
 
     @staticmethod
     def run_text(
-        func: Callable[[NendoPlugin, str, Any], None],
+        func: Callable[[NendoPlugin, str, Any], Tuple[str, np.ndarray]],
     ) -> Callable[
         [NendoPlugin, Any],
         Union[
@@ -589,11 +589,10 @@ class NendoEmbeddingPlugin(NendoPlugin):
         """
 
         @functools.wraps(func)
-        def wrapper(self, **kwargs: Any) -> Union[
-            [str, np.ndarray],
-            List[Tuple[str, np.ndarray]],
-        ]:
-            track_or_collection, kwargs = self._get_track_or_collection_from_args(
+        def wrapper(
+            self, **kwargs: Any
+        ) -> Union[[str, np.ndarray], List[Tuple[str, np.ndarray]],]:
+            track_or_collection, kwargs = self._pop_track_or_collection_from_args(
                 **kwargs,
             )
             if track_or_collection is None:
@@ -639,13 +638,12 @@ class NendoEmbeddingPlugin(NendoPlugin):
 
         @functools.wraps(func)
         def wrapper(self, **kwargs: Any) -> Union[NendoEmbedding, List[NendoEmbedding]]:
-            track_or_collection, kwargs = self._get_track_or_collection_from_args(
+            track_or_collection, kwargs = self._pop_track_or_collection_from_args(
                 **kwargs,
             )
             if track_or_collection is None:
                 signal = kwargs.get("signal", None)
                 sr = kwargs.get("sr", None)
-                text = kwargs.get("text", None)
                 text, embedding_vector = func(self, **kwargs)
                 new_track = self.nendo_instance.library.add_track_from_signal(
                     signal=signal if signal is not None else np.array([]),
@@ -714,6 +712,7 @@ class NendoEmbeddingPlugin(NendoPlugin):
                     )
                 embeddings.append(embedding)
             return embeddings
+
         return wrapper
 
     @staticmethod
@@ -733,7 +732,7 @@ class NendoEmbeddingPlugin(NendoPlugin):
 
         @functools.wraps(func)
         def wrapper(self, **kwargs: Any) -> Union[NendoEmbedding, List[NendoEmbedding]]:
-            track_or_collection, kwargs = self._get_track_or_collection_from_args(
+            track_or_collection, kwargs = self._pop_track_or_collection_from_args(
                 **kwargs,
             )
             if isinstance(track_or_collection, NendoTrack):
@@ -757,7 +756,7 @@ class NendoEmbeddingPlugin(NendoPlugin):
                         "enable automatic storing of embeddings.",
                     )
                 return embedding
-            if isinstance(track_or_collection, NendoTrack):
+            if isinstance(track_or_collection, NendoCollection):
                 embeddings = []
                 for track in track_or_collection.tracks():
                     text, embedding_vector = func(self, track, **kwargs)
@@ -781,7 +780,7 @@ class NendoEmbeddingPlugin(NendoPlugin):
             new_track = self.nendo_instance.library.add_track_from_signal(
                 signal=signal if signal is not None else np.array([]),
                 sr=sr if sr is not None else self.config.default_sr,
-                meta = {"text": text},
+                meta={"text": text},
             )
             kwargs.pop("signal", None)
             kwargs.pop("sr", None)
@@ -806,6 +805,7 @@ class NendoEmbeddingPlugin(NendoPlugin):
                     "enable automatic storing of embeddings.",
                 )
             return embedding
+
         return wrapper
 
     @staticmethod
@@ -825,7 +825,7 @@ class NendoEmbeddingPlugin(NendoPlugin):
 
         @functools.wraps(func)
         def wrapper(self, **kwargs: Any) -> Union[NendoEmbedding, List[NendoEmbedding]]:
-            track_or_collection, kwargs = self._get_track_or_collection_from_args(
+            track_or_collection, kwargs = self._pop_track_or_collection_from_args(
                 **kwargs,
             )
             # TODO we currently have no way of handling embeddings of collections,
@@ -839,7 +839,7 @@ class NendoEmbeddingPlugin(NendoPlugin):
                 track_or_collection = self.nendo_instance.library.add_track_from_signal(
                     signal=signal if signal is not None else np.array([]),
                     sr=sr if sr is not None else self.config.default_sr,
-                    meta = {"text": text},
+                    meta={"text": text},
                 )
                 kwargs.pop("signal", None)
                 kwargs.pop("sr", None)
@@ -851,10 +851,12 @@ class NendoEmbeddingPlugin(NendoPlugin):
                 collection_type="temp",
             )
             return func(self, tmp_collection, **kwargs)
+
         return wrapper
 
     def __call__(
-        self, **kwargs: Any,
+        self,
+        **kwargs: Any,
     ) -> Optional[
         Union[
             NendoEmbedding,
@@ -864,37 +866,28 @@ class NendoEmbeddingPlugin(NendoPlugin):
         ]
     ]:
         wrapped_methods = get_wrapped_methods(self)
-
         if len(wrapped_methods) > 1:
-            track_or_collection, kwargs = self._get_track_or_collection_from_args(
-                **kwargs,
-            )
-            if isinstance(track_or_collection, NendoCollection):
-                # first, try to find a `@run_collection` wrapped method
+            # if called with text run first method that can call text
+            # which we assume is decorated with `@run_text`
+            if "text" in kwargs:
                 for wrapped_method in wrapped_methods:
-                    if wrapped_method.__wrapped__.__name__ == "run_collection":
+                    if "text" in inspect.signature(wrapped_method).parameters:
                         return wrapped_method(self, **kwargs)
-                # second, try to find a `@run_track` wrapped method
-                for wrapped_method in wrapped_methods:
-                    if wrapped_method.__wrapped__.__name__ == "run_track":
-                        return wrapped_method(self, **kwargs)
-            if isinstance(track_or_collection, NendoTrack):
-                # first, try to find a `@run_collection` wrapped method
-                for wrapped_method in wrapped_methods:
-                    if wrapped_method.__wrapped__.__name__ == "run_track":
-                        return wrapped_method(self, **kwargs)
-                # second, try to find a `@run_track` wrapped method
-                for wrapped_method in wrapped_methods:
-                    if wrapped_method.__wrapped__.__name__ == "run_collection":
-                        return wrapped_method(self, **kwargs)
-            # third, try to find a `@run_signal_and_text` wrapped method
-            for wrapped_method in wrapped_methods:
-                if wrapped_method.__wrapped__.__name__ == "run_signal_and_text":
-                    return wrapped_method(self, **kwargs)
-            # finally, try to find a `@run_text` wrapped method
-            for wrapped_method in wrapped_methods:
-                if wrapped_method.__wrapped__.__name__ == "run_text":
-                    return wrapped_method(self, **kwargs)
+
+            elif "track" in kwargs or "collection" in kwargs:
+                # remove @run_text function
+                wrapped_methods = [
+                    w
+                    for w in wrapped_methods
+                    if "text" not in inspect.signature(w).parameters
+                ]
+
+                if len(wrapped_methods) > 1:
+                    self.logger.warning(
+                        self._generate_multiple_wrapped_warning(wrapped_methods)
+                    )
+                    return None
+
         if len(wrapped_methods) == 0:
             raise NendoPluginRuntimeError(
                 "No wrapped embedding plugin function found. "

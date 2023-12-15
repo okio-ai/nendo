@@ -60,7 +60,9 @@ class TrackTrackRelationshipDB(Base):
     target_id = Column(UUID(as_uuid=True), ForeignKey("tracks.id"))
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(
-        DateTime(timezone=True), server_default=func.now(), onupdate=func.now(),
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
     )
     relationship_type = Column(String)
     meta = Column(mutable_json_type(dbtype=JSONEncodedDict, nested=True))
@@ -142,7 +144,9 @@ class NendoTrackDB(Base):
     track_type = Column(String, default="track")
     visibility = Column(ENUM(schema.Visibility), default="private")
     updated_at = Column(
-        DateTime(timezone=True), default=func.now(), onupdate=func.now(),
+        DateTime(timezone=True),
+        default=func.now(),
+        onupdate=func.now(),
     )
     created_at = Column(DateTime(timezone=True), default=func.now())
     images = Column(mutable_json_type(dbtype=JSONEncodedDict, nested=True))
