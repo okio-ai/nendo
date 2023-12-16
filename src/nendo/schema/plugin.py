@@ -574,7 +574,8 @@ class NendoEmbeddingPlugin(NendoPlugin):
         [NendoPlugin, Any],
         Union[
             [str, np.ndarray],
-            List[Tuple[str, np.ndarray]],
+            NendoEmbedding,
+            List[NendoEmbedding],
         ],
     ]:
         """Decorator to register a function that embeds a given text string into a vector space.
@@ -585,14 +586,14 @@ class NendoEmbeddingPlugin(NendoPlugin):
             func: Callable[[NendoPlugin, str, Any], None]: The function to register.
 
         Returns:
-            Callable[[NendoPlugin, Any], Union[[str, np.ndarray], List[Tuple[str, np.ndarray]]]]: The wrapped function.
+            Callable[[NendoPlugin, Any], Union[[str, np.ndarray], NendoEmbedding, List[NendoEmbedding]]]: The wrapped function.
         """
 
         @functools.wraps(func)
         def wrapper(
             self,
             **kwargs: Any,
-        ) -> Union[[str, np.ndarray], List[Tuple[str, np.ndarray]]]:
+        ) -> Union[[str, np.ndarray], NendoEmbedding, List[NendoEmbedding]]:
             track_or_collection, kwargs = self._pop_track_or_collection_from_args(
                 **kwargs,
             )
@@ -607,7 +608,25 @@ class NendoEmbeddingPlugin(NendoPlugin):
                     text=self.track_to_text(track=track_or_collection),
                     **kwargs,
                 )
-                return text, embedding_vector
+                embedding = NendoEmbedding(
+                    track_id=track_or_collection.id,
+                    user_id=self.nendo_instance.library.user.id,
+                    plugin_name=self.plugin_name,
+                    plugin_version=self.plugin_version,
+                    text=text,
+                    embedding=embedding_vector,
+                )
+                try:
+                    embedding = self.nendo_instance.library.add_embedding(
+                        embedding=embedding,
+                    )
+                except AttributeError as e:  # noqa: F841
+                    self.logger.error(
+                        "Error adding the embedding to the library. "
+                        "Please use a library plugin with vector support to "
+                        "enable automatic storing of embeddings.",
+                    )
+                return embedding
             processed_tracks = []
             for track in track_or_collection.tracks():
                 text, embedding_vector = func(
@@ -615,9 +634,25 @@ class NendoEmbeddingPlugin(NendoPlugin):
                     text=self.track_to_text(track=track),
                     **kwargs,
                 )
-                processed_tracks.append(
-                    (text, embedding_vector),
+                embedding = NendoEmbedding(
+                    track_id=track.id,
+                    user_id=self.nendo_instance.library.user.id,
+                    plugin_name=self.plugin_name,
+                    plugin_version=self.plugin_version,
+                    text=text,
+                    embedding=embedding_vector,
                 )
+                try:
+                    embedding = self.nendo_instance.library.add_embedding(
+                        embedding=embedding,
+                    )
+                except AttributeError as e:  # noqa: F841
+                    self.logger.error(
+                        "Error adding the embedding to the library. "
+                        "Please use a library plugin with vector support to "
+                        "enable automatic storing of embeddings.",
+                    )
+                processed_tracks.append(embedding)
             return processed_tracks
 
         return wrapper
@@ -863,7 +898,6 @@ class NendoEmbeddingPlugin(NendoPlugin):
             NendoEmbedding,
             List[NendoEmbedding],
             [str, np.ndarray],
-            List[Tuple[str, np.ndarray]],
         ]
     ]:
         """Call the plugin.
@@ -883,7 +917,8 @@ class NendoEmbeddingPlugin(NendoPlugin):
                     List[Tuple[str, np.ndarray]
                 ],
             ]: The NendoEmbedding, if run on a track. A list of NendoEmbeddings,
-            if run on a collection.
+            if run on a collection of tracks. The text and corresponding vector as numpy.ndarray,
+            if run on a text.
         """
         wrapped_methods = get_wrapped_methods(self)
         if len(wrapped_methods) > 1:
