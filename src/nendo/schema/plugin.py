@@ -590,8 +590,9 @@ class NendoEmbeddingPlugin(NendoPlugin):
 
         @functools.wraps(func)
         def wrapper(
-            self, **kwargs: Any
-        ) -> Union[[str, np.ndarray], List[Tuple[str, np.ndarray]],]:
+            self,
+            **kwargs: Any,
+        ) -> Union[[str, np.ndarray], List[Tuple[str, np.ndarray]]]:
             track_or_collection, kwargs = self._pop_track_or_collection_from_args(
                 **kwargs,
             )
@@ -865,6 +866,25 @@ class NendoEmbeddingPlugin(NendoPlugin):
             List[Tuple[str, np.ndarray]],
         ]
     ]:
+        """Call the plugin.
+
+        Runs a registered run function of a plugin on a text, a track, a collection.
+        If the plugin has more than one run function, a warning is raised and all the possible options are listed.
+
+        Args:
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Optional[
+                Union[
+                    NendoEmbedding,
+                    List[NendoEmbedding],
+                    [str, np.ndarray],
+                    List[Tuple[str, np.ndarray]
+                ],
+            ]: The NendoEmbedding, if run on a track. A list of NendoEmbeddings,
+            if run on a collection.
+        """
         wrapped_methods = get_wrapped_methods(self)
         if len(wrapped_methods) > 1:
             # if called with text run first method that can call text
@@ -884,7 +904,7 @@ class NendoEmbeddingPlugin(NendoPlugin):
 
                 if len(wrapped_methods) > 1:
                     self.logger.warning(
-                        self._generate_multiple_wrapped_warning(wrapped_methods)
+                        self._generate_multiple_wrapped_warning(wrapped_methods),
                     )
                     return None
 

@@ -1,4 +1,5 @@
 """Unit tests for the Nendo plugin system."""
+# ruff: noqa: ARG002
 import unittest
 from unittest.mock import Mock, patch
 

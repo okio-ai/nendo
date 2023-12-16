@@ -105,6 +105,7 @@ class PluginDataTest(unittest.TestCase):
         self.assertEqual(plugin_data_2[0].value, "value2")
 
     def test_get_plugin_value(self):
+        """Test the getting of a single plugin value from `NendoTrack`."""
         nd.library.reset(force=True)
         track = nd.library.add_track(file_path="tests/assets/test.mp3")
         _ = nd.library.add_plugin_data(

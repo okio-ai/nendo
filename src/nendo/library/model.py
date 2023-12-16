@@ -1,5 +1,5 @@
 # -*- encoding: utf-8 -*-
-# ruff: noqa: A003
+# ruff: noqa: A003, D101, D102, D103
 """Module containing all SQLAlchemy ORM models for the nendo core schema.
 
 Used by the SQLAlchemy implementation of the nendo library.

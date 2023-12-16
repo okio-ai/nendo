@@ -20,7 +20,7 @@ from abc import ABC, abstractmethod
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from enum import Enum
-from typing import Any, ClassVar, Dict, Iterator, List, Optional, Tuple, Union, Callable
+from typing import Any, Callable, ClassVar, Dict, Iterator, List, Optional, Tuple, Union
 
 import librosa
 import numpy as np
@@ -1355,7 +1355,8 @@ class NendoPlugin(BaseModel, ABC):
         )
 
     def _generate_multiple_wrapped_warning(
-        self, wrapped_methods: List[Callable]
+        self,
+        wrapped_methods: List[Callable],
     ) -> str:
         warning_module = (
             inspect.getmodule(type(self))
@@ -1365,7 +1366,11 @@ class NendoPlugin(BaseModel, ABC):
         warning_methods = [
             f"nendo.plugins.{warning_module}.{m.__name__}()" for m in wrapped_methods
         ]
-        return f" Warning: Multiple wrapped methods found in plugin. Please call the plugin via one of the following methods: {', '.join(warning_methods)}."
+        return (
+            " Warning: Multiple wrapped methods found in plugin. "
+            "Please call the plugin via one of the following methods: "
+            f"{', '.join(warning_methods)}."
+        )
 
     def _run_default_wrapped_method(
         self,
@@ -1385,7 +1390,7 @@ class NendoPlugin(BaseModel, ABC):
 
         if len(wrapped_methods) > 1:
             self.logger.warning(
-                self._generate_multiple_wrapped_warning(wrapped_methods)
+                self._generate_multiple_wrapped_warning(wrapped_methods),
             )
             return None
 
