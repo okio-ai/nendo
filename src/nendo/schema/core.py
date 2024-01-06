@@ -335,6 +335,8 @@ class NendoTrack(NendoTrackBase):
 
     def __len__(self):
         """Return the length of the track in seconds."""
+        if(np.ndim(self.signal) == 1):
+            return self.signal.shape[0] / self.sr
         return self.signal.shape[1] / self.sr
 
     @classmethod

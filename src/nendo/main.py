@@ -137,6 +137,7 @@ class Nendo:
 
     def _load_plugins(self, plugin_names: List[str] = settings.plugins) -> None:
         """Load the specified nendo plugins."""
+        # TODO sort the list of plugins such that the "library" plugins are loaded last
         for module_name in plugin_names:
             plugin_instance = self._load_plugin(module_name=module_name)
             self.plugins.add(
