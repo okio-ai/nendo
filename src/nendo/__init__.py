@@ -53,6 +53,7 @@ from .schema import (
     NendoTrackSlim,
     NendoUser,
     NendoUserNotFoundError,
+    NendoUtilityPlugin,
     ResourceLocation,
 )
 

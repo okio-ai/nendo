@@ -953,6 +953,35 @@ class NendoEmbeddingPlugin(NendoPlugin):
         return run_func(self, **kwargs)
 
 
+class NendoUtilityPlugin(NendoPlugin):
+    """Basic class for nendo utility plugins."""
+
+    @property
+    def plugin_type(self) -> str:
+        """Return type of plugin."""
+        return "UtilityPlugin"
+
+    @staticmethod
+    def run_utility(
+        func: Callable[
+            [NendoPlugin, Optional[NendoTrack], Any],
+            Union[str, float, int, bool, List],
+        ],
+    ) -> Callable[[NendoPlugin, Any], Union[str, float, int, bool, List]]:
+        @functools.wraps(func)
+        def wrapper(self, **kwargs: Any) -> Union[str, float, int, bool, List]:
+            track_or_collection, kwargs = self._pop_track_or_collection_from_args(
+                **kwargs,
+            )
+            if track_or_collection is None:
+                return func(self, **kwargs)
+            util = func(self, track_or_collection, **kwargs)
+            return util
+
+        return wrapper
+
+
+
 class NendoLibraryPlugin(NendoPlugin):
     """Basic class for nendo library plugins."""
 

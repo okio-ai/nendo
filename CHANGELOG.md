@@ -5,6 +5,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 <!-- insertion marker -->
+## [0.1.3](https://github.com/okio-ai/nendo/releases/tag/0.1.3) - 2023-12-08
+
+<small>[Compare with 0.1.2](https://github.com/okio-ai/nendo/compare/0.1.2...0.1.3)</small>
+
+### Bug Fixes
+
+- remove psycopg2 dependency (#15) ([ebd4a23](https://github.com/okio-ai/nendo/commit/ebd4a234d8cad32fad832093ca9808a07ed2375c) by Felix Lorenz).
+
 ## [0.1.2](https://github.com/okio-ai/nendo/releases/tag/0.1.2) - 2023-11-30
 
 <small>[Compare with previous version](https://github.com/okio-ai/nendo/compare/0.1.1...0.1.2)</small>

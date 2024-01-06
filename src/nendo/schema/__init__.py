@@ -57,6 +57,7 @@ from .exception import (
 )
 from .plugin import (
     NendoAnalysisPlugin,
+    NendoUtilityPlugin,
     NendoEffectPlugin,
     NendoEmbeddingPlugin,
     NendoGeneratePlugin,
