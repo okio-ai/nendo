@@ -61,11 +61,11 @@ class NendoLibraryVectorExtension(BaseModel):
             # try to auto-detect an embedding plugin from the registry
             self.embedding_plugin = self._get_embedding_plugin()
             if self.embedding_plugin is None:
-                raise NendoPluginLoadingError(
+                self.logger.error(
                     "No embedding plugin was configured for the "
                     "NendoLibraryVectorExtension and none was found in the "
-                    "PluginRegistry. Please make sure to enable at least one "
-                    "EmbeddingPlugin when using a NendoLibrary with vector support.",
+                    "PluginRegistry. Please make sure to install and enable one "
+                    "to use the embedding features of the nendo library.",
                 )
         self._default_distance = default_distance
 
