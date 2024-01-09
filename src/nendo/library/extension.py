@@ -51,12 +51,12 @@ class NendoLibraryVectorExtension(BaseModel):
                     embedding_plugin,
                 )
             except AttributeError as e:
-                self.logger.error(e)
-                raise NendoPluginLoadingError(
+                self.logger.error(
                     f"Plugin with name {embedding_plugin} has been configured "
                     "for the NendoLibraryVectorExtension but is not loaded. "
-                    "Please load the plugin or change the library configuration.",
-                ) from None
+                    "Please make sure to install and enable the plugin "
+                    "to use the embedding features of the nendo library.",
+                )
         else:
             # try to auto-detect an embedding plugin from the registry
             self.embedding_plugin = self._get_embedding_plugin()
