@@ -352,12 +352,12 @@ class NendoTrack(NendoTrackBase):
         self.__dict__["sr"] = rsr
         return new_signal
 
-    def local(self) -> str:
+    def local(self, user_id: Optional[Union[str, uuid.UUID]] = None) -> str:
         """Get a path to a local file handle on the track."""
         return self.nendo_instance.library.storage_driver.as_local(
             file_path=self.resource.src,
             location=self.resource.location,
-            user_id=self.nendo_instance.config.user_id,
+            user_id=str(user_id) or str(self.nendo_instance.config.user_id),
         )
 
     def overlay(self, track: NendoTrack, gain_db: Optional[float] = 0) -> NendoTrack:
