@@ -27,7 +27,7 @@ import numpy as np
 import soundfile as sf
 from pydantic import BaseModel, ConfigDict, Field, FilePath
 
-from nendo.config import NendoConfig
+from nendo.config import NendoConfig, get_settings
 from nendo.main import Nendo
 from nendo.schema.exception import NendoError, NendoPluginRuntimeError
 from nendo.utils import (
@@ -39,7 +39,6 @@ from nendo.utils import (
 )
 
 logger = logging.getLogger("nendo")
-
 
 class ResourceType(str, Enum):
     """Enum representing different types of resources used in Nendo."""
@@ -1682,17 +1681,18 @@ class NendoStorageLocalFS(NendoStorage):
         **kwargs: Any,
     ):
         super().__init__(**kwargs)
-        self.library_path = os.path.join(library_path, user_id)
+        self.library_path = library_path
         self.init_storage_for_user(user_id=user_id)
 
     def init_storage_for_user(self, user_id: str) -> str:  # noqa: ARG002
         """Initialize local storage for user."""
-        if not os.path.isdir(self.library_path):
+        user_lib_path = os.path.join(self.library_path, user_id)
+        if not os.path.isdir(user_lib_path):
             logger.info(
-                f"Library path {self.library_path} does not exist, creating now.",
+                f"Library path {user_lib_path} does not exist, creating now.",
             )
-            os.makedirs(self.library_path)
-        return self.library_path
+            os.makedirs(user_lib_path)
+        return user_lib_path
 
     def generate_filename(self, filetype: str, user_id: str) -> str:  # noqa: ARG002
         """Generate a unique filename."""
@@ -1722,7 +1722,7 @@ class NendoStorageLocalFS(NendoStorage):
         user_id: str,  # noqa: ARG002
     ) -> str:
         """Save the given signal to storage."""
-        target_file_path = self.get_file(file_name=file_name, user_id="")
+        target_file_path = self.get_file(file_name=file_name, user_id=user_id)
         sf.write(target_file_path, signal, sr, subtype="PCM_16")
         return target_file_path
 
@@ -1733,7 +1733,7 @@ class NendoStorageLocalFS(NendoStorage):
         user_id: str,  # noqa: ARG002
     ) -> str:
         """Save the given bytes to storage."""
-        target_file_path = self.get_file(file_name=file_name, user_id="")
+        target_file_path = self.get_file(file_name=file_name, user_id=user_id)
         with open(target_file_path, "wb") as target_file:
             pickle.dump(data, target_file)
         return target_file_path
@@ -1756,13 +1756,13 @@ class NendoStorageLocalFS(NendoStorage):
         """Get the file name (without the path)."""
         return os.path.basename(src)
 
-    def get_file(self, file_name: str, user_id: str) -> str:  # noqa: ARG002
+    def get_file(self, file_name: str, user_id: str) -> str:
         """Get the full path to the file."""
-        return os.path.join(self.library_path, file_name)
+        return os.path.join(self.library_path, user_id, file_name)
 
-    def list_files(self, user_id: str) -> List[str]:  # noqa: ARG002
+    def list_files(self, user_id: str) -> List[str]:
         """List all files contained in the storage."""
-        with os.scandir(self.library_path) as entries:
+        with os.scandir(os.path.join(self.library_path, user_id)) as entries:
             return [entry.name for entry in entries if entry.is_file()]
 
     def get_bytes(self, file_name: str, user_id: str) -> Any:

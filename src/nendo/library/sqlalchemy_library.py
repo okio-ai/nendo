@@ -157,6 +157,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
 
         file_checksum = md5sum(file_path)
         file_stats = os.stat(file_path)
+        user_id = self._ensure_user_uuid(user_id)
 
         # skip adding a duplicate based on config flag and hashsum of the file
         skip_duplicate = skip_duplicate or self.config.skip_duplicate
@@ -211,21 +212,21 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                     path_in_library = self.storage_driver.save_signal(
                         file_name=self.storage_driver.generate_filename(
                             filetype="wav",
-                            user_id=user_id,
+                            user_id=str(user_id),
                         ),
                         signal=signal,
                         sr=sr,
-                        user_id=str(user_id) if user_id else str(self.user.id),
+                        user_id=str(user_id),
                     )
                 else:
                     # save file to storage in its original format
                     path_in_library = self.storage_driver.save_file(
                         file_name=self.storage_driver.generate_filename(
                             filetype=os.path.splitext(file_path)[1][1:],  # without dot
-                            user_id=user_id,
+                            user_id=str(user_id),
                         ),
                         file_path=file_path,
-                        user_id=str(user_id) if user_id else str(self.user.id),
+                        user_id=str(user_id),
                     )
 
                 # save the parsed sample rate
@@ -253,11 +254,11 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         resource = schema.NendoResource(
             file_path=self.storage_driver.get_file_path(
                 src=path_in_library,
-                user_id=str(user_id) if user_id else str(self.user.id),
+                user_id=str(user_id),
             ),
             file_name=self.storage_driver.get_file_name(
                 src=path_in_library,
-                user_id=str(user_id) if user_id else str(self.user.id),
+                user_id=str(user_id),
             ),
             resource_type="audio",
             location=location,
@@ -292,6 +293,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             schema.NendoTrackCreate: The created NendoTrack.
         """
         target_file = None
+        user_id = self._ensure_user_uuid(user_id)
         # sf.write expects the channels in the second dimension of the
         # signal array! Librosa.load() loads them into the first dimension
         signal = np.transpose(signal) if signal.shape[0] <= 2 else signal
@@ -307,11 +309,11 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             target_file = self.storage_driver.save_signal(
                 file_name=self.storage_driver.generate_filename(
                     filetype="wav",
-                    user_id=str(user_id) if user_id else str(self.user.id),
+                    user_id=str(user_id),
                 ),
                 signal=signal,
                 sr=sr,
-                user_id=user_id,
+                user_id=str(user_id),
             )
         except Exception as e:  # noqa: BLE001
             raise schema.NendoLibraryError(
@@ -320,11 +322,11 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         resource = schema.NendoResource(
             file_path=self.storage_driver.get_file_path(
                 src=target_file,
-                user_id=str(user_id) if user_id else str(self.user.id),
+                user_id=str(user_id),
             ),
             file_name=self.storage_driver.get_file_name(
                 src=target_file,
-                user_id=str(user_id) if user_id else str(self.user.id),
+                user_id=str(user_id),
             ),
             resource_type="audio",
             location=self.storage_driver.get_driver_location(),
@@ -1462,7 +1464,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             logger.info("Removing resources associated with Track %s", str(track_id))
             return self.storage_driver.remove_file(
                 file_name=target.resource["file_name"],
-                user_id=str(user_id) if user_id else str(self.user.id),
+                user_id=str(user_id),
             )
         return True
 
@@ -2326,14 +2328,15 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
     ) -> schema.NendoBlobCreate:
         """Create a blob from the given bytes."""
         target_file = None
+        user_id_str = str(user_id) if user_id else str(self.user.id)
         try:
             target_file = self.storage_driver.save_bytes(
                 file_name=self.storage_driver.generate_filename(
                     filetype="pkl",
-                    user_id=str(user_id) if user_id else str(self.user.id),
+                    user_id=user_id_str,
                 ),
                 data=data,
-                user_id=str(user_id) if user_id else str(self.user.id),
+                user_id=user_id_str,
             )
         except Exception as e:  # noqa: BLE001
             raise schema.NendoLibraryError(
@@ -2342,11 +2345,11 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         resource = schema.NendoResource(
             file_path=self.storage_driver.get_file_path(
                 src=target_file,
-                user_id=str(user_id) if user_id else str(self.user.id),
+                user_id=user_id_str,
             ),
             file_name=self.storage_driver.get_file_name(
                 src=target_file,
-                user_id=str(user_id) if user_id else str(self.user.id),
+                user_id=user_id_str,
             ),
             resource_type="blob",
             location=self.storage_driver.get_driver_location(),
@@ -2438,7 +2441,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                 local_blob = self.storage_driver.as_local(
                     file_path=blob.resource.src,
                     location=blob.resource.location,
-                    user_id=user_id,
+                    user_id=str(user_id),
                 )
 
                 # load blob data into memory
@@ -2533,7 +2536,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             try:
                 self.storage_driver.remove_file(
                     file_name=target.resource["file_name"],
-                    user_id=user_id,
+                    user_id=str(user_id),
                 )
             except Exception as e:  # noqa: BLE001
                 logger.error(
@@ -2594,5 +2597,5 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             # delete all tracks
             session.query(model.NendoTrackDB).delete()
         # remove files
-        for library_file in self.storage_driver.list_files(user_id=user_id):
-            self.storage_driver.remove_file(file_name=library_file, user_id=user_id)
+        for library_file in self.storage_driver.list_files(user_id=str(user_id)):
+            self.storage_driver.remove_file(file_name=library_file, user_id=str(user_id))
