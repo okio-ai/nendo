@@ -359,7 +359,7 @@ class NendoTrack(NendoTrackBase):
             location=self.resource.location,
             user_id=(str(user_id) if
                      user_id is not None else
-                     str(self.nendo_instance.config.user_iduser_id)
+                     str(self.nendo_instance.config.user_id)
             ),
         )
 
