@@ -357,7 +357,10 @@ class NendoTrack(NendoTrackBase):
         return self.nendo_instance.library.storage_driver.as_local(
             file_path=self.resource.src,
             location=self.resource.location,
-            user_id=str(user_id) or str(self.nendo_instance.config.user_id),
+            user_id=(str(user_id) if
+                     user_id is not None else
+                     str(self.nendo_instance.config.user_iduser_id)
+            ),
         )
 
     def overlay(self, track: NendoTrack, gain_db: Optional[float] = 0) -> NendoTrack:
