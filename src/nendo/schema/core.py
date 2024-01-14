@@ -800,6 +800,20 @@ class NendoTrack(NendoTrackBase):
         )
         return self
 
+    def relate_to_track(
+        self,
+        track_id: Union[str, uuid.UUID],
+        relationship_type: str = "relationship",
+        meta: Optional[Dict[str, Any]] = None,
+    ):
+        self.nendo_instance.library.add_track_relationship(
+            track_one_id=self.id,
+            track_two_id=track_id,
+            relationship_type=relationship_type,
+            meta=meta,
+        )
+        return self
+
     def process(self, plugin: str, **kwargs: Any) -> Union[NendoTrack, NendoCollection]:
         """Process the track with the specified plugin.
 
