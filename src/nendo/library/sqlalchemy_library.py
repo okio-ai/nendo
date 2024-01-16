@@ -403,7 +403,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         Returns:
             Query: The SQLAlchemy query object.
         """
-        user_id = user_id or self.user.id
+        user_id = self._ensure_user_uuid(user_id)
         return (
             session.query(model.NendoTrackDB)
             .join(
