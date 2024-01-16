@@ -425,6 +425,17 @@ class NendoTrack(NendoTrackBase):
         self.nendo_instance.library.update_track(track=self)
         return self
 
+    def refresh(self) -> NendoTrack:
+        """Refreshes the track with the latest values from the library.
+
+        Returns:
+            NendoTrack: The track itself.
+        """
+        refreshed_track = self.nendo_instance.library.get_track(self.id)
+        for attr in vars(refreshed_track):
+            setattr(self, attr, getattr(refreshed_track, attr))
+        return self
+
     def delete(
         self,
         remove_relationships: bool = False,
@@ -644,7 +655,7 @@ class NendoTrack(NendoTrackBase):
         Returns:
             NendoTrack: The track itself.
         """
-        related_track = self.nendo_instance.library.add_related_track(
+        self.nendo_instance.library.add_related_track(
             file_path=file_path,
             related_track_id=self.id,
             track_type=track_type,
@@ -653,7 +664,7 @@ class NendoTrack(NendoTrackBase):
             relationship_type=relationship_type,
             meta=meta,
         )
-        self.related_tracks.append(related_track.related_tracks[0])
+        self.refresh()
         return self
 
     def add_related_track_from_signal(
@@ -682,7 +693,7 @@ class NendoTrack(NendoTrackBase):
         Returns:
             NendoTrack: The track itself.
         """
-        related_track = self.nendo_instance.library.add_related_track_from_signal(
+        self.nendo_instance.library.add_related_track_from_signal(
             signal=signal,
             sr=sr,
             track_type=track_type,
@@ -692,7 +703,7 @@ class NendoTrack(NendoTrackBase):
             relationship_type=relationship_type,
             meta=meta,
         )
-        self.related_tracks.append(related_track.related_tracks[0])
+        self.refresh()
         return self
 
     def has_relationship(self, relationship_type: str = "relationship") -> bool:
@@ -779,6 +790,7 @@ class NendoTrack(NendoTrackBase):
             position=position,
             meta=meta,
         )
+        self.refresh()
         return self
 
     def remove_from_collection(
@@ -798,6 +810,7 @@ class NendoTrack(NendoTrackBase):
             track_id=self.id,
             collection_id=collection_id,
         )
+        self.refresh()
         return self
 
     def relate_to_track(
@@ -812,6 +825,7 @@ class NendoTrack(NendoTrackBase):
             relationship_type=relationship_type,
             meta=meta,
         )
+        self.refresh()
         return self
 
     def process(self, plugin: str, **kwargs: Any) -> Union[NendoTrack, NendoCollection]:
@@ -955,6 +969,17 @@ class NendoCollection(NendoCollectionBase):
         self.nendo_instance.library.update_collection(collection=self)
         return self
 
+    def refresh(self) -> NendoCollection:
+        """Refreshes the collection with the latest values from the library.
+
+        Returns:
+            NendoCollection: The collection itself.
+        """
+        refreshed_collection = self.nendo_instance.library.get_collection(self.id)
+        for attr in vars(refreshed_collection):
+            setattr(self, attr, getattr(refreshed_collection, attr))
+        return self
+
     def delete(
         self,
         remove_relationships: bool = False,
@@ -1065,11 +1090,7 @@ class NendoCollection(NendoCollectionBase):
             track_id=track_id,
             collection_id=self.id,
         )
-        # NOTE the following removes _all_ relationships between the track and
-        # the collection. In the future, this could be refined to account for cases
-        # where multiple relationships of different types exist between a track
-        # and a collection
-        self.related_tracks = [t for t in self.related_tracks if t.id != track_id]
+        self.refresh()
         return self
 
     def add_related_collection(
@@ -1103,6 +1124,7 @@ class NendoCollection(NendoCollectionBase):
             relationship_type=relationship_type,
             meta=meta,
         )
+        self.refresh()
         return self
 
     def set_meta(self, meta: Dict[str, Any]) -> NendoCollection:

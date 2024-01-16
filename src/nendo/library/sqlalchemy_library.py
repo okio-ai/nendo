@@ -842,7 +842,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                 ),
             )
         # avoid redundancy; only append one direction
-        track_one.related_tracks.append(relationship_from)
+        # track_one.related_tracks.append(relationship_from)
         return True
 
     def add_related_track(
@@ -1144,7 +1144,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         """Get tracks with a relationship to the track with track_id.
 
         Args:
-            track_id (str): ID of the track to be searched for.
+            track_id (Union[str, UUID]): ID of the track to be searched for.
             user_id (Union[str, UUID], optional): The user ID to filter for.
             order_by (Optional[str]): Key used for ordering the results.
             order (Optional[str]): Order in which to retrieve results ("asc" or "desc").

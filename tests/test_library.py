@@ -321,6 +321,14 @@ class DefaultLibraryTests(unittest.TestCase):
             relationship_type="stem",
             meta={"test": "value"},
         )
+        inserted_track4 = nd.library.add_track(
+            file_path="tests/assets/test.wav",
+        )
+        inserted_track5 = nd.library.add_track(
+            file_path="tests/assets/test.wav",
+        )
+        inserted_track4.relate_to_track(inserted_track1.id)
+        inserted_track5.relate_to_track(inserted_track1.id)
 
         # confirm that the related_tracks exist
         inserted_track2 = nd.library.get_track(inserted_track2.id)
@@ -329,8 +337,14 @@ class DefaultLibraryTests(unittest.TestCase):
         inserted_track3 = nd.library.get_track(inserted_track3.id)
         self.assertTrue(inserted_track3.has_relationship("stem"))
 
-        result = nd.library.remove_track(inserted_track1.id, remove_relationships=True)
-        inserted_track1 = nd.library.get_track(inserted_track1.id)
+        self.assertTrue(inserted_track4.has_relationship_to(inserted_track1.id))
+        self.assertTrue(inserted_track5.has_relationship_to(inserted_track1.id))
+
+        inserted_track1_id = inserted_track1.id
+        result = nd.library.remove_track(inserted_track1_id, remove_relationships=True)
+        inserted_track1 = nd.library.get_track(inserted_track1_id)
+        inserted_track4.refresh()
+        inserted_track5.refresh()
 
         self.assertIsNone(inserted_track1)
         self.assertTrue(result)
@@ -341,6 +355,9 @@ class DefaultLibraryTests(unittest.TestCase):
 
         inserted_track3 = nd.library.get_track(inserted_track3.id)
         self.assertFalse(inserted_track3.has_relationship("stem"))
+
+        self.assertFalse(inserted_track4.has_relationship_to(inserted_track1_id))
+        self.assertFalse(inserted_track5.has_relationship_to(inserted_track1_id))
 
         nd.config.skip_duplicate = True
 

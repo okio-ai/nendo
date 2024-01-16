@@ -4,13 +4,12 @@ from __future__ import annotations
 
 from abc import abstractmethod
 from enum import Enum
-from typing import TYPE_CHECKING, List, Optional, Tuple
+from typing import TYPE_CHECKING, List, Optional, Tuple, Union
 
 import numpy as np
 import numpy.typing as npt
 from pydantic import BaseModel
 
-from nendo.schema.exception import NendoPluginLoadingError
 from nendo.schema.plugin import NendoEmbeddingPlugin
 
 if TYPE_CHECKING:
@@ -231,6 +230,7 @@ class NendoLibraryVectorExtension(BaseModel):
         self,
         vec: npt.ArrayLike,
         n: int = 5,
+        user_id: Optional[Union[str, uuid.UUID]] = None,
         distance_metric: Optional[DistanceMetric] = None,
     ) -> List[NendoTrack]:
         """Obtain the n nearest neighboring tracks to a vector from the library.
@@ -238,6 +238,7 @@ class NendoLibraryVectorExtension(BaseModel):
         Args:
             vec (numpy.typing.ArrayLike): The vector from which to start the neighbor search.
             n (int, optional): The number of neighbors to retrieve. Defaults to 5.
+            user_id (Union[str, uuid.UUID]): ID of the user whose tracks to retrieve.
             distance_metric (Optional[DistanceMetric], optional): The distance metric
                 to use. Defaults to None.
 
@@ -248,6 +249,7 @@ class NendoLibraryVectorExtension(BaseModel):
         tracks_and_scores = self.get_similar_by_vector_with_score(
             vec=vec,
             n=n,
+            user_id=user_id,
             distance_metric=distance_metric,
         )
         return [track for track, _ in tracks_and_scores]
@@ -256,6 +258,7 @@ class NendoLibraryVectorExtension(BaseModel):
         self,
         track: NendoTrack,
         n: int = 5,
+        user_id: Optional[Union[str, uuid.UUID]] = None,
         distance_metric: Optional[DistanceMetric] = None,
     ) -> List[NendoTrack]:
         """Obtain the n nearest neighboring tracks to a track from the library.
@@ -263,6 +266,7 @@ class NendoLibraryVectorExtension(BaseModel):
         Args:
             track (NendoTrack): The track from which to start the neighbor search.
             n (int, optional): The number of neighbors to retrieve. Defaults to 5.
+            user_id (Union[str, uuid.UUID]): ID of the user whose tracks to retrieve.
             distance_metric (Optional[DistanceMetric], optional): The distance metric
                 to use. Defaults to None.
 
@@ -273,6 +277,7 @@ class NendoLibraryVectorExtension(BaseModel):
         tracks_and_scores = self.nearest_by_track_with_score(
             track=track,
             n=n,
+            user_id=user_id,
             distance_metric=distance_metric,
         )
         return [track for track, _ in tracks_and_scores]
@@ -281,6 +286,7 @@ class NendoLibraryVectorExtension(BaseModel):
         self,
         track: NendoTrack,
         n: int = 5,
+        user_id: Optional[Union[str, uuid.UUID]] = None,
         distance_metric: Optional[DistanceMetric] = None,
     ) -> List[Tuple[NendoTrack, float]]:
         """Obtain the n nearest neighbors to a track, together with their distances.
@@ -288,6 +294,7 @@ class NendoLibraryVectorExtension(BaseModel):
         Args:
             track (NendoTrack): The track from which to start the neighbor search.
             n (int, optional): The number of neighbors to retrieve. Defaults to 5.
+            user_id (Union[str, uuid.UUID]): ID of the user whose tracks to retrieve.
             distance_metric (Optional[DistanceMetric], optional): The distance metric
                 to use. Defaults to None.
 
@@ -309,6 +316,7 @@ class NendoLibraryVectorExtension(BaseModel):
         nearest = self.nearest_by_vector_with_score(
             vec=track_embedding.embedding,
             n=n + 1,
+            user_id=user_id,
             distance_metric=distance_metric,
         )
         return nearest[1:]
@@ -317,6 +325,7 @@ class NendoLibraryVectorExtension(BaseModel):
         self,
         query: str,
         n: int = 5,
+        user_id: Optional[Union[str, uuid.UUID]] = None,
         distance_metric: Optional[DistanceMetric] = None,
     ) -> List[NendoTrack]:
         """Obtain the n nearest neighboring tracks to a query string.
@@ -324,6 +333,7 @@ class NendoLibraryVectorExtension(BaseModel):
         Args:
             query (str): The query from which to start the neighbor search.
             n (int, optional): The number of neighbors to retrieve. Defaults to 5.
+            user_id (Union[str, uuid.UUID]): ID of the user whose tracks to retrieve.
             distance_metric (Optional[DistanceMetric], optional): The distance metric
                 to use. Defaults to None.
 
@@ -334,6 +344,7 @@ class NendoLibraryVectorExtension(BaseModel):
         tracks_and_scores = self.nearest_by_query_with_score(
             query=query,
             n=n,
+            user_id=user_id,
             distance_metric=distance_metric,
         )
         return [track for track, _ in tracks_and_scores]
@@ -342,6 +353,7 @@ class NendoLibraryVectorExtension(BaseModel):
         self,
         query: str,
         n: int = 5,
+        user_id: Optional[Union[str, uuid.UUID]] = None,
         distance_metric: Optional[DistanceMetric] = None,
     ) -> List[Tuple[NendoTrack, float]]:
         """Obtain the n nearest neighboring tracks to a query, together with scores.
@@ -349,6 +361,7 @@ class NendoLibraryVectorExtension(BaseModel):
         Args:
             query (str): The query from which to start the neighbor search.
             n (int, optional): The number of neighbors to retrieve. Defaults to 5.
+            user_id (Union[str, uuid.UUID]): ID of the user whose tracks to retrieve.
             distance_metric (Optional[DistanceMetric], optional): The distance metric
                 to use. Defaults to None.
 
@@ -361,6 +374,7 @@ class NendoLibraryVectorExtension(BaseModel):
         return self.nearest_by_vector_with_score(
             vec=query_embedding,
             n=n,
+            user_id=user_id,
             distance_metric=distance_metric,
         )
 
@@ -463,6 +477,7 @@ class NendoLibraryVectorExtension(BaseModel):
         self,
         vec: npt.ArrayLike,
         n: int = 5,
+        user_id: Optional[Union[str, uuid.UUID]] = None,
         distance_metric: Optional[DistanceMetric] = None,
     ) -> List[Tuple[NendoTrack, float]]:
         """Obtain the n nearest neighbors to a vector, together with their distances.
@@ -471,6 +486,7 @@ class NendoLibraryVectorExtension(BaseModel):
             vec (numpy.typing.ArrayLike): The vector from which to start the neighbor
                 search.
             n (int, optional): The number of neighbors to retrieve. Defaults to 5.
+            user_id (Union[str, uuid.UUID]): ID of the user whose vectors to retrieve.
             distance_metric (Optional[DistanceMetric], optional): The distance metric
                 to use. Defaults to None.
 
