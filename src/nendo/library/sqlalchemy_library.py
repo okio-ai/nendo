@@ -421,6 +421,125 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             )
         )
 
+    def _get_filtered_tracks_query(
+        self,
+        session: Session,
+        query: Optional[Query] = None,
+        filters: Optional[Dict[str, Any]] = None,
+        resource_filters: Optional[Dict[str, Any]] = None,
+        track_type: Optional[Union[str, List[str]]] = None,
+        user_id: Optional[Union[str, uuid.UUID]] = None,
+        collection_id: Optional[Union[str, uuid.UUID]] = None,
+        plugin_names: Optional[List[str]] = None,
+    ) -> Query:
+        """Get tracks with a relationship to the track with track_id from the DB.
+
+        Args:
+            track_id (UUID): ID of the track to be searched for.
+            session (Session): Session to be used for the transaction.
+            user_id (UUID, optional): The user ID to filter for.
+
+        Returns:
+            Query: The SQLAlchemy query object.
+        """
+        user_id = user_id or self.user.id
+        with session as session_local:
+            if query:
+                query_local = query
+            else:
+                query_local = session_local.query(model.NendoTrackDB).filter(
+                    model.NendoTrackDB.user_id == user_id,
+                )
+            plugin_name_condition = true()
+            if (
+                plugin_names is not None
+                and isinstance(plugin_names, list)
+                and len(plugin_names) > 0
+            ):
+                plugin_name_condition = model.NendoPluginDataDB.plugin_name.in_(
+                    plugin_names,
+                )
+
+            # apply track type filter if applicable
+            if track_type is not None:
+                if isinstance(track_type, list):
+                    query_local = query_local.filter(model.NendoTrackDB.track_type.in_(track_type))
+                else:
+                    query_local = query_local.filter(model.NendoTrackDB.track_type == track_type)
+
+            # apply collection filter if applicable
+            if collection_id is not None:
+                collection_id = ensure_uuid(collection_id)
+
+                query_local = query_local.join(
+                    model.TrackCollectionRelationshipDB,
+                    model.NendoTrackDB.id
+                    == model.TrackCollectionRelationshipDB.source_id,
+                ).filter(
+                    model.TrackCollectionRelationshipDB.target_id == collection_id,
+                )
+
+            # apply resource filters if applicable
+            if resource_filters:
+                values = [v for v in resource_filters.values() if isinstance(v, list)]
+                or_filter = or_(
+                    *(
+                        cast(model.NendoTrackDB.resource, Text()).ilike(
+                            "%{}%".format(str(value)),
+                        )
+                        for rf in values
+                        for value in rf
+                    ),
+                )
+                query_local = query_local.filter(or_filter)
+
+            # apply plugin data filters
+            if filters is not None:
+                for k, v in filters.items():
+                    if v is None:
+                        continue
+
+                    # range
+                    if type(v) == tuple:
+                        query_local = query_local.filter(
+                            model.NendoTrackDB.plugin_data.any(
+                                and_(
+                                    plugin_name_condition,
+                                    model.NendoPluginDataDB.key == k,
+                                    cast(model.NendoPluginDataDB.value, Float)
+                                    >= cast(v[0], Float),
+                                    cast(model.NendoPluginDataDB.value, Float)
+                                    <= cast(v[1], Float),
+                                ),
+                            ),
+                        )
+                    # multiselect
+                    elif isinstance(v, list):
+                        sv = [str(vi) for vi in v]
+                        query_local = query_local.filter(
+                            model.NendoTrackDB.plugin_data.any(
+                                and_(
+                                    plugin_name_condition,
+                                    model.NendoPluginDataDB.key == k,
+                                    model.NendoPluginDataDB.value.in_(sv),
+                                ),
+                            ),
+                        )
+                    # fuzzy match
+                    else:
+                        query_local = query_local.filter(
+                            model.NendoTrackDB.plugin_data.any(
+                                and_(
+                                    plugin_name_condition,
+                                    model.NendoPluginDataDB.key == k,
+                                    cast(model.NendoPluginDataDB.value, Text()).ilike(
+                                        "%{}%".format(str(v)),
+                                    ),
+                                ),
+                            ),
+                        )
+            return query_local
+
     def _upsert_track_track_relationship(
         self,
         relationship: schema.NendoRelationshipBase,
@@ -1171,6 +1290,73 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                 session=session,
             )
 
+    def filter_related_tracks(
+        self,
+        track_id: Union[str, uuid.UUID],
+        filters: Optional[Dict[str, Any]] = None,
+        resource_filters: Optional[Dict[str, Any]] = None,
+        track_type: Optional[Union[str, List[str]]] = None,
+        user_id: Optional[Union[str, uuid.UUID]] = None,
+        collection_id: Optional[Union[str, uuid.UUID]] = None,
+        plugin_names: Optional[List[str]] = None,
+        order_by: Optional[str] = None,
+        order: Optional[str] = "asc",
+        limit: Optional[int] = None,
+        offset: Optional[int] = None,
+    ) -> Union[List, Iterator]:
+        """Get tracks with a relationship to a track and filter the results.
+
+        Args:
+            track_id (Union[str, UUID]): ID of the track to be searched for.
+            filters (Optional[dict]): Dictionary containing the filters to apply.
+                Defaults to None.
+            resource_filters (dict): Dictionary containing the keywords to search for
+                over the track.resource.meta field. The dictionary's values
+                should contain singular search tokens and the keys currently have no
+                effect but might in the future. Defaults to {}.
+            track_type (Union[str, List[str]], optional): Track type to filter for.
+                Can be a singular type or a list of types. Defaults to None.
+            user_id (Union[str, UUID], optional): The user ID to filter for.
+            collection_id (Union[str, uuid.UUID], optional): Collection id to
+                which the filtered tracks must have a relationship. Defaults to None.
+            plugin_names (list, optional): List used for applying the filter only to
+                data of certain plugins. If None, all plugin data related to the track
+                is used for filtering.
+            order_by (Optional[str]): Key used for ordering the results.
+            order (Optional[str]): Order in which to retrieve results ("asc" or "desc").
+            limit (Optional[int]): Limit the number of returned results.
+            offset (Optional[int]): Offset into the paginated results (requires limit).
+
+        Returns:
+            Union[List, Iterator]: List or generator of tracks, depending on the
+                configuration variable stream_mode
+        """
+        user_id = self._ensure_user_uuid(user_id)
+        with self.session_scope() as session:
+            query = self._get_related_tracks_query(
+                track_id=ensure_uuid(track_id),
+                session=session,
+                user_id=user_id,
+            )
+            query = self._get_filtered_tracks_query(
+                session=session,
+                query=query,
+                filters=filters,
+                resource_filters=resource_filters,
+                track_type=track_type,
+                user_id=user_id,
+                collection_id=collection_id,
+                plugin_names=plugin_names,
+            )
+            return self.get_tracks(
+                query=query,
+                order_by=order_by,
+                order=order,
+                limit=limit,
+                offset=offset,
+                session=session,
+            )
+
     def find_tracks(
         self,
         value: str,
@@ -1262,97 +1448,15 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         s = session or self.session_scope()
         with s as session_local:
             """Obtain tracks from the db by filtering w.r.t. various fields."""
-            query = session_local.query(model.NendoTrackDB).filter(
-                model.NendoTrackDB.user_id == user_id,
+            query = self._get_filtered_tracks_query(
+                session=session_local,
+                filters=filters,
+                resource_filters=resource_filters,
+                track_type=track_type,
+                user_id=user_id,
+                collection_id=collection_id,
+                plugin_names=plugin_names,
             )
-            plugin_name_condition = true()
-            if (
-                plugin_names is not None
-                and isinstance(plugin_names, list)
-                and len(plugin_names) > 0
-            ):
-                plugin_name_condition = model.NendoPluginDataDB.plugin_name.in_(
-                    plugin_names,
-                )
-
-            # apply track type filter if applicable
-            if track_type is not None:
-                if isinstance(track_type, list):
-                    query = query.filter(model.NendoTrackDB.track_type.in_(track_type))
-                else:
-                    query = query.filter(model.NendoTrackDB.track_type == track_type)
-
-            # apply collection filter if applicable
-            if collection_id is not None:
-                collection_id = ensure_uuid(collection_id)
-
-                query = query.join(
-                    model.TrackCollectionRelationshipDB,
-                    model.NendoTrackDB.id
-                    == model.TrackCollectionRelationshipDB.source_id,
-                ).filter(
-                    model.TrackCollectionRelationshipDB.target_id == collection_id,
-                )
-
-            # apply resource filters if applicable
-            if resource_filters:
-                values = [v for v in resource_filters.values() if isinstance(v, list)]
-                or_filter = or_(
-                    *(
-                        cast(model.NendoTrackDB.resource, Text()).ilike(
-                            "%{}%".format(str(value)),
-                        )
-                        for rf in values
-                        for value in rf
-                    ),
-                )
-                query = query.filter(or_filter)
-
-            # apply plugin data filters
-            if filters is not None:
-                for k, v in filters.items():
-                    if v is None:
-                        continue
-
-                    # range
-                    if type(v) == tuple:
-                        query = query.filter(
-                            model.NendoTrackDB.plugin_data.any(
-                                and_(
-                                    plugin_name_condition,
-                                    model.NendoPluginDataDB.key == k,
-                                    cast(model.NendoPluginDataDB.value, Float)
-                                    >= cast(v[0], Float),
-                                    cast(model.NendoPluginDataDB.value, Float)
-                                    <= cast(v[1], Float),
-                                ),
-                            ),
-                        )
-                    # multiselect
-                    elif isinstance(v, list):
-                        sv = [str(vi) for vi in v]
-                        query = query.filter(
-                            model.NendoTrackDB.plugin_data.any(
-                                and_(
-                                    plugin_name_condition,
-                                    model.NendoPluginDataDB.key == k,
-                                    model.NendoPluginDataDB.value.in_(sv),
-                                ),
-                            ),
-                        )
-                    # fuzzy match
-                    else:
-                        query = query.filter(
-                            model.NendoTrackDB.plugin_data.any(
-                                and_(
-                                    plugin_name_condition,
-                                    model.NendoPluginDataDB.key == k,
-                                    cast(model.NendoPluginDataDB.value, Text()).ilike(
-                                        "%{}%".format(str(v)),
-                                    ),
-                                ),
-                            ),
-                        )
 
             return self.get_tracks(
                 query=query,
@@ -1360,7 +1464,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                 order=order,
                 limit=limit,
                 offset=offset,
-                session=session,
+                session=session_local,
             )
 
     def remove_track(
