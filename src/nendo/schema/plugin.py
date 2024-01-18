@@ -1257,6 +1257,50 @@ class NendoLibraryPlugin(NendoPlugin):
         raise NotImplementedError
 
     @abstractmethod
+    def filter_related_tracks(
+        self,
+        track_id: Union[str, uuid.UUID],
+        filters: Optional[Dict[str, Any]] = None,
+        resource_filters: Optional[Dict[str, Any]] = None,
+        track_type: Optional[Union[str, List[str]]] = None,
+        user_id: Optional[Union[str, uuid.UUID]] = None,
+        collection_id: Optional[Union[str, uuid.UUID]] = None,
+        plugin_names: Optional[List[str]] = None,
+        order_by: Optional[str] = None,
+        order: Optional[str] = "asc",
+        limit: Optional[int] = None,
+        offset: Optional[int] = None,
+    ) -> Union[List, Iterator]:
+        """Get tracks with a relationship to a track and filter the results.
+
+        Args:
+            track_id (Union[str, UUID]): ID of the track to be searched for.
+            filters (Optional[dict]): Dictionary containing the filters to apply.
+                Defaults to None.
+            resource_filters (dict): Dictionary containing the keywords to search for
+                over the track.resource.meta field. The dictionary's values
+                should contain singular search tokens and the keys currently have no
+                effect but might in the future. Defaults to {}.
+            track_type (Union[str, List[str]], optional): Track type to filter for.
+                Can be a singular type or a list of types. Defaults to None.
+            user_id (Union[str, UUID], optional): The user ID to filter for.
+            collection_id (Union[str, uuid.UUID], optional): Collection id to
+                which the filtered tracks must have a relationship. Defaults to None.
+            plugin_names (list, optional): List used for applying the filter only to
+                data of certain plugins. If None, all plugin data related to the track
+                is used for filtering.
+            order_by (Optional[str]): Key used for ordering the results.
+            order (Optional[str]): Order in which to retrieve results ("asc" or "desc").
+            limit (Optional[int]): Limit the number of returned results.
+            offset (Optional[int]): Offset into the paginated results (requires limit).
+
+        Returns:
+            Union[List, Iterator]: List or generator of tracks, depending on the
+                configuration variable stream_mode
+        """
+        raise NotImplementedError
+
+    @abstractmethod
     def find_tracks(
         self,
         value: str,

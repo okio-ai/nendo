@@ -167,6 +167,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                 return schema.NendoTrack.model_validate(tracks[0])
 
         meta = meta or {}
+        resource_meta = {}
 
         # gather file metadata
         try:
@@ -232,6 +233,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                 # save the parsed sample rate
                 if sr is not None:
                     meta["sr"] = sr
+                    resource_meta["sr"] = sr
 
                 location = self.storage_driver.get_driver_location()
             except Exception as e:  # noqa: BLE001
@@ -242,7 +244,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             path_in_library = file_path
             location = schema.ResourceLocation.original
 
-        meta.update(
+        resource_meta.update(
             {
                 "original_filename": os.path.basename(file_path),
                 "original_filepath": os.path.dirname(file_path),
@@ -262,14 +264,14 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             ),
             resource_type="audio",
             location=location,
-            meta=meta,
+            meta=resource_meta,
         )
         return schema.NendoTrackCreate(
             nendo_instance=self.nendo_instance,
             resource=resource.model_dump(),
             user_id=user_id or self.user.id,
             track_type=track_type,
-            meta=meta or {},
+            meta=meta,
         )
 
     def _create_track_from_signal(
