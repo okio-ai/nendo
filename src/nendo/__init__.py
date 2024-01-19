@@ -45,6 +45,7 @@ from .schema import (
     NendoPluginLoadingError,
     NendoPluginRuntimeError,
     NendoRelationshipNotFoundError,
+    NendoResource,
     NendoStorage,
     NendoStorageError,
     NendoStorageLocalFS,
