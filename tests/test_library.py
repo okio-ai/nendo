@@ -26,7 +26,7 @@ class DefaultLibraryTests(unittest.TestCase):
 
     def test_create_track(self):
         nd.library.reset(force=True)
-        new_track = nd.library.create_track(
+        new_track = nd.library.create_object(
             track_type="track",
             meta={
                 "test": "ok",

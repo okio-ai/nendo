@@ -33,6 +33,7 @@ from .core import (
     NendoUserCreate,
     RegisteredNendoPlugin,
     ResourceLocation,
+    ResourceType,
     Visibility,
 )
 from .exception import (

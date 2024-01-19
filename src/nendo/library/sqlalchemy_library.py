@@ -797,28 +797,91 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         session.commit()
         return existing_plugin_data
 
-    def create_track(
+    def create_object(
         self,
-        track_type: str = "track",
         user_id: Optional[Union[str, uuid.UUID]] = None,
+        track_type: str = "track",
         meta: Optional[Dict[str, Any]] = None,
+        visibility: schema.Visibility = schema.Visibility.private,
+        images: Optional[List[schema.NendoResource]] = None,
+        file_path: str = "",
+        resource_type: schema.ResourceType = schema.ResourceType.text,
+        location: schema.ResourceLocation = schema.ResourceLocation.local,
+        resource_meta: Optional[Dict[str, Any]] = None,
+        copy_to_library: Optional[bool] = None,
     ) -> schema.NendoTrack:
-        """Create a new track, manually.
+        """Create a new object, manually.
 
         Args:
-            track_type (str, optional): The type of the track. Defaults to "track".
-            user_id (Optional[uuid.UUID], optional): The ID of the track's user.
-                Defaults to None.
-            meta (Optional[Dict[str, Any]], optional): Metadata about the track.
-                Defaults to None.
+            user_id (uuid.UUID, optional): The ID of the object's user.
+            track_type (str): The type of the object. Defaults to "track".
+            meta (Dict[str, Any], optional): Metadata about the object.
+            visibility (Visibility): Visibility of the object. Defaults to "private".
+            images (List[NendoResource], optional): List of (additional) images for
+                the object.
+            file_path (str): Path to a file to be added to the track as NendoResource.
+                Defaults to "" (no file path).
+            resource_type (ResourceType): Type of the resource to set.
+                Defaults to "text".
+            location (ResourceLocation): Location of the resource to set.
+                Defaults to "local".
+            resource_meta (dict, optional): Metadata about the NendoResource.
+            copy_to_library (bool, optional): Flag that determines, whether to copy
+                the file to the library storage or not.
 
         Returns:
             NendoTrack: The created track.
         """
         user_id = self._ensure_user_uuid(user_id)
+        resource = None
+        if len(file_path) > 0:
+            copy_to_library = copy_to_library or self.config.copy_to_library
+            if copy_to_library:
+                try:
+                    # save file to storage in its original format
+                    path_in_library = self.storage_driver.save_file(
+                        file_name=self.storage_driver.generate_filename(
+                            filetype=os.path.splitext(file_path)[1][1:],  # without dot
+                            user_id=str(user_id),
+                        ),
+                        file_path=file_path,
+                        user_id=str(user_id),
+                    )
+                    location = self.storage_driver.get_driver_location()
+                except Exception as e:  # noqa: BLE001
+                    raise schema.NendoLibraryError(
+                        f"Error copying file to the library: {e}.",
+                    ) from e
+            else:
+                path_in_library = file_path
+                location = schema.ResourceLocation.original
+
+            resource = schema.NendoResource(
+                file_path=self.storage_driver.get_file_path(
+                    src=path_in_library,
+                    user_id=str(user_id),
+                ),
+                file_name=self.storage_driver.get_file_name(
+                    src=path_in_library,
+                    user_id=str(user_id),
+                ),
+                resource_type=resource_type,
+                location=location,
+                meta=resource_meta or {},
+            )
+        else:
+            resource = schema.NendoResource(
+                file_path="",
+                file_name="",
+                resource_type=resource_type,
+                location=location,
+                meta=resource_meta or {},
+            )
         track = schema.NendoTrackCreate(
-            nendo_instance=self.nendo_instance,
             user_id=user_id,
+            visibility=visibility,
+            images=images or [],
+            resource=resource,
             track_type=track_type,
             meta=meta or {},
         )

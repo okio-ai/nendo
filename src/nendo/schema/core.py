@@ -27,7 +27,7 @@ import numpy as np
 import soundfile as sf
 from pydantic import BaseModel, ConfigDict, Field, FilePath
 
-from nendo.config import NendoConfig, get_settings
+from nendo.config import NendoConfig
 from nendo.main import Nendo
 from nendo.schema.exception import NendoError, NendoPluginRuntimeError
 from nendo.utils import (
@@ -45,6 +45,8 @@ class ResourceType(str, Enum):
 
     audio: str = "audio"
     image: str = "image"
+    text: str = "text"
+    video: str = "video"
     model: str = "model"
     blob: str = "blob"
 
@@ -253,7 +255,7 @@ class NendoTrackBase(BaseModel):
     track_type: str = "track"
     visibility: Visibility = Visibility.private
     images: List[NendoResource] = Field(default_factory=list)
-    resource: Optional[NendoResource] = None
+    resource: NendoResource
     related_tracks: List[NendoTrackTrackRelationship] = Field(default_factory=list)
     related_collections: List[NendoTrackCollectionRelationship] = Field(
         default_factory=list,
