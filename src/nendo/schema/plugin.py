@@ -998,6 +998,27 @@ class NendoLibraryPlugin(NendoPlugin):
     # ==========================
 
     @abstractmethod
+    def create_track(
+        self,
+        track_type: str = "track",
+        user_id: Optional[Union[str, uuid.UUID]] = None,
+        meta: Optional[Dict[str, Any]] = None,
+    ) -> NendoTrack:
+        """Create a new track, manually.
+
+        Args:
+            track_type (str, optional): The type of the track. Defaults to "track".
+            user_id (Optional[uuid.UUID], optional): The ID of the track's user.
+                Defaults to None.
+            meta (Optional[Dict[str, Any]], optional): Metadata about the track.
+                Defaults to None.
+
+        Returns:
+            NendoTrack: The created track.
+        """
+        raise NotImplementedError
+
+    @abstractmethod
     def add_track(
         self,
         file_path: Union[FilePath, str],

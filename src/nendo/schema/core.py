@@ -253,7 +253,7 @@ class NendoTrackBase(BaseModel):
     track_type: str = "track"
     visibility: Visibility = Visibility.private
     images: List[NendoResource] = Field(default_factory=list)
-    resource: NendoResource
+    resource: Optional[NendoResource] = None
     related_tracks: List[NendoTrackTrackRelationship] = Field(default_factory=list)
     related_collections: List[NendoTrackCollectionRelationship] = Field(
         default_factory=list,

@@ -415,6 +415,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             .filter(
                 and_(
                     model.NendoTrackDB.user_id == user_id,
+                    model.NendoTrackDB.id != track_id,
                     or_(
                         model.TrackTrackRelationshipDB.target_id == track_id,
                         model.TrackTrackRelationshipDB.source_id == track_id,
@@ -795,6 +796,35 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         existing_plugin_data.user_id = plugin_data.user_id
         session.commit()
         return existing_plugin_data
+
+    def create_track(
+        self,
+        track_type: str = "track",
+        user_id: Optional[Union[str, uuid.UUID]] = None,
+        meta: Optional[Dict[str, Any]] = None,
+    ) -> schema.NendoTrack:
+        """Create a new track, manually.
+
+        Args:
+            track_type (str, optional): The type of the track. Defaults to "track".
+            user_id (Optional[uuid.UUID], optional): The ID of the track's user.
+                Defaults to None.
+            meta (Optional[Dict[str, Any]], optional): Metadata about the track.
+                Defaults to None.
+
+        Returns:
+            NendoTrack: The created track.
+        """
+        user_id = self._ensure_user_uuid(user_id)
+        track = schema.NendoTrackCreate(
+            nendo_instance=self.nendo_instance,
+            user_id=user_id,
+            track_type=track_type,
+            meta=meta or {},
+        )
+        with self.session_scope() as session:
+            db_track = self._upsert_track_db(track=track, session=session)
+            return schema.NendoTrack.model_validate(db_track)
 
     def add_track(
         self,

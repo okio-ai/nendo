@@ -24,6 +24,20 @@ nd = Nendo(
 class DefaultLibraryTests(unittest.TestCase):
     """Unit test class for testing the default (DuckDB) library."""
 
+    def test_create_track(self):
+        nd.library.reset(force=True)
+        new_track = nd.library.create_track(
+            track_type="track",
+            meta={
+                "test": "ok",
+            },
+        )
+        self.assertTrue(isinstance(new_track, NendoTrack))
+        retrieved_track = nd.library.get_track(new_track.id)
+        self.assertEqual(retrieved_track.track_type, "track")
+        self.assertTrue(retrieved_track.has_meta("test"))
+        self.assertEqual(retrieved_track.get_meta("test"), "ok")
+
     def test_len_library(self):
         """Test `len(nd.library)`."""
         nd.library.reset(force=True)
