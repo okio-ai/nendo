@@ -22,6 +22,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Callable, ClassVar, Dict, Iterator, List, Optional, Tuple, Union
 
+import audioread
 import librosa
 import numpy as np
 import soundfile as sf
@@ -281,9 +282,20 @@ class NendoTrackBase(BaseModel):
                 location=self.resource.location,
                 user_id=self.nendo_instance.config.user_id,
             )
-            signal, sr = librosa.load(track_local, sr=self.sr, mono=False)
+            audio_np = None
+            sr = None
+            with audioread.audio_open(track_local) as f:
+                audio_data = bytearray()
+                for buf in f:
+                    audio_data.extend(buf)
+                audio_np = np.frombuffer(audio_data, dtype=np.int16)
+                if f.channels == 2:
+                    audio_np = np.reshape(audio_np, (-1, 2))
+                    audio_np = np.transpose(audio_np)
+                sr = f.samplerate
             self.__dict__["sr"] = sr
-            self.__dict__["signal"] = signal
+            self.__dict__["signal"] = audio_np
+            return audio_np
         return signal
 
     @property
@@ -300,7 +312,9 @@ class NendoTrackBase(BaseModel):
                 location=self.resource.location,
                 user_id=self.nendo_instance.config.user_id,
             )
-            sr = librosa.get_samplerate(track_local)
+            # sr = librosa.get_samplerate(track_local)
+            with audioread.audio_open(track_local) as f:
+                sr =f.samplerate
             self.set_meta({"sr": sr})
             self.__dict__["sr"] = sr
         return sr

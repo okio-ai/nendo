@@ -551,10 +551,6 @@ class NendoEmbeddingPlugin(NendoPlugin):
         for k, v in track.meta.items():
             # TODO add support for list, dict?
             if isinstance(v, (str, float, int, bool)) and k not in [
-                "original_filename",
-                "original_filepath",
-                "original_size",
-                "original_checksum",
                 "filesize",
                 "audio_offset",
                 "bitrate",

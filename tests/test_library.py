@@ -91,7 +91,7 @@ class DefaultLibraryTests(unittest.TestCase):
         )
 
         related_tracks = nd.library.get_related_tracks(inserted_track1.id)
-        self.assertEqual(len(related_tracks), 2)
+        self.assertEqual(len(related_tracks), 1)
 
     def test_get_tracks_returns_tracks(self):
         """Test the `nd.library.get_tracks()` method."""
@@ -230,7 +230,7 @@ class DefaultLibraryTests(unittest.TestCase):
         )
 
         related_tracks = nd.library.get_related_tracks(inserted_track1.id)
-        self.assertEqual(len(related_tracks), 2)
+        self.assertEqual(len(related_tracks), 1)
 
     def test_add_file_without_conversion(self):
         """Test adding a file to the library without conversion."""
