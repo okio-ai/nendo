@@ -415,10 +415,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             session.query(model.NendoTrackDB)
             .join(
                 model.TrackTrackRelationshipDB,
-                or_(
-                    model.NendoTrackDB.id == model.TrackTrackRelationshipDB.source_id,
-                    model.NendoTrackDB.id == model.TrackTrackRelationshipDB.target_id,
-                ),
+                model.NendoTrackDB.id == model.TrackTrackRelationshipDB.source_id,
             )
             .filter(
                 and_(
