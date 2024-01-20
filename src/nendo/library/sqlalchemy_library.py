@@ -188,7 +188,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             try:
                 sr = None
                 if self.config.auto_convert:
-                    if file_path.endswith(".mp3"):
+                    if file_path.endswith((".flac", ".mp3")):
                         with audioread.audio_open(file_path) as f:
                             audio_data = bytearray()
                             for buf in f:
