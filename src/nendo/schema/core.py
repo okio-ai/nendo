@@ -288,7 +288,7 @@ class NendoTrackBase(BaseModel):
                 audio_data = bytearray()
                 for buf in f:
                     audio_data.extend(buf)
-                audio_np = np.frombuffer(audio_data, dtype=np.float16)
+                audio_np = np.frombuffer(audio_data, dtype=np.float32)
                 if f.channels == 2:
                     audio_np = np.reshape(audio_np, (-1, 2))
                     audio_np = np.transpose(audio_np)
