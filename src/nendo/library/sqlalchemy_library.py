@@ -193,7 +193,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                             audio_data = bytearray()
                             for buf in f:
                                 audio_data.extend(buf)
-                            signal = np.frombuffer(audio_data, dtype=np.int16)
+                            signal = np.frombuffer(audio_data, dtype=np.float16)
                             if f.channels == 2:
                                 signal = np.reshape(signal, (-1, 2))
                                 signal = np.transpose(signal)
