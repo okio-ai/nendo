@@ -394,40 +394,81 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             db_tracks = self._upsert_tracks_db(tracks=create_list, session=session)
             return [schema.NendoTrack.model_validate(t) for t in db_tracks]
 
+    from sqlalchemy import and_, or_
+
     def _get_related_tracks_query(
         self,
         track_id: uuid.UUID,
         session: Session,
         user_id: Optional[uuid.UUID] = None,
+        direction: str = "to",
     ) -> Query:
-        """Get tracks with a relationship to the track with track_id from the DB.
+        """Get tracks related to the track with track_id from the DB.
 
         Args:
             track_id (UUID): ID of the track to be searched for.
             session (Session): Session to be used for the transaction.
             user_id (UUID, optional): The user ID to filter for.
+            direction (str, optional): The relationship direction ("to", "from", "both").
 
         Returns:
             Query: The SQLAlchemy query object.
         """
         user_id = user_id or self.user.id
-        return (
-            session.query(model.NendoTrackDB)
-            .join(
-                model.TrackTrackRelationshipDB,
-                model.NendoTrackDB.id == model.TrackTrackRelationshipDB.source_id,
-            )
-            .filter(
-                and_(
-                    model.NendoTrackDB.user_id == user_id,
-                    model.NendoTrackDB.id != track_id,
-                    or_(
+
+        if direction == "to":
+            return (
+                session.query(model.NendoTrackDB)
+                .join(
+                    model.TrackTrackRelationshipDB,
+                    model.NendoTrackDB.id == model.TrackTrackRelationshipDB.source_id,
+                )
+                .filter(
+                    and_(
+                        model.NendoTrackDB.user_id == user_id,
+                        model.NendoTrackDB.id != track_id,
                         model.TrackTrackRelationshipDB.target_id == track_id,
+                    ),
+                )
+            )
+        if direction == "from":
+            return (
+                session.query(model.NendoTrackDB)
+                .join(
+                    model.TrackTrackRelationshipDB,
+                    model.NendoTrackDB.id == model.TrackTrackRelationshipDB.target_id,
+                )
+                .filter(
+                    and_(
+                        model.NendoTrackDB.user_id == user_id,
+                        model.NendoTrackDB.id != track_id,
                         model.TrackTrackRelationshipDB.source_id == track_id,
                     ),
-                ),
+                )
             )
-        )
+        if direction == "both":
+            return (
+                session.query(model.NendoTrackDB)
+                .join(
+                    model.TrackTrackRelationshipDB,
+                    or_(
+                        model.NendoTrackDB.id == model.TrackTrackRelationshipDB.source_id,
+                        model.NendoTrackDB.id == model.TrackTrackRelationshipDB.target_id,
+                    ),
+                )
+                .filter(
+                    and_(
+                        model.NendoTrackDB.user_id == user_id,
+                        model.NendoTrackDB.id != track_id,
+                        or_(
+                            model.TrackTrackRelationshipDB.source_id == track_id,
+                            model.TrackTrackRelationshipDB.target_id == track_id,
+                        ),
+                    ),
+                )
+            )
+        raise ValueError("Invalid direction value. Must be 'to', 'from', or 'all'.")
+
 
     def _get_filtered_tracks_query(
         self,
@@ -1034,34 +1075,19 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             logger.error("Error track id %s not found", str(track_two_id))
             return False
 
-        # create bidirectional relationship
-        relationship_from = schema.NendoRelationshipCreate(
+        relationship = schema.NendoRelationshipCreate(
             source_id=track_one.id,
             target_id=track_two.id,
             relationship_type=relationship_type,
             meta=meta or {},
         )
-        relationship_to = schema.NendoRelationshipCreate(
-            source_id=track_two.id,
-            target_id=track_one.id,
-            relationship_type=relationship_type,
-            meta=meta or {},
-        )
         with self.session_scope() as session:
-            relationship_from = schema.NendoRelationship.model_validate(
+            relationship = schema.NendoRelationship.model_validate(
                 self._upsert_track_track_relationship(
-                    relationship=relationship_from,
+                    relationship=relationship,
                     session=session,
                 ),
             )
-            _ = schema.NendoRelationship.model_validate(
-                self._upsert_track_track_relationship(
-                    relationship=relationship_to,
-                    session=session,
-                ),
-            )
-        # avoid redundancy; only append one direction
-        # track_one.related_tracks.append(relationship_from)
         return True
 
     def add_related_track(
@@ -1083,34 +1109,19 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             user_id=user_id,
             meta=track_meta,
         )
-        # create bidirectional relationship
-        relationship_from = schema.NendoRelationshipCreate(
+        relationship = schema.NendoRelationshipCreate(
             source_id=track.id,
             target_id=related_track_id,
             relationship_type=relationship_type,
             meta=meta or {},
         )
-        relationship_to = schema.NendoRelationshipCreate(
-            source_id=related_track_id,
-            target_id=track.id,
-            relationship_type=relationship_type,
-            meta=meta or {},
-        )
         with self.session_scope() as session:
-            relationship_from = schema.NendoRelationship.model_validate(
+            relationship = schema.NendoRelationship.model_validate(
                 self._upsert_track_track_relationship(
-                    relationship=relationship_from,
+                    relationship=relationship,
                     session=session,
                 ),
             )
-            _ = schema.NendoRelationship.model_validate(
-                self._upsert_track_track_relationship(
-                    relationship=relationship_to,
-                    session=session,
-                ),
-            )
-        # avoid redundancy; only append one direction
-        track.related_tracks.append(relationship_from)
         return track
 
     def add_related_track_from_signal(
@@ -1133,34 +1144,19 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             track_type=track_type,
             meta=track_meta,
         )
-        # create bidirectional relationship
-        relationship_from = schema.NendoRelationshipCreate(
-            source_id=track.id,
-            target_id=related_track_id,
-            relationship_type=relationship_type,
-            meta=meta or {},
-        )
-        relationship_to = schema.NendoRelationshipCreate(
+        relationship = schema.NendoRelationshipCreate(
             source_id=track.id,
             target_id=related_track_id,
             relationship_type=relationship_type,
             meta=meta or {},
         )
         with self.session_scope() as session:
-            relationship_from = schema.NendoRelationship.model_validate(
+            relationship = schema.NendoRelationship.model_validate(
                 self._upsert_track_track_relationship(
-                    relationship=relationship_from,
+                    relationship=relationship,
                     session=session,
                 ),
             )
-            _ = schema.NendoRelationship.model_validate(
-                self._upsert_track_track_relationship(
-                    relationship=relationship_to,
-                    session=session,
-                ),
-            )
-        # avoid redundancy; only append one direction
-        track.related_tracks.append(relationship_from)
         return track
 
     def update_track(
@@ -1354,6 +1350,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
     def get_related_tracks(
         self,
         track_id: Union[str, uuid.UUID],
+        direction: str = "to",
         user_id: Optional[Union[str, uuid.UUID]] = None,
         order_by: Optional[str] = None,
         order: Optional[str] = "asc",
@@ -1364,6 +1361,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
 
         Args:
             track_id (Union[str, UUID]): ID of the track to be searched for.
+            direction (str, optional): The relationship direction ("to", "from", "both").
             user_id (Union[str, UUID], optional): The user ID to filter for.
             order_by (Optional[str]): Key used for ordering the results.
             order (Optional[str]): Order in which to retrieve results ("asc" or "desc").
@@ -1380,6 +1378,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                 track_id=ensure_uuid(track_id),
                 session=session,
                 user_id=user_id,
+                direction=direction,
             )
             return self.get_tracks(
                 query=query,
@@ -1393,6 +1392,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
     def filter_related_tracks(
         self,
         track_id: Union[str, uuid.UUID],
+        direction: str = "to",
         filters: Optional[Dict[str, Any]] = None,
         resource_filters: Optional[Dict[str, Any]] = None,
         track_type: Optional[Union[str, List[str]]] = None,
@@ -1408,6 +1408,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
 
         Args:
             track_id (Union[str, UUID]): ID of the track to be searched for.
+            direction (str, optional): The relationship direction ("to", "from", "both").
             filters (Optional[dict]): Dictionary containing the filters to apply.
                 Defaults to None.
             resource_filters (dict): Dictionary containing the keywords to search for
@@ -1437,6 +1438,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                 track_id=ensure_uuid(track_id),
                 session=session,
                 user_id=user_id,
+                direction=direction,
             )
             query = self._get_filtered_tracks_query(
                 session=session,
@@ -1636,9 +1638,9 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                     session.query(model.TrackTrackRelationshipDB).filter(
                         model.TrackTrackRelationshipDB.target_id == track_id,
                     ).delete()
-                    session.query(model.TrackTrackRelationshipDB).filter(
-                        model.TrackTrackRelationshipDB.source_id == track_id,
-                    ).delete()
+                    # session.query(model.TrackTrackRelationshipDB).filter(
+                    #     model.TrackTrackRelationshipDB.source_id == track_id,
+                    # ).delete()
                     # remove track from all collections
                     for collection in collections_with_relations:
                         self._remove_track_from_collection_db(
@@ -1941,29 +1943,16 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                     id=collection_id,
                 )
 
-            # create bidirectional relationship
-            relationship_from = schema.NendoRelationshipCreate(
+            relationship = schema.NendoRelationshipCreate(
                 source_id=new_collection.id,
                 target_id=collection_id,
                 relationship_type=relationship_type,
                 meta=meta or {},
             )
-            relationship_to = schema.NendoRelationshipCreate(
-                source_id=collection_id,
-                target_id=new_collection.id,
-                relationship_type=relationship_type,
-                meta=meta or {},
+            relationship = model.CollectionCollectionRelationshipDB(
+                **relationship.model_dump(),
             )
-            relationship_from = model.CollectionCollectionRelationshipDB(
-                **relationship_from.model_dump(),
-            )
-            relationship_to = model.CollectionCollectionRelationshipDB(
-                **relationship_to.model_dump(),
-            )
-            session.add(relationship_from)
-            session.add(relationship_to)
-
-        new_collection.related_collections.append(relationship_from)
+            session.add(relationship)
         return new_collection
 
     def add_track_to_collection(

@@ -217,7 +217,7 @@ As stated above, it is possible for tracks in Nendo Core to have relationships t
         ```pycon
         # track_1 = ...
         # track_2 = track_1.add_related_track(...)
-        >>> track_2.has_relationship_to(track_1.id)
+        >>> track_1.has_related_track(track_2.id)
         True
         ```
 

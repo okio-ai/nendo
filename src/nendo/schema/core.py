@@ -737,24 +737,24 @@ class NendoTrack(NendoTrackBase):
             return False
         return any(r.relationship_type == relationship_type for r in all_relationships)
 
-    def has_relationship_to(self, track_id: Union[str, uuid.UUID]) -> bool:
-        """Check if the track has a relationship to the track with the given track_id.
+    def has_related_track(self, track_id: Union[str, uuid.UUID]) -> bool:
+        """Check if there is a related track with the given track_id.
 
         Args:
-            track_id (Union[str, uuid.UUID]): ID of the track to which to check
-                for relationships.
+            track_id (Union[str, uuid.UUID]): ID of the potential related track.
 
         Returns:
-            bool: True if a relationship to the track with the given track_id exists.
+            bool: True if a relationship from the track with the given track_id exists.
                 False otherwise.
         """
         track_id = ensure_uuid(track_id)
         if self.related_tracks is None:
             return False
-        return any(r.target_id == track_id for r in self.related_tracks)
+        return any(r.source_id == track_id for r in self.related_tracks)
 
     def get_related_tracks(
         self,
+        direction: str = "to",
         user_id: Optional[Union[str, uuid.UUID]] = None,
         order_by: Optional[str] = None,
         order: Optional[str] = "asc",
@@ -764,6 +764,7 @@ class NendoTrack(NendoTrackBase):
         """Get all tracks to which the current track has a relationship.
 
         Args:
+            direction (str, optional): The relationship direction ("to", "from", "all").
             user_id (Union[str, UUID], optional): The user ID to filter for.
             order_by (Optional[str]): Key used for ordering the results.
             order (Optional[str]): Order in which to retrieve results ("asc" or "desc").
@@ -775,6 +776,7 @@ class NendoTrack(NendoTrackBase):
         """
         return self.nendo_instance.library.get_related_tracks(
             track_id=self.id,
+            direction=direction,
             user_id=user_id,
             order_by=order_by,
             order=order,
@@ -1055,7 +1057,7 @@ class NendoCollection(NendoCollectionBase):
             r.relationship_type == relationship_type for r in self.related_collections
         )
 
-    def has_relationship_to(self, collection_id: Union[str, uuid.UUID]) -> bool:
+    def has_related_collection(self, collection_id: Union[str, uuid.UUID]) -> bool:
         """Check if the collection has a relationship to the specified collection ID."""
         collection_id = ensure_uuid(collection_id)
         if self.related_collections is None:

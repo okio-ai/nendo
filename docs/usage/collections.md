@@ -155,7 +155,7 @@ As stated above, it is possible for collections in Nendo Core to have relationsh
         ```pycon
         >>> # collection_1 = ...
         >>> # collection_2 = collection_1.add_related_collection(...)
-        >>> collection_2.has_relationship_to(collection_1.id)
+        >>> collection_1.has_related_collection(collection_2.id)
         True
         ```
 

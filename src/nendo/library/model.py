@@ -156,9 +156,9 @@ class NendoTrackDB(Base):
     # Relationships
     related_tracks = relationship(
         "TrackTrackRelationshipDB",
-        primaryjoin="NendoTrackDB.id==TrackTrackRelationshipDB.source_id",
-        foreign_keys="[TrackTrackRelationshipDB.source_id]",
-        back_populates="source",
+        primaryjoin="NendoTrackDB.id==TrackTrackRelationshipDB.target_id",
+        foreign_keys="[TrackTrackRelationshipDB.target_id]",
+        back_populates="target",
         # cascade="all, delete-orphan",
     )
     related_collections = relationship(
@@ -219,8 +219,8 @@ class NendoCollectionDB(Base):
 
     related_collections = relationship(
         "CollectionCollectionRelationshipDB",
-        primaryjoin="NendoCollectionDB.id==CollectionCollectionRelationshipDB.source_id",
-        foreign_keys="[CollectionCollectionRelationshipDB.source_id]",
-        back_populates="source",
+        primaryjoin="NendoCollectionDB.id==CollectionCollectionRelationshipDB.target_id",
+        foreign_keys="[CollectionCollectionRelationshipDB.target_id]",
+        back_populates="target",
         # cascade="all, delete-orphan",
     )
