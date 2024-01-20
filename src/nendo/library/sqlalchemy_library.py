@@ -20,7 +20,6 @@ from datetime import datetime
 from tempfile import NamedTemporaryFile
 from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union
 
-import audioread
 import librosa
 import numpy as np
 import soundfile as sf
@@ -188,16 +187,12 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             try:
                 sr = None
                 if self.config.auto_convert:
-                    if file_path.endswith((".flac", ".mp3")):
-                        with audioread.audio_open(file_path) as f:
-                            audio_data = bytearray()
-                            for buf in f:
-                                audio_data.extend(buf)
-                            signal = np.frombuffer(audio_data, dtype=np.float32)
-                            if f.channels == 2:
-                                signal = np.reshape(signal, (-1, 2))
-                                signal = np.transpose(signal)
-                            sr = f.samplerate
+                    if file_path.endswith(".mp3"):
+                        signal, sr = librosa.load(
+                            path=file_path,
+                            sr=None,
+                            mono=False,
+                        )
                     else:
                         signal, sr = sf.read(file=file_path)
                     # resample to default rate if required
