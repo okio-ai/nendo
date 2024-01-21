@@ -1264,12 +1264,22 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                 )
             return schema.NendoPluginData.model_validate(db_plugin_data)
 
-    def get_track(self, track_id: uuid.UUID) -> schema.NendoTrack:
+    def get_track(
+        self,
+        track_id: uuid.UUID,
+        user_id: Optional[Union[str, uuid.UUID]] = None,
+    ) -> schema.NendoTrack:
         """Get a single track from the library by ID."""
+        user_id = self._ensure_user_uuid(user_id)
         with self.session_scope() as session:
             track_db = (
                 session.query(model.NendoTrackDB)
-                .filter(model.NendoTrackDB.id == track_id)
+                .filter(
+                    and_(
+                        model.NendoTrackDB.id == track_id,
+                        model.NendoTrackDB.user_id == user_id,
+                    ),
+                )
                 .one_or_none()
             )
             return (

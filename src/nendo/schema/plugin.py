@@ -1188,13 +1188,18 @@ class NendoLibraryPlugin(NendoPlugin):
         """
 
     @abstractmethod
-    def get_track(self, track_id: Any) -> NendoTrack:
+    def get_track(
+        self,
+        track_id: uuid.UUID,
+        user_id: Optional[Union[str, uuid.UUID]] = None,
+    ) -> NendoTrack:
         """Get a single track from the library by ID.
 
         If no track with the given ID was found, return None.
 
         Args:
-            track_id (Any): The ID of the track to get
+            track_id (Any): The ID of the track to get.
+            user_id (uuid4, optional): ID of user adding the plugin data.
 
         Returns:
             track (NendoTrack): The track with the given ID

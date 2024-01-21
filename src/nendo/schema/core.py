@@ -300,9 +300,7 @@ class NendoTrackBase(BaseModel):
                 location=self.resource.location,
                 user_id=self.nendo_instance.config.user_id,
             )
-            # sr = librosa.get_samplerate(track_local)
-            with audioread.audio_open(track_local) as f:
-                sr =f.samplerate
+            sr = librosa.get_samplerate(track_local)
             self.set_meta({"sr": sr})
             self.__dict__["sr"] = sr
         return sr
@@ -743,11 +741,7 @@ class NendoTrack(NendoTrackBase):
         related_tracks = self.get_related_tracks(
             direction=direction,
         )
-        if direction == "to":
-            return any(r.source_id == track_id for r in related_tracks)
-        if direction == "from":
-            return any(r.target_id == track_id for r in related_tracks)
-        return any(track_id in (r.target_id, r.source_id) for r in related_tracks)
+        return any(rt.id == track_id for rt in related_tracks)
 
     def get_related_tracks(
         self,
