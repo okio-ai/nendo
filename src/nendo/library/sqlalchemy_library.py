@@ -847,7 +847,6 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         images: Optional[List[schema.NendoResource]] = None,
         file_path: str = "",
         resource_type: schema.ResourceType = schema.ResourceType.text,
-        location: schema.ResourceLocation = schema.ResourceLocation.local,
         resource_meta: Optional[Dict[str, Any]] = None,
         copy_to_library: Optional[bool] = None,
     ) -> schema.NendoTrack:
@@ -864,8 +863,6 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                 Defaults to "" (no file path).
             resource_type (ResourceType): Type of the resource to set.
                 Defaults to "text".
-            location (ResourceLocation): Location of the resource to set.
-                Defaults to "local".
             resource_meta (dict, optional): Metadata about the NendoResource.
             copy_to_library (bool, optional): Flag that determines, whether to copy
                 the file to the library storage or not.
