@@ -725,7 +725,11 @@ class NendoTrack(NendoTrackBase):
             return False
         return any(r.relationship_type == relationship_type for r in all_relationships)
 
-    def has_related_track(self, track_id: Union[str, uuid.UUID]) -> bool:
+    def has_related_track(
+        self,
+        track_id: Union[str, uuid.UUID],
+        direction: str = "to",
+    ) -> bool:
         """Check if there is a related track with the given track_id.
 
         Args:
@@ -736,9 +740,14 @@ class NendoTrack(NendoTrackBase):
                 False otherwise.
         """
         track_id = ensure_uuid(track_id)
-        if self.related_tracks is None:
-            return False
-        return any(r.source_id == track_id for r in self.related_tracks)
+        related_tracks = self.get_related_tracks(
+            direction=direction,
+        )
+        if direction == "to":
+            return any(r.source_id == track_id for r in related_tracks)
+        if direction == "from":
+            return any(r.target_id == track_id for r in related_tracks)
+        return any(track_id in (r.target_id, r.source_id) for r in related_tracks)
 
     def get_related_tracks(
         self,
