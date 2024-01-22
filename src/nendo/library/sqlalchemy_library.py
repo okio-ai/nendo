@@ -409,10 +409,8 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         Returns:
             Query: The SQLAlchemy query object.
         """
-        user_id = user_id or self.user.id
-
         if direction == "to":
-            return (
+            query = (
                 session.query(model.NendoTrackDB)
                 .join(
                     model.TrackTrackRelationshipDB,
@@ -420,14 +418,13 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                 )
                 .filter(
                     and_(
-                        model.NendoTrackDB.user_id == user_id,
                         model.NendoTrackDB.id != track_id,
                         model.TrackTrackRelationshipDB.target_id == track_id,
                     ),
                 )
             )
-        if direction == "from":
-            return (
+        elif direction == "from":
+            query = (
                 session.query(model.NendoTrackDB)
                 .join(
                     model.TrackTrackRelationshipDB,
@@ -435,14 +432,13 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                 )
                 .filter(
                     and_(
-                        model.NendoTrackDB.user_id == user_id,
                         model.NendoTrackDB.id != track_id,
                         model.TrackTrackRelationshipDB.source_id == track_id,
                     ),
                 )
             )
-        if direction == "both":
-            return (
+        elif direction == "both":
+            query = (
                 session.query(model.NendoTrackDB)
                 .join(
                     model.TrackTrackRelationshipDB,
@@ -453,7 +449,6 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                 )
                 .filter(
                     and_(
-                        model.NendoTrackDB.user_id == user_id,
                         model.NendoTrackDB.id != track_id,
                         or_(
                             model.TrackTrackRelationshipDB.source_id == track_id,
@@ -462,7 +457,11 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                     ),
                 )
             )
-        raise ValueError("Invalid direction value. Must be 'to', 'from', or 'all'.")
+        else:
+            raise ValueError("Invalid direction value. Must be 'to', 'from', or 'all'.")
+        if user_id is not None:
+            query = query.filter(model.NendoTrackDB.user_id == user_id)
+        return query
 
 
     def _get_filtered_tracks_query(
@@ -908,6 +907,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                 meta=resource_meta or {},
             )
         else:
+            location = self.storage_driver.get_driver_location()
             resource = schema.NendoResource(
                 file_path="",
                 file_name="",
@@ -1267,18 +1267,18 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         user_id: Optional[Union[str, uuid.UUID]] = None,
     ) -> schema.NendoTrack:
         """Get a single track from the library by ID."""
-        user_id = self._ensure_user_uuid(user_id)
         with self.session_scope() as session:
-            track_db = (
-                session.query(model.NendoTrackDB)
-                .filter(
-                    and_(
-                        model.NendoTrackDB.id == track_id,
-                        model.NendoTrackDB.user_id == user_id,
-                    ),
-                )
-                .one_or_none()
+            query = (
+                session
+                .query(model.NendoTrackDB)
+                .filter(model.NendoTrackDB.id == track_id)
             )
+
+            if user_id is not None:
+                user_id = self._ensure_user_uuid(user_id)
+                query = query.filter(model.NendoTrackDB.user_id == user_id)
+
+            track_db = query.one_or_none()
             return (
                 schema.NendoTrack.model_validate(track_db)
                 if track_db is not None
@@ -1374,7 +1374,6 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             Union[List, Iterator]: List or generator of tracks, depending on the
                 configuration variable stream_mode
         """
-        user_id = self._ensure_user_uuid(user_id)
         with self.session_scope() as session:
             query = self._get_related_tracks_query(
                 track_id=ensure_uuid(track_id),
@@ -1597,13 +1596,13 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         Returns:
             success (bool): True if removal was successful, False otherwise.
         """
-        user_id = self._ensure_user_uuid(user_id)
         track_id = ensure_uuid(track_id)
         with self.session_scope() as session:
             tracks_with_relations = self._get_related_tracks_query(
                 track_id=track_id,
                 session=session,
-                user_id=user_id,
+                user_id=uuid.UUID(user_id) if user_id is not None else None,
+                direction="both",
             ).all()
             collections_with_relations = (
                 session.query(model.NendoCollectionDB)
@@ -1640,9 +1639,9 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                     session.query(model.TrackTrackRelationshipDB).filter(
                         model.TrackTrackRelationshipDB.target_id == track_id,
                     ).delete()
-                    # session.query(model.TrackTrackRelationshipDB).filter(
-                    #     model.TrackTrackRelationshipDB.source_id == track_id,
-                    # ).delete()
+                    session.query(model.TrackTrackRelationshipDB).filter(
+                        model.TrackTrackRelationshipDB.source_id == track_id,
+                    ).delete()
                     # remove track from all collections
                     for collection in collections_with_relations:
                         self._remove_track_from_collection_db(
@@ -1667,6 +1666,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             session.delete(target)
         # only delete if file has been copied to the library
         # ("original_filepath" is present)
+        user_id = self._ensure_user_uuid(user_id)
         target_track = schema.NendoTrack.model_validate(target)
         if remove_resources and target_track.resource.location != "original":
             logger.info("Removing resources associated with Track %s", str(track_id))
