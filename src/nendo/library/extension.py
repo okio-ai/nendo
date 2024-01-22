@@ -10,6 +10,7 @@ import numpy as np
 import numpy.typing as npt
 from pydantic import BaseModel
 
+from nendo.schema.exception import NendoLibraryError
 from nendo.schema.plugin import NendoEmbeddingPlugin
 
 if TYPE_CHECKING:
@@ -195,11 +196,16 @@ class NendoLibraryVectorExtension(BaseModel):
         Args:
             text (str): The text to be embedded.
 
+        Raises:
+            NendoLibraryError: If not embedding plugin has been loaded.
+
         Returns:
             npt.ArrayLike: The embedding vector corresponding to the text.
         """
-        _, emb = self.embedding_plugin(text=text)
-        return emb
+        if self.embedding_plugin is not None:
+            _, emb = self.embedding_plugin(text=text)
+            return emb
+        raise NendoLibraryError("No embedding plugin loaded. Cannot embed track.")
 
     def embed_track(self, track: NendoTrack) -> NendoEmbedding:
         """Embed the given track using the library's default embedding plugin.
@@ -207,10 +213,15 @@ class NendoLibraryVectorExtension(BaseModel):
         Args:
             track (NendoTrack): The track to be embedded.
 
+        Raises:
+            NendoLibraryError: If not embedding plugin has been loaded.
+
         Returns:
             NendoEmbedding: The object representing the track embedding.
         """
-        return self.embedding_plugin(track=track)
+        if self.embedding_plugin is not None:
+            return self.embedding_plugin(track=track)
+        raise NendoLibraryError("No embedding plugin loaded. Cannot embed track.")
 
     def embed_collection(self, collection: NendoCollection) -> List[NendoEmbedding]:
         """Embed the given collection using the library's default embedding plugin.
@@ -218,11 +229,16 @@ class NendoLibraryVectorExtension(BaseModel):
         Args:
             collection (NendoCollection): The collection to be embedded.
 
+        Raises:
+            NendoLibraryError: If not embedding plugin has been loaded.
+
         Returns:
             List[NendoEmbedding]: A list of embeddings corresponding to the
                 collection's tracks.
         """
-        return self.embedding_plugin(collection=collection)
+        if self.embedding_plugin is not None:
+            return self.embedding_plugin(collection=collection)
+        raise NendoLibraryError("No embedding plugin loaded. Cannot embed Collection.")
 
     # Query / retrieval functions
 
@@ -305,8 +321,14 @@ class NendoLibraryVectorExtension(BaseModel):
         """
         track_embeddings = self.get_embeddings(
             track_id=track.id,
-            plugin_name=self.embedding_plugin.plugin_name,
-            plugin_version=self.embedding_plugin.plugin_version,
+            plugin_name=(
+                self.embedding_plugin.plugin_name if
+                self.embedding_plugin is not None else None
+            ),
+            plugin_version=(
+                self.embedding_plugin.plugin_version if
+                self.embedding_plugin is not None else None
+            ),
         )
         if len(track_embeddings) < 1:
             track_embedding = self.embed_track(track)
