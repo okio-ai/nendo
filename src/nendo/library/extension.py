@@ -245,7 +245,8 @@ class NendoLibraryVectorExtension(BaseModel):
     def nearest_by_vector(
         self,
         vec: npt.ArrayLike,
-        n: int = 5,
+        limit: int = 10,
+        offset: Optional[int] = None,
         user_id: Optional[Union[str, uuid.UUID]] = None,
         distance_metric: Optional[DistanceMetric] = None,
     ) -> List[NendoTrack]:
@@ -253,7 +254,8 @@ class NendoLibraryVectorExtension(BaseModel):
 
         Args:
             vec (numpy.typing.ArrayLike): The vector from which to start the neighbor search.
-            n (int, optional): The number of neighbors to retrieve. Defaults to 5.
+            limit (int): Limit the number of returned results. Default is 10.
+            offset (Optional[int]): Offset into the paginated results (requires limit).
             user_id (Union[str, uuid.UUID]): ID of the user whose tracks to retrieve.
             distance_metric (Optional[DistanceMetric], optional): The distance metric
                 to use. Defaults to None.
@@ -264,7 +266,8 @@ class NendoLibraryVectorExtension(BaseModel):
         """
         tracks_and_scores = self.get_similar_by_vector_with_score(
             vec=vec,
-            n=n,
+            limit=limit,
+            offset=offset,
             user_id=user_id,
             distance_metric=distance_metric,
         )
@@ -273,7 +276,8 @@ class NendoLibraryVectorExtension(BaseModel):
     def nearest_by_track(
         self,
         track: NendoTrack,
-        n: int = 5,
+        limit: int = 10,
+        offset: Optional[int] = None,
         user_id: Optional[Union[str, uuid.UUID]] = None,
         distance_metric: Optional[DistanceMetric] = None,
     ) -> List[NendoTrack]:
@@ -281,7 +285,8 @@ class NendoLibraryVectorExtension(BaseModel):
 
         Args:
             track (NendoTrack): The track from which to start the neighbor search.
-            n (int, optional): The number of neighbors to retrieve. Defaults to 5.
+            limit (int): Limit the number of returned results. Default is 10.
+            offset (Optional[int]): Offset into the paginated results (requires limit).
             user_id (Union[str, uuid.UUID]): ID of the user whose tracks to retrieve.
             distance_metric (Optional[DistanceMetric], optional): The distance metric
                 to use. Defaults to None.
@@ -292,7 +297,8 @@ class NendoLibraryVectorExtension(BaseModel):
         """
         tracks_and_scores = self.nearest_by_track_with_score(
             track=track,
-            n=n,
+            limit=limit,
+            offset=offset,
             user_id=user_id,
             distance_metric=distance_metric,
         )
@@ -301,7 +307,8 @@ class NendoLibraryVectorExtension(BaseModel):
     def nearest_by_track_with_score(
         self,
         track: NendoTrack,
-        n: int = 5,
+        limit: int = 10,
+        offset: Optional[int] = None,
         user_id: Optional[Union[str, uuid.UUID]] = None,
         distance_metric: Optional[DistanceMetric] = None,
     ) -> List[Tuple[NendoTrack, float]]:
@@ -309,7 +316,8 @@ class NendoLibraryVectorExtension(BaseModel):
 
         Args:
             track (NendoTrack): The track from which to start the neighbor search.
-            n (int, optional): The number of neighbors to retrieve. Defaults to 5.
+            limit (int): Limit the number of returned results. Default is 10.
+            offset (Optional[int]): Offset into the paginated results (requires limit).
             user_id (Union[str, uuid.UUID]): ID of the user whose tracks to retrieve.
             distance_metric (Optional[DistanceMetric], optional): The distance metric
                 to use. Defaults to None.
@@ -337,7 +345,8 @@ class NendoLibraryVectorExtension(BaseModel):
 
         nearest = self.nearest_by_vector_with_score(
             vec=track_embedding.embedding,
-            n=n + 1,
+            limit=limit + 1,
+            offset=offset,
             user_id=user_id,
             distance_metric=distance_metric,
         )
@@ -346,7 +355,8 @@ class NendoLibraryVectorExtension(BaseModel):
     def nearest_by_query(
         self,
         query: str,
-        n: int = 5,
+        limit: int = 10,
+        offset: Optional[int] = None,
         user_id: Optional[Union[str, uuid.UUID]] = None,
         distance_metric: Optional[DistanceMetric] = None,
     ) -> List[NendoTrack]:
@@ -354,7 +364,8 @@ class NendoLibraryVectorExtension(BaseModel):
 
         Args:
             query (str): The query from which to start the neighbor search.
-            n (int, optional): The number of neighbors to retrieve. Defaults to 5.
+            limit (int): Limit the number of returned results. Default is 10.
+            offset (Optional[int]): Offset into the paginated results (requires limit).
             user_id (Union[str, uuid.UUID]): ID of the user whose tracks to retrieve.
             distance_metric (Optional[DistanceMetric], optional): The distance metric
                 to use. Defaults to None.
@@ -365,7 +376,8 @@ class NendoLibraryVectorExtension(BaseModel):
         """
         tracks_and_scores = self.nearest_by_query_with_score(
             query=query,
-            n=n,
+            limit=limit,
+            offset=offset,
             user_id=user_id,
             distance_metric=distance_metric,
         )
@@ -374,7 +386,8 @@ class NendoLibraryVectorExtension(BaseModel):
     def nearest_by_query_with_score(
         self,
         query: str,
-        n: int = 5,
+        limit: int = 10,
+        offset: Optional[int] = None,
         user_id: Optional[Union[str, uuid.UUID]] = None,
         distance_metric: Optional[DistanceMetric] = None,
     ) -> List[Tuple[NendoTrack, float]]:
@@ -382,7 +395,8 @@ class NendoLibraryVectorExtension(BaseModel):
 
         Args:
             query (str): The query from which to start the neighbor search.
-            n (int, optional): The number of neighbors to retrieve. Defaults to 5.
+            limit (int): Limit the number of returned results. Default is 10.
+            offset (Optional[int]): Offset into the paginated results (requires limit).
             user_id (Union[str, uuid.UUID]): ID of the user whose tracks to retrieve.
             distance_metric (Optional[DistanceMetric], optional): The distance metric
                 to use. Defaults to None.
@@ -395,7 +409,8 @@ class NendoLibraryVectorExtension(BaseModel):
         query_embedding = self.embed_text(query)
         return self.nearest_by_vector_with_score(
             vec=query_embedding,
-            n=n,
+            limit=limit,
+            offset=offset,
             user_id=user_id,
             distance_metric=distance_metric,
         )
@@ -498,7 +513,8 @@ class NendoLibraryVectorExtension(BaseModel):
     def nearest_by_vector_with_score(
         self,
         vec: npt.ArrayLike,
-        n: int = 5,
+        limit: int = 10,
+        offset: Optional[int] = None,
         user_id: Optional[Union[str, uuid.UUID]] = None,
         distance_metric: Optional[DistanceMetric] = None,
     ) -> List[Tuple[NendoTrack, float]]:
@@ -507,7 +523,8 @@ class NendoLibraryVectorExtension(BaseModel):
         Args:
             vec (numpy.typing.ArrayLike): The vector from which to start the neighbor
                 search.
-            n (int, optional): The number of neighbors to retrieve. Defaults to 5.
+            limit (int): Limit the number of returned results. Default is 10.
+            offset (Optional[int]): Offset into the paginated results (requires limit).
             user_id (Union[str, uuid.UUID]): ID of the user whose vectors to retrieve.
             distance_metric (Optional[DistanceMetric], optional): The distance metric
                 to use. Defaults to None.

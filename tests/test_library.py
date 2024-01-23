@@ -374,17 +374,6 @@ class DefaultLibraryTests(unittest.TestCase):
         self.assertIsNone(inserted_track1)
         self.assertTrue(result)
 
-        #  confirm that the related_tracks are removed
-        # inserted_track2.refresh()
-        # self.assertFalse(inserted_track1.has_relationship("stem"))
-
-        # inserted_track3.refresh()
-        # self.assertFalse(inserted_track3.has_relationship("stem"))
-
-        # these would be .is_related_to_track(...) (other direction)
-        # self.assertFalse(inserted_track4.has_related_track(inserted_track1_id))
-        # self.assertFalse(inserted_track5.has_related_track(inserted_track1_id))
-
         nd.config.skip_duplicate = True
 
     def test_add_collection_adds_collection(self):
