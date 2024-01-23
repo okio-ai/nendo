@@ -220,13 +220,13 @@ Managing a large collection of audio files can be tedious. Nendo core allows to 
         )
         ```
 
-    !!! example "Filtering by resource meta values"
+    !!! example "Filtering by search value"
 
-        The following call will filter all tracks whose `resource.meta` field has _any_ entry where the `value` matches `"Michael Jackson"`:
+        The following call will filter all tracks wehre both words `"Michael"` and `"Jackson"` occur anywhere in their `track.meta` or `track.resource.meta` fields:
 
         ```python
         mj_tracks = nendo.library.filter_tracks(
-            resource_filters = {"artist": "Michael Jackson"},
+            search_meta = ["Michael", "Jackson"],
         )
         ```
     
@@ -246,7 +246,7 @@ Managing a large collection of audio files can be tedious. Nendo core allows to 
     | Parameter | Type | Description |
     | --- | --- | ---------------------------------------------------------------------------------------- |
     | `#!py3 filters` | `dict` | Filters to apply to the `plugin_data` field of the track. The dictionary can contain multiple filters, where the key is matched against the `key` of the `NendoPluginData` entry and the value can be either of the following: <ul><li>`tuple` - Check, whether the plugin data's `value` is in the range specified by the `tuple`.</li><li>`list` - Check, whether the plugin data's `value` matches any of the items in the list.</li><li>`str` - Do a fuzzy match comparison between plugin data's `value` and the `value` passed in the `filters` dictionary.</li></ul> |
-    | `#!py3 resource_filters` | `dict` | Dictionary containing the keywords to search for over the track.resource.meta field. The dictionary's values should contain singular search tokens and the keys have no effect in the `default` implementation of the nendo library. |
+    | `#!py3 search_meta` | `dict` | Dictionary containing the keywords to search for over the track.resource.meta field. The dictionary's values should contain singular search tokens and the keys have no effect in the `default` implementation of the nendo library. |
     | `#!py3 track_type` | `str` | Match the `NendoTrack.track_type` field against this value. |
     | `#!py3 user_id` | `uuid` | Filter for tracks with the given `user_id`. |
     | `#!py3 collection_id` | `uuid` | Filter for tracks who have a relationship to the collection with the given ID. |

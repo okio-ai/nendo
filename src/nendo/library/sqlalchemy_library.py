@@ -469,27 +469,17 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         session: Session,
         query: Optional[Query] = None,
         filters: Optional[Dict[str, Any]] = None,
-        resource_filters: Optional[Dict[str, Any]] = None,
+        search_meta: Optional[List[str]] = None,
         track_type: Optional[Union[str, List[str]]] = None,
-        user_id: Optional[Union[str, uuid.UUID]] = None,
+        user_id: Optional[uuid.UUID] = None,
         collection_id: Optional[Union[str, uuid.UUID]] = None,
         plugin_names: Optional[List[str]] = None,
     ) -> Query:
-        """Get tracks with a relationship to the track with track_id from the DB.
-
-        Args:
-            track_id (UUID): ID of the track to be searched for.
-            session (Session): Session to be used for the transaction.
-            user_id (UUID, optional): The user ID to filter for.
-
-        Returns:
-            Query: The SQLAlchemy query object.
-        """
-        user_id = user_id or self.user.id
         with session as session_local:
             if query:
                 query_local = query
             else:
+                user_id = user_id or self.user.id
                 query_local = session_local.query(model.NendoTrackDB).filter(
                     model.NendoTrackDB.user_id == user_id,
                 )
@@ -523,18 +513,20 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                 )
 
             # apply resource filters if applicable
-            if resource_filters:
-                values = [v for v in resource_filters.values() if isinstance(v, list)]
-                or_filter = or_(
+            if search_meta and len(search_meta) > 0:
+                search_filter = and_(
                     *(
-                        cast(model.NendoTrackDB.resource, Text()).ilike(
-                            "%{}%".format(str(value)),
-                        )
-                        for rf in values
-                        for value in rf
+                        or_(
+                            cast(model.NendoTrackDB.meta, Text()).ilike(
+                                "%{}%".format(str(value)),
+                            ),
+                            cast(model.NendoTrackDB.resource, Text()).ilike(
+                                "%{}%".format(str(value)),
+                            ),
+                        ) for value in search_meta
                     ),
                 )
-                query_local = query_local.filter(or_filter)
+                query_local = query_local.filter(search_filter)
 
             # apply plugin data filters
             if filters is not None:
@@ -1395,7 +1387,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         track_id: Union[str, uuid.UUID],
         direction: str = "to",
         filters: Optional[Dict[str, Any]] = None,
-        resource_filters: Optional[Dict[str, Any]] = None,
+        search_meta: Optional[Dict[str, Any]] = None,
         track_type: Optional[Union[str, List[str]]] = None,
         user_id: Optional[Union[str, uuid.UUID]] = None,
         collection_id: Optional[Union[str, uuid.UUID]] = None,
@@ -1412,7 +1404,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             direction (str, optional): The relationship direction ("to", "from", "both").
             filters (Optional[dict]): Dictionary containing the filters to apply.
                 Defaults to None.
-            resource_filters (dict): Dictionary containing the keywords to search for
+            search_meta (dict): Dictionary containing the keywords to search for
                 over the track.resource.meta field. The dictionary's values
                 should contain singular search tokens and the keys currently have no
                 effect but might in the future. Defaults to {}.
@@ -1445,7 +1437,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                 session=session,
                 query=query,
                 filters=filters,
-                resource_filters=resource_filters,
+                search_meta=search_meta,
                 track_type=track_type,
                 user_id=user_id,
                 collection_id=collection_id,
@@ -1510,7 +1502,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
     def filter_tracks(
         self,
         filters: Optional[Dict[str, Any]] = None,
-        resource_filters: Optional[Dict[str, Any]] = None,
+        search_meta: Optional[Dict[str, Any]] = None,
         track_type: Optional[Union[str, List[str]]] = None,
         user_id: Optional[Union[str, uuid.UUID]] = None,
         collection_id: Optional[Union[str, uuid.UUID]] = None,
@@ -1526,7 +1518,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         Args:
             filters (Optional[dict]): Dictionary containing the filters to apply.
                 Defaults to None.
-            resource_filters (dict): Dictionary containing the keywords to search for
+            search_meta (dict): Dictionary containing the keywords to search for
                 over the track.resource.meta field. The dictionary's values
                 should contain singular search tokens and the keys currently have no
                 effect but might in the future. Defaults to {}.
@@ -1554,7 +1546,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             query = self._get_filtered_tracks_query(
                 session=session_local,
                 filters=filters,
-                resource_filters=resource_filters,
+                search_meta=search_meta,
                 track_type=track_type,
                 user_id=user_id,
                 collection_id=collection_id,

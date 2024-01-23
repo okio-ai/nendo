@@ -139,7 +139,7 @@ class PluginDataTest(unittest.TestCase):
         self.assertEqual(type(example_data), list)
         self.assertEqual(example_data[0].value, pd.value)
 
-    def test_filter_by_plugin_data_and_filename(self):
+    def test_filter_by_plugin_data(self):
         """Test filtering by plugin data and track file name."""
         nd.library.reset(force=True)
         track = nd.library.add_track(file_path="tests/assets/test.mp3")
@@ -152,8 +152,6 @@ class PluginDataTest(unittest.TestCase):
         )
         example_data = nd.library.filter_tracks(
             filters={"test": "value"},
-            resource_filters={},
-            order_by="random",
             plugin_names=["test_plugin"],
         )[0].get_plugin_data(plugin_name="test_plugin")
         self.assertEqual(type(example_data), list)

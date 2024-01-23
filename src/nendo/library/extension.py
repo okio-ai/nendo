@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from abc import abstractmethod
 from enum import Enum
-from typing import TYPE_CHECKING, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import numpy.typing as npt
@@ -247,7 +247,12 @@ class NendoLibraryVectorExtension(BaseModel):
         vec: npt.ArrayLike,
         limit: int = 10,
         offset: Optional[int] = None,
+        filters: Optional[Dict[str, Any]] = None,
+        search_meta: Optional[List[str]] = None,
+        track_type: Optional[Union[str, List[str]]] = None,
         user_id: Optional[Union[str, uuid.UUID]] = None,
+        collection_id: Optional[Union[str, uuid.UUID]] = None,
+        plugin_names: Optional[List[str]] = None,
         distance_metric: Optional[DistanceMetric] = None,
     ) -> List[NendoTrack]:
         """Obtain the n nearest neighboring tracks to a vector from the library.
@@ -256,7 +261,20 @@ class NendoLibraryVectorExtension(BaseModel):
             vec (numpy.typing.ArrayLike): The vector from which to start the neighbor search.
             limit (int): Limit the number of returned results. Default is 10.
             offset (Optional[int]): Offset into the paginated results (requires limit).
-            user_id (Union[str, uuid.UUID]): ID of the user whose tracks to retrieve.
+            filters (Optional[dict]): Dictionary containing the filters to apply.
+                Defaults to None.
+            search_meta (dict): Dictionary containing the keywords to search for
+                over the track.resource.meta field. The dictionary's values
+                should contain singular search tokens and the keys currently have no
+                effect but might in the future. Defaults to {}.
+            track_type (Union[str, List[str]], optional): Track type to filter for.
+                Can be a singular type or a list of types. Defaults to None.
+            user_id (Union[str, UUID], optional): The user ID to filter for.
+            collection_id (Union[str, uuid.UUID], optional): Collection id to
+                which the filtered tracks must have a relationship. Defaults to None.
+            plugin_names (list, optional): List used for applying the filter only to
+                data of certain plugins. If None, all plugin data related to the track
+                is used for filtering.
             distance_metric (Optional[DistanceMetric], optional): The distance metric
                 to use. Defaults to None.
 
@@ -268,7 +286,12 @@ class NendoLibraryVectorExtension(BaseModel):
             vec=vec,
             limit=limit,
             offset=offset,
+            filters=filters,
+            search_meta=search_meta,
+            track_type=track_type,
             user_id=user_id,
+            collection_id=collection_id,
+            plugin_names=plugin_names,
             distance_metric=distance_metric,
         )
         return [track for track, _ in tracks_and_scores]
@@ -278,7 +301,12 @@ class NendoLibraryVectorExtension(BaseModel):
         track: NendoTrack,
         limit: int = 10,
         offset: Optional[int] = None,
+        filters: Optional[Dict[str, Any]] = None,
+        search_meta: Optional[List[str]] = None,
+        track_type: Optional[Union[str, List[str]]] = None,
         user_id: Optional[Union[str, uuid.UUID]] = None,
+        collection_id: Optional[Union[str, uuid.UUID]] = None,
+        plugin_names: Optional[List[str]] = None,
         distance_metric: Optional[DistanceMetric] = None,
     ) -> List[NendoTrack]:
         """Obtain the n nearest neighboring tracks to a track from the library.
@@ -287,7 +315,20 @@ class NendoLibraryVectorExtension(BaseModel):
             track (NendoTrack): The track from which to start the neighbor search.
             limit (int): Limit the number of returned results. Default is 10.
             offset (Optional[int]): Offset into the paginated results (requires limit).
-            user_id (Union[str, uuid.UUID]): ID of the user whose tracks to retrieve.
+            filters (Optional[dict]): Dictionary containing the filters to apply.
+                Defaults to None.
+            search_meta (dict): Dictionary containing the keywords to search for
+                over the track.resource.meta field. The dictionary's values
+                should contain singular search tokens and the keys currently have no
+                effect but might in the future. Defaults to {}.
+            track_type (Union[str, List[str]], optional): Track type to filter for.
+                Can be a singular type or a list of types. Defaults to None.
+            user_id (Union[str, UUID], optional): The user ID to filter for.
+            collection_id (Union[str, uuid.UUID], optional): Collection id to
+                which the filtered tracks must have a relationship. Defaults to None.
+            plugin_names (list, optional): List used for applying the filter only to
+                data of certain plugins. If None, all plugin data related to the track
+                is used for filtering.
             distance_metric (Optional[DistanceMetric], optional): The distance metric
                 to use. Defaults to None.
 
@@ -299,7 +340,12 @@ class NendoLibraryVectorExtension(BaseModel):
             track=track,
             limit=limit,
             offset=offset,
+            filters=filters,
+            search_meta=search_meta,
+            track_type=track_type,
             user_id=user_id,
+            collection_id=collection_id,
+            plugin_names=plugin_names,
             distance_metric=distance_metric,
         )
         return [track for track, _ in tracks_and_scores]
@@ -309,7 +355,12 @@ class NendoLibraryVectorExtension(BaseModel):
         track: NendoTrack,
         limit: int = 10,
         offset: Optional[int] = None,
+        filters: Optional[Dict[str, Any]] = None,
+        search_meta: Optional[List[str]] = None,
+        track_type: Optional[Union[str, List[str]]] = None,
         user_id: Optional[Union[str, uuid.UUID]] = None,
+        collection_id: Optional[Union[str, uuid.UUID]] = None,
+        plugin_names: Optional[List[str]] = None,
         distance_metric: Optional[DistanceMetric] = None,
     ) -> List[Tuple[NendoTrack, float]]:
         """Obtain the n nearest neighbors to a track, together with their distances.
@@ -318,7 +369,20 @@ class NendoLibraryVectorExtension(BaseModel):
             track (NendoTrack): The track from which to start the neighbor search.
             limit (int): Limit the number of returned results. Default is 10.
             offset (Optional[int]): Offset into the paginated results (requires limit).
-            user_id (Union[str, uuid.UUID]): ID of the user whose tracks to retrieve.
+            filters (Optional[dict]): Dictionary containing the filters to apply.
+                Defaults to None.
+            search_meta (dict): Dictionary containing the keywords to search for
+                over the track.resource.meta field. The dictionary's values
+                should contain singular search tokens and the keys currently have no
+                effect but might in the future. Defaults to {}.
+            track_type (Union[str, List[str]], optional): Track type to filter for.
+                Can be a singular type or a list of types. Defaults to None.
+            user_id (Union[str, UUID], optional): The user ID to filter for.
+            collection_id (Union[str, uuid.UUID], optional): Collection id to
+                which the filtered tracks must have a relationship. Defaults to None.
+            plugin_names (list, optional): List used for applying the filter only to
+                data of certain plugins. If None, all plugin data related to the track
+                is used for filtering.
             distance_metric (Optional[DistanceMetric], optional): The distance metric
                 to use. Defaults to None.
 
@@ -347,7 +411,12 @@ class NendoLibraryVectorExtension(BaseModel):
             vec=track_embedding.embedding,
             limit=limit + 1,
             offset=offset,
+            filters=filters,
+            search_meta=search_meta,
+            track_type=track_type,
             user_id=user_id,
+            collection_id=collection_id,
+            plugin_names=plugin_names,
             distance_metric=distance_metric,
         )
         return nearest[1:]
@@ -357,7 +426,12 @@ class NendoLibraryVectorExtension(BaseModel):
         query: str,
         limit: int = 10,
         offset: Optional[int] = None,
+        filters: Optional[Dict[str, Any]] = None,
+        search_meta: Optional[List[str]] = None,
+        track_type: Optional[Union[str, List[str]]] = None,
         user_id: Optional[Union[str, uuid.UUID]] = None,
+        collection_id: Optional[Union[str, uuid.UUID]] = None,
+        plugin_names: Optional[List[str]] = None,
         distance_metric: Optional[DistanceMetric] = None,
     ) -> List[NendoTrack]:
         """Obtain the n nearest neighboring tracks to a query string.
@@ -366,7 +440,20 @@ class NendoLibraryVectorExtension(BaseModel):
             query (str): The query from which to start the neighbor search.
             limit (int): Limit the number of returned results. Default is 10.
             offset (Optional[int]): Offset into the paginated results (requires limit).
-            user_id (Union[str, uuid.UUID]): ID of the user whose tracks to retrieve.
+            filters (Optional[dict]): Dictionary containing the filters to apply.
+                Defaults to None.
+            search_meta (dict): Dictionary containing the keywords to search for
+                over the track.resource.meta field. The dictionary's values
+                should contain singular search tokens and the keys currently have no
+                effect but might in the future. Defaults to {}.
+            track_type (Union[str, List[str]], optional): Track type to filter for.
+                Can be a singular type or a list of types. Defaults to None.
+            user_id (Union[str, UUID], optional): The user ID to filter for.
+            collection_id (Union[str, uuid.UUID], optional): Collection id to
+                which the filtered tracks must have a relationship. Defaults to None.
+            plugin_names (list, optional): List used for applying the filter only to
+                data of certain plugins. If None, all plugin data related to the track
+                is used for filtering.
             distance_metric (Optional[DistanceMetric], optional): The distance metric
                 to use. Defaults to None.
 
@@ -378,7 +465,12 @@ class NendoLibraryVectorExtension(BaseModel):
             query=query,
             limit=limit,
             offset=offset,
+            filters=filters,
+            search_meta=search_meta,
+            track_type=track_type,
             user_id=user_id,
+            collection_id=collection_id,
+            plugin_names=plugin_names,
             distance_metric=distance_metric,
         )
         return [track for track, _ in tracks_and_scores]
@@ -388,7 +480,12 @@ class NendoLibraryVectorExtension(BaseModel):
         query: str,
         limit: int = 10,
         offset: Optional[int] = None,
+        filters: Optional[Dict[str, Any]] = None,
+        search_meta: Optional[List[str]] = None,
+        track_type: Optional[Union[str, List[str]]] = None,
         user_id: Optional[Union[str, uuid.UUID]] = None,
+        collection_id: Optional[Union[str, uuid.UUID]] = None,
+        plugin_names: Optional[List[str]] = None,
         distance_metric: Optional[DistanceMetric] = None,
     ) -> List[Tuple[NendoTrack, float]]:
         """Obtain the n nearest neighboring tracks to a query, together with scores.
@@ -397,7 +494,20 @@ class NendoLibraryVectorExtension(BaseModel):
             query (str): The query from which to start the neighbor search.
             limit (int): Limit the number of returned results. Default is 10.
             offset (Optional[int]): Offset into the paginated results (requires limit).
-            user_id (Union[str, uuid.UUID]): ID of the user whose tracks to retrieve.
+            filters (Optional[dict]): Dictionary containing the filters to apply.
+                Defaults to None.
+            search_meta (dict): Dictionary containing the keywords to search for
+                over the track.resource.meta field. The dictionary's values
+                should contain singular search tokens and the keys currently have no
+                effect but might in the future. Defaults to {}.
+            track_type (Union[str, List[str]], optional): Track type to filter for.
+                Can be a singular type or a list of types. Defaults to None.
+            user_id (Union[str, UUID], optional): The user ID to filter for.
+            collection_id (Union[str, uuid.UUID], optional): Collection id to
+                which the filtered tracks must have a relationship. Defaults to None.
+            plugin_names (list, optional): List used for applying the filter only to
+                data of certain plugins. If None, all plugin data related to the track
+                is used for filtering.
             distance_metric (Optional[DistanceMetric], optional): The distance metric
                 to use. Defaults to None.
 
@@ -411,7 +521,12 @@ class NendoLibraryVectorExtension(BaseModel):
             vec=query_embedding,
             limit=limit,
             offset=offset,
+            filters=filters,
+            search_meta=search_meta,
+            track_type=track_type,
             user_id=user_id,
+            collection_id=collection_id,
+            plugin_names=plugin_names,
             distance_metric=distance_metric,
         )
 
@@ -515,7 +630,12 @@ class NendoLibraryVectorExtension(BaseModel):
         vec: npt.ArrayLike,
         limit: int = 10,
         offset: Optional[int] = None,
+        filters: Optional[Dict[str, Any]] = None,
+        search_meta: Optional[List[str]] = None,
+        track_type: Optional[Union[str, List[str]]] = None,
         user_id: Optional[Union[str, uuid.UUID]] = None,
+        collection_id: Optional[Union[str, uuid.UUID]] = None,
+        plugin_names: Optional[List[str]] = None,
         distance_metric: Optional[DistanceMetric] = None,
     ) -> List[Tuple[NendoTrack, float]]:
         """Obtain the n nearest neighbors to a vector, together with their distances.
@@ -525,7 +645,20 @@ class NendoLibraryVectorExtension(BaseModel):
                 search.
             limit (int): Limit the number of returned results. Default is 10.
             offset (Optional[int]): Offset into the paginated results (requires limit).
-            user_id (Union[str, uuid.UUID]): ID of the user whose vectors to retrieve.
+            filters (Optional[dict]): Dictionary containing the filters to apply.
+                Defaults to None.
+            search_meta (dict): Dictionary containing the keywords to search for
+                over the track.resource.meta field. The dictionary's values
+                should contain singular search tokens and the keys currently have no
+                effect but might in the future. Defaults to {}.
+            track_type (Union[str, List[str]], optional): Track type to filter for.
+                Can be a singular type or a list of types. Defaults to None.
+            user_id (Union[str, UUID], optional): The user ID to filter for.
+            collection_id (Union[str, uuid.UUID], optional): Collection id to
+                which the filtered tracks must have a relationship. Defaults to None.
+            plugin_names (list, optional): List used for applying the filter only to
+                data of certain plugins. If None, all plugin data related to the track
+                is used for filtering.
             distance_metric (Optional[DistanceMetric], optional): The distance metric
                 to use. Defaults to None.
 

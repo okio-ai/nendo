@@ -1262,7 +1262,7 @@ class NendoLibraryPlugin(NendoPlugin):
         self,
         track_id: Union[str, uuid.UUID],
         filters: Optional[Dict[str, Any]] = None,
-        resource_filters: Optional[Dict[str, Any]] = None,
+        search_meta: Optional[Dict[str, Any]] = None,
         track_type: Optional[Union[str, List[str]]] = None,
         user_id: Optional[Union[str, uuid.UUID]] = None,
         collection_id: Optional[Union[str, uuid.UUID]] = None,
@@ -1278,7 +1278,7 @@ class NendoLibraryPlugin(NendoPlugin):
             track_id (Union[str, UUID]): ID of the track to be searched for.
             filters (Optional[dict]): Dictionary containing the filters to apply.
                 Defaults to None.
-            resource_filters (dict): Dictionary containing the keywords to search for
+            search_meta (dict): Dictionary containing the keywords to search for
                 over the track.resource.meta field. The dictionary's values
                 should contain singular search tokens and the keys currently have no
                 effect but might in the future. Defaults to {}.
@@ -1329,7 +1329,7 @@ class NendoLibraryPlugin(NendoPlugin):
     def filter_tracks(
         self,
         filters: Optional[dict] = None,
-        resource_filters: Optional[Dict[str, Any]] = None,
+        search_meta: Optional[Dict[str, Any]] = None,
         track_type: Optional[Union[str, List[str]]] = None,
         user_id: Optional[Union[str, uuid.UUID]] = None,
         collection_id: Optional[Union[str, uuid.UUID]] = None,
@@ -1344,7 +1344,7 @@ class NendoLibraryPlugin(NendoPlugin):
         Args:
             filters (Optional[dict]): Dictionary containing the filters to apply.
                 Defaults to None.
-            resource_filters (dict): Dictionary containing the keywords to search for
+            search_meta (dict): Dictionary containing the keywords to search for
                 over the track.resource.meta field. The dictionary's values
                 should contain singular search tokens and  the keys currently have no
                 effect but might in the future. Defaults to {}.
