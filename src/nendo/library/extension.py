@@ -50,7 +50,7 @@ class NendoLibraryVectorExtension(BaseModel):
                     self.nendo_instance.plugins,
                     embedding_plugin,
                 )
-            except AttributeError as e:
+            except AttributeError:
                 self.logger.warning(
                     f"Plugin with name {embedding_plugin} has been configured "
                     "for the NendoLibraryVectorExtension but is not loaded. "
@@ -394,12 +394,14 @@ class NendoLibraryVectorExtension(BaseModel):
         track_embeddings = self.get_embeddings(
             track_id=track.id,
             plugin_name=(
-                self.embedding_plugin.plugin_name if
-                self.embedding_plugin is not None else None
+                self.embedding_plugin.plugin_name
+                if self.embedding_plugin is not None
+                else None
             ),
             plugin_version=(
-                self.embedding_plugin.plugin_version if
-                self.embedding_plugin is not None else None
+                self.embedding_plugin.plugin_version
+                if self.embedding_plugin is not None
+                else None
             ),
         )
         if len(track_embeddings) < 1:

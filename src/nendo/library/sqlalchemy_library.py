@@ -443,8 +443,10 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                 .join(
                     model.TrackTrackRelationshipDB,
                     or_(
-                        model.NendoTrackDB.id == model.TrackTrackRelationshipDB.source_id,
-                        model.NendoTrackDB.id == model.TrackTrackRelationshipDB.target_id,
+                        model.NendoTrackDB.id
+                        == model.TrackTrackRelationshipDB.source_id,
+                        model.NendoTrackDB.id
+                        == model.TrackTrackRelationshipDB.target_id,
                     ),
                 )
                 .filter(
@@ -462,7 +464,6 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         if user_id is not None:
             query = query.filter(model.NendoTrackDB.user_id == user_id)
         return query
-
 
     def _get_filtered_tracks_query(
         self,
@@ -496,9 +497,13 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             # apply track type filter if applicable
             if track_type is not None:
                 if isinstance(track_type, list):
-                    query_local = query_local.filter(model.NendoTrackDB.track_type.in_(track_type))
+                    query_local = query_local.filter(
+                        model.NendoTrackDB.track_type.in_(track_type)
+                    )
                 else:
-                    query_local = query_local.filter(model.NendoTrackDB.track_type == track_type)
+                    query_local = query_local.filter(
+                        model.NendoTrackDB.track_type == track_type
+                    )
 
             # apply collection filter if applicable
             if collection_id is not None:
@@ -523,7 +528,8 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                             cast(model.NendoTrackDB.resource, Text()).ilike(
                                 "%{}%".format(str(value)),
                             ),
-                        ) for value in search_meta
+                        )
+                        for value in search_meta
                     ),
                 )
                 query_local = query_local.filter(search_filter)
@@ -1260,10 +1266,8 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
     ) -> schema.NendoTrack:
         """Get a single track from the library by ID."""
         with self.session_scope() as session:
-            query = (
-                session
-                .query(model.NendoTrackDB)
-                .filter(model.NendoTrackDB.id == track_id)
+            query = session.query(model.NendoTrackDB).filter(
+                model.NendoTrackDB.id == track_id
             )
 
             if user_id is not None:
@@ -1565,15 +1569,16 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
     def remove_track(
         self,
         track_id: Union[str, uuid.UUID],
+        user_id: Optional[Union[str, uuid.UUID]] = None,
         remove_relationships: bool = False,
         remove_plugin_data: bool = True,
         remove_resources: bool = True,
-        user_id: Optional[Union[str, uuid.UUID]] = None,
     ) -> bool:
         """Delete track from library by ID.
 
         Args:
             track_id (Union[str, uuid.UUID]): The ID of the track to remove
+            user_id (Union[str, UUID], optional): The ID of the user
             remove_relationships (bool):
                 If False prevent deletion if related tracks exist,
                 if True delete relationships together with the object
@@ -1583,7 +1588,6 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             remove_resources (bool):
                 If False, keep the related resources, e.g. files
                 if True, delete the related resources
-            user_id (Union[str, UUID], optional): The ID of the user owning the track.
 
         Returns:
             success (bool): True if removal was successful, False otherwise.
@@ -1720,6 +1724,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             sf.write(temp_path, signal, track.sr)
             subprocess.run(
                 ["ffmpeg", "-i", temp_path, "-acodec", "libmp3lame", file_path],
+                check=False,
             )
         else:
             raise ValueError(
@@ -2361,12 +2366,14 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
     def remove_collection(
         self,
         collection_id: uuid.UUID,
+        user_id: Optional[Union[str, uuid.UUID]] = None,
         remove_relationships: bool = False,
     ) -> bool:
         """Deletes the collection identified by `collection_id`.
 
         Args:
-            collection_id (uuid.UUID): ID of the collection to remove.
+            collection_id (uuid.UUID): ID of the collection to remove
+            user_id (Union[str, UUID], optional): The ID of the user
             remove_relationships (bool, optional):
                 If False prevent deletion if related tracks exist,
                 if True delete relationships together with the object.
@@ -2422,9 +2429,15 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             session.commit()
 
             # delete actual target
-            session.query(model.NendoCollectionDB).filter(
+            query = session.query(model.NendoCollectionDB).filter(
                 model.NendoCollectionDB.id == collection_id,
-            ).delete()
+            )
+            if user_id is not None:
+                user_id = self._ensure_user_uuid(user_id)
+                query = query.filter(
+                    model.NendoCollectionDB.user_id == user_id,
+                )
+            query.delete()
 
         return True
 
@@ -2785,4 +2798,6 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             session.query(model.NendoTrackDB).delete()
         # remove files
         for library_file in self.storage_driver.list_files(user_id=str(user_id)):
-            self.storage_driver.remove_file(file_name=library_file, user_id=str(user_id))
+            self.storage_driver.remove_file(
+                file_name=library_file, user_id=str(user_id)
+            )

@@ -40,6 +40,7 @@ from nendo.utils import (
 
 logger = logging.getLogger("nendo")
 
+
 class ResourceType(str, Enum):
     """Enum representing different types of resources used in Nendo."""
 
@@ -336,7 +337,7 @@ class NendoTrack(NendoTrackBase):
 
     def __len__(self):
         """Return the length of the track in seconds."""
-        if(np.ndim(self.signal) == 1):
+        if np.ndim(self.signal) == 1:
             return self.signal.shape[0] / self.sr
         return self.signal.shape[1] / self.sr
 
@@ -359,9 +360,10 @@ class NendoTrack(NendoTrackBase):
         return self.nendo_instance.library.storage_driver.as_local(
             file_path=self.resource.src,
             location=self.resource.location,
-            user_id=(str(user_id) if
-                     user_id is not None else
-                     str(self.nendo_instance.config.user_id)
+            user_id=(
+                str(user_id)
+                if user_id is not None
+                else str(self.nendo_instance.config.user_id)
             ),
         )
 
@@ -1732,7 +1734,7 @@ class NendoStorageLocalFS(NendoStorage):
         self.library_path = library_path
         self.init_storage_for_user(user_id=user_id)
 
-    def init_storage_for_user(self, user_id: str) -> str:  # noqa: ARG002
+    def init_storage_for_user(self, user_id: str) -> str:
         """Initialize local storage for user."""
         user_lib_path = os.path.join(self.library_path, user_id)
         if not os.path.isdir(user_lib_path):
@@ -1767,7 +1769,7 @@ class NendoStorageLocalFS(NendoStorage):
         file_name: str,
         signal: np.ndarray,
         sr: int,
-        user_id: str,  # noqa: ARG002
+        user_id: str,
     ) -> str:
         """Save the given signal to storage."""
         target_file_path = self.get_file(file_name=file_name, user_id=user_id)
@@ -1778,7 +1780,7 @@ class NendoStorageLocalFS(NendoStorage):
         self,
         file_name: str,
         data: bytes,
-        user_id: str,  # noqa: ARG002
+        user_id: str,
     ) -> str:
         """Save the given bytes to storage."""
         target_file_path = self.get_file(file_name=file_name, user_id=user_id)

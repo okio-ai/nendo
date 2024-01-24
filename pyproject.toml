@@ -162,10 +162,7 @@ ignore = [
   "SLF001", # Private member accessed
   "TRY003",  # Avoid specifying long messages outside the exception class
 ]
-fixable = [
-    "F401", # Remove unused imports.
-    "NPY001", # Fix numpy types, which are removed in 1.24.
-]
+fixable = ["ALL"]
 unfixable = ["B"]
 exclude = [
     ".bzr",

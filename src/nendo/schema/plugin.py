@@ -889,13 +889,7 @@ class NendoEmbeddingPlugin(NendoPlugin):
     def __call__(
         self,
         **kwargs: Any,
-    ) -> Optional[
-        Union[
-            NendoEmbedding,
-            List[NendoEmbedding],
-            [str, np.ndarray],
-        ]
-    ]:
+    ) -> Optional[Union[NendoEmbedding, List[NendoEmbedding], [str, np.ndarray],]]:
         """Call the plugin.
 
         Runs a registered run function of a plugin on a text, a track, a collection.
@@ -975,7 +969,6 @@ class NendoUtilityPlugin(NendoPlugin):
             return util
 
         return wrapper
-
 
 
 class NendoLibraryPlugin(NendoPlugin):
