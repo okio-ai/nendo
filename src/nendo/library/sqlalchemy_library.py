@@ -498,11 +498,11 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             if track_type is not None:
                 if isinstance(track_type, list):
                     query_local = query_local.filter(
-                        model.NendoTrackDB.track_type.in_(track_type)
+                        model.NendoTrackDB.track_type.in_(track_type),
                     )
                 else:
                     query_local = query_local.filter(
-                        model.NendoTrackDB.track_type == track_type
+                        model.NendoTrackDB.track_type == track_type,
                     )
 
             # apply collection filter if applicable
@@ -1267,7 +1267,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         """Get a single track from the library by ID."""
         with self.session_scope() as session:
             query = session.query(model.NendoTrackDB).filter(
-                model.NendoTrackDB.id == track_id
+                model.NendoTrackDB.id == track_id,
             )
 
             if user_id is not None:
@@ -2799,5 +2799,6 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         # remove files
         for library_file in self.storage_driver.list_files(user_id=str(user_id)):
             self.storage_driver.remove_file(
-                file_name=library_file, user_id=str(user_id)
+                file_name=library_file,
+                user_id=str(user_id),
             )

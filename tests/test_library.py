@@ -25,6 +25,7 @@ class DefaultLibraryTests(unittest.TestCase):
     """Unit test class for testing the default (DuckDB) library."""
 
     def test_create_track(self):
+        """Test manual track creation."""
         nd.library.reset(force=True)
         new_track = nd.library.create_object(
             track_type="track",
@@ -354,7 +355,7 @@ class DefaultLibraryTests(unittest.TestCase):
             relationship_type="stem",
             meta={"test": "value"},
         )
-        inserted_track3 = nd.library.add_related_track(
+        nd.library.add_related_track(
             file_path="tests/assets/test.wav",
             related_track_id=inserted_track2.id,
             relationship_type="stem",

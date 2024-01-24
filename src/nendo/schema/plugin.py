@@ -889,7 +889,7 @@ class NendoEmbeddingPlugin(NendoPlugin):
     def __call__(
         self,
         **kwargs: Any,
-    ) -> Optional[Union[NendoEmbedding, List[NendoEmbedding], [str, np.ndarray],]]:
+    ) -> Optional[Union[NendoEmbedding, List[NendoEmbedding], [str, np.ndarray]]]:
         """Call the plugin.
 
         Runs a registered run function of a plugin on a text, a track, a collection.
@@ -958,6 +958,8 @@ class NendoUtilityPlugin(NendoPlugin):
             Union[str, float, int, bool, List],
         ],
     ) -> Callable[[NendoPlugin, Any], Union[str, float, int, bool, List]]:
+        """Run utility plugin."""
+
         @functools.wraps(func)
         def wrapper(self, **kwargs: Any) -> Union[str, float, int, bool, List]:
             track_or_collection, kwargs = self._pop_track_or_collection_from_args(
@@ -965,8 +967,7 @@ class NendoUtilityPlugin(NendoPlugin):
             )
             if track_or_collection is None:
                 return func(self, **kwargs)
-            util = func(self, track_or_collection, **kwargs)
-            return util
+            return func(self, track_or_collection, **kwargs)
 
         return wrapper
 

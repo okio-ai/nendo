@@ -830,6 +830,7 @@ class NendoTrack(NendoTrackBase):
         relationship_type: str = "relationship",
         meta: Optional[Dict[str, Any]] = None,
     ):
+        """Add relationship to another track."""
         self.nendo_instance.library.add_track_relationship(
             track_one_id=self.id,
             track_two_id=track_id,
