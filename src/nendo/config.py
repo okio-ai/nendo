@@ -36,6 +36,7 @@ class NendoConfig(BaseSettings):
     copy_to_library: bool = Field(default=True)
     auto_convert: bool = Field(default=True)
     skip_duplicate: bool = Field(default=True)
+    replace_plugin_data: bool = Field(default=False)
     max_threads: int = Field(default=2)
     batch_size: int = Field(default=10)
     stream_mode: bool = Field(default=False)

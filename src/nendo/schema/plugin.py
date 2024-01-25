@@ -107,7 +107,7 @@ class NendoAnalysisPlugin(NendoPlugin):
                     plugin_version=self.plugin_version,
                     key=str(k),
                     value=v,
-                    # replace=False,
+                    replace=self.nendo_instance.config.replace_plugin_data,
                 )
             return f_result
 
@@ -546,21 +546,19 @@ class NendoEmbeddingPlugin(NendoPlugin):
             str: The string representation of the given track.
         """
         text = ""
+        meta_items = [
+            "artist",
+            "album",
+            "title",
+            "genre",
+            "year",
+            "duration",
+        ]
+        for i in meta_items:
+            if track.has_meta(i):
+                text += f"{i}: {track.get_meta(i)}; "
         for pd in track.get_plugin_data():
             text += f"{pd.key}: {pd.value}; "
-        for k, v in track.meta.items():
-            # TODO add support for list, dict?
-            if isinstance(v, (str, float, int, bool)) and k not in [
-                "filesize",
-                "audio_offset",
-                "bitrate",
-                "channels",
-                "duration",
-                "samplerate",
-                "bitdepth",
-                "sr",
-            ]:
-                text += f"{k}: {v}; "
         return text
 
     @staticmethod
