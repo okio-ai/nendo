@@ -774,7 +774,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         key: str,
         session: Session,
         user_id: Optional[uuid.UUID] = None,
-    ) -> model.NendoPluginDataDB:
+    ) -> Optional[model.NendoPluginDataDB]:
         """Get the latest plugin data for a given track id, plugin name and data key.
 
         Args:
@@ -1232,15 +1232,14 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             value=value_converted,
         )
         with self.session_scope() as session:
+            existing_plugin_data = self._get_latest_plugin_data_db(
+                track_id=track_id,
+                plugin_name=plugin_name,
+                plugin_version=plugin_version,
+                key=key,
+                session=session,
+            )
             if replace:
-                existing_plugin_data = self._get_latest_plugin_data_db(
-                    track_id=track_id,
-                    plugin_name=plugin_name,
-                    plugin_version=plugin_version,
-                    key=key,
-                    session=session,
-                )
-
                 if existing_plugin_data is not None:
                     db_plugin_data = self._update_plugin_data_db(
                         existing_plugin_data=existing_plugin_data,
@@ -1253,6 +1252,8 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                         session=session,
                     )
             else:
+                if existing_plugin_data is not None:
+                    return existing_plugin_data
                 db_plugin_data = self._insert_plugin_data_db(
                     plugin_data=plugin_data,
                     session=session,
