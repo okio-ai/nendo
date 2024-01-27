@@ -838,7 +838,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
     def create_object(
         self,
         user_id: Optional[Union[str, uuid.UUID]] = None,
-        track_type: str = "track",
+        track_type: str = "text",
         meta: Optional[Dict[str, Any]] = None,
         visibility: schema.Visibility = schema.Visibility.private,
         images: Optional[List[schema.NendoResource]] = None,

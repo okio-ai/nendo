@@ -126,9 +126,9 @@ class Nendo:
                         )
                         return plugin_instance
             except Exception as e:  # noqa: BLE001
-                raise schema.NendoPluginLoadingError(
+                raise schema.NendoPluginLoadingError(  # noqa: B904
                     f"Failed to import plugin '{module_name}'. Error: {e}",
-                ) from None
+                )
         else:
             raise schema.NendoPluginLoadingError(
                 f"Plugin {module_name} not installed in system. "
