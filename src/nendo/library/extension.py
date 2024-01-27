@@ -73,7 +73,7 @@ class NendoLibraryVectorExtension(BaseModel):
         for registered_plugin in self.nendo_instance.plugins:
             # return the first embedding plugin found
             plugin = registered_plugin.plugin_instance
-            if isinstance(plugin, NendoEmbeddingPlugin):
+            if issubclass(plugin.__class__, NendoEmbeddingPlugin):
                 self.logger.info(
                     f"Using {registered_plugin.name} as embedding plugin "
                     "for the NendoLibraryVectorExtension.",
