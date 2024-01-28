@@ -8,7 +8,7 @@
 
 <p align="center">
 <a href="https://okio.ai" target="_blank">
-    <img src="https://img.shields.io/website/https/nendo.ai" alt="Documentation">
+    <img src="https://img.shields.io/website/https/okio.ai" alt="Website">
 </a>
 <a href="https://github.com/okio-ai/nendo/actions/workflows/test.yml" target="_blank">
     <img src="https://github.com/okio-ai/nendo/actions/workflows/test.yml/badge.svg" alt="Test">
