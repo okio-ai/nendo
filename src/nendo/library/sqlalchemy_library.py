@@ -917,7 +917,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             user_id=user_id,
             visibility=visibility,
             images=images or [],
-            resource=resource,
+            resource=resource.model_dump(),
             track_type=track_type,
             meta=meta or {},
         )

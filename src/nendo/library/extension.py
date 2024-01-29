@@ -253,6 +253,8 @@ class NendoLibraryVectorExtension(BaseModel):
         user_id: Optional[Union[str, uuid.UUID]] = None,
         collection_id: Optional[Union[str, uuid.UUID]] = None,
         plugin_names: Optional[List[str]] = None,
+        embedding_name: Optional[str] = None,
+        embedding_version: Optional[str] = None,
         distance_metric: Optional[DistanceMetric] = None,
     ) -> List[NendoTrack]:
         """Obtain the n nearest neighboring tracks to a vector from the library.
@@ -275,6 +277,14 @@ class NendoLibraryVectorExtension(BaseModel):
             plugin_names (list, optional): List used for applying the filter only to
                 data of certain plugins. If None, all plugin data related to the track
                 is used for filtering.
+            embedding_name (str, optional): Name of the embedding plugin for which to
+                retrieve and compare the vectors. If none is given, the name of the
+                currently configured embedding plugin for the library vector extension
+                is used.
+            embedding_version (str, optional): Version of the embedding plugin for
+                which to retrieve and compare the vectors. If none is given, the
+                version of the currently configured embedding plugin for the library
+                vector extension is used.
             distance_metric (Optional[DistanceMetric], optional): The distance metric
                 to use. Defaults to None.
 
@@ -292,6 +302,8 @@ class NendoLibraryVectorExtension(BaseModel):
             user_id=user_id,
             collection_id=collection_id,
             plugin_names=plugin_names,
+            embedding_name=embedding_name,
+            embedding_version=embedding_version,
             distance_metric=distance_metric,
         )
         return [track for track, _ in tracks_and_scores]
@@ -307,6 +319,8 @@ class NendoLibraryVectorExtension(BaseModel):
         user_id: Optional[Union[str, uuid.UUID]] = None,
         collection_id: Optional[Union[str, uuid.UUID]] = None,
         plugin_names: Optional[List[str]] = None,
+        embedding_name: Optional[str] = None,
+        embedding_version: Optional[str] = None,
         distance_metric: Optional[DistanceMetric] = None,
     ) -> List[NendoTrack]:
         """Obtain the n nearest neighboring tracks to a track from the library.
@@ -329,6 +343,16 @@ class NendoLibraryVectorExtension(BaseModel):
             plugin_names (list, optional): List used for applying the filter only to
                 data of certain plugins. If None, all plugin data related to the track
                 is used for filtering.
+            embedding_name (str, optional): Name of the embedding plugin for which to
+                retrieve and compare the vectors. If none is given, the name of the
+                first embedding found for that track is used. If no embedding exists,
+                the name of the currently configured embedding plugin for the library
+                vector extension is used.
+            embedding_version (str, optional): Version of the embedding plugin for
+                which to retrieve and compare the vectors. If none is given, the name
+                of the first embedding found for that track is used. If no embedding
+                exists,the version of the currently configured embedding plugin for
+                the library vector extension is used.
             distance_metric (Optional[DistanceMetric], optional): The distance metric
                 to use. Defaults to None.
 
@@ -346,6 +370,8 @@ class NendoLibraryVectorExtension(BaseModel):
             user_id=user_id,
             collection_id=collection_id,
             plugin_names=plugin_names,
+            embedding_name=embedding_name,
+            embedding_version=embedding_version,
             distance_metric=distance_metric,
         )
         return [track for track, _ in tracks_and_scores]
@@ -361,6 +387,8 @@ class NendoLibraryVectorExtension(BaseModel):
         user_id: Optional[Union[str, uuid.UUID]] = None,
         collection_id: Optional[Union[str, uuid.UUID]] = None,
         plugin_names: Optional[List[str]] = None,
+        embedding_name: Optional[str] = None,
+        embedding_version: Optional[str] = None,
         distance_metric: Optional[DistanceMetric] = None,
     ) -> List[Tuple[NendoTrack, float]]:
         """Obtain the n nearest neighbors to a track, together with their distances.
@@ -383,6 +411,16 @@ class NendoLibraryVectorExtension(BaseModel):
             plugin_names (list, optional): List used for applying the filter only to
                 data of certain plugins. If None, all plugin data related to the track
                 is used for filtering.
+            embedding_name (str, optional): Name of the embedding plugin for which to
+                retrieve and compare the vectors. If none is given, the name of the
+                first embedding found for that track is used. If no embedding exists,
+                the name of the currently configured embedding plugin for the library
+                vector extension is used.
+            embedding_version (str, optional): Version of the embedding plugin for
+                which to retrieve and compare the vectors. If none is given, the name
+                of the first embedding found for that track is used. If no embedding
+                exists,the version of the currently configured embedding plugin for
+                the library vector extension is used.
             distance_metric (Optional[DistanceMetric], optional): The distance metric
                 to use. Defaults to None.
 
@@ -391,23 +429,35 @@ class NendoLibraryVectorExtension(BaseModel):
                 the first position and their distance ("score") in the second
                 position, ordered by their distance in ascending order.
         """
+        plugin_name = (
+            embedding_name
+            if embedding_name is not None
+            else (
+                self.embedding_plugin.plugin_name if
+                self.embedding_plugin.plugin_name is not None else
+                None
+            )
+        )
+        plugin_version = (
+            embedding_version
+            if embedding_version is not None
+            else (
+                self.embedding_plugin.plugin_version if
+                self.embedding_plugin.plugin_version is not None else
+                None
+            )
+        )
         track_embeddings = self.get_embeddings(
             track_id=track.id,
-            plugin_name=(
-                self.embedding_plugin.plugin_name
-                if self.embedding_plugin is not None
-                else None
-            ),
-            plugin_version=(
-                self.embedding_plugin.plugin_version
-                if self.embedding_plugin is not None
-                else None
-            ),
+            plugin_name=plugin_name,
+            plugin_version=plugin_version,
         )
         if len(track_embeddings) < 1:
             track_embedding = self.embed_track(track)
         else:
             track_embedding = track_embeddings[0]
+            plugin_name = track_embedding.plugin_name
+            plugin_version = track_embedding.plugin_version
 
         nearest = self.nearest_by_vector_with_score(
             vec=track_embedding.embedding,
@@ -419,6 +469,8 @@ class NendoLibraryVectorExtension(BaseModel):
             user_id=user_id,
             collection_id=collection_id,
             plugin_names=plugin_names,
+            embedding_name=plugin_name,
+            embedding_version=plugin_version,
             distance_metric=distance_metric,
         )
         return nearest[1:]
@@ -434,6 +486,8 @@ class NendoLibraryVectorExtension(BaseModel):
         user_id: Optional[Union[str, uuid.UUID]] = None,
         collection_id: Optional[Union[str, uuid.UUID]] = None,
         plugin_names: Optional[List[str]] = None,
+        embedding_name: Optional[str] = None,
+        embedding_version: Optional[str] = None,
         distance_metric: Optional[DistanceMetric] = None,
     ) -> List[NendoTrack]:
         """Obtain the n nearest neighboring tracks to a query string.
@@ -456,6 +510,14 @@ class NendoLibraryVectorExtension(BaseModel):
             plugin_names (list, optional): List used for applying the filter only to
                 data of certain plugins. If None, all plugin data related to the track
                 is used for filtering.
+            embedding_name (str, optional): Name of the embedding plugin for which to
+                retrieve and compare the vectors. If none is given, the name of the
+                currently configured embedding plugin for the library vector extension
+                is used.
+            embedding_version (str, optional): Version of the embedding plugin for
+                which to retrieve and compare the vectors. If none is given, the
+                version of the currently configured embedding plugin for the library
+                vector extension is used.
             distance_metric (Optional[DistanceMetric], optional): The distance metric
                 to use. Defaults to None.
 
@@ -473,6 +535,8 @@ class NendoLibraryVectorExtension(BaseModel):
             user_id=user_id,
             collection_id=collection_id,
             plugin_names=plugin_names,
+            embedding_name=embedding_name,
+            embedding_version=embedding_version,
             distance_metric=distance_metric,
         )
         return [track for track, _ in tracks_and_scores]
@@ -488,6 +552,8 @@ class NendoLibraryVectorExtension(BaseModel):
         user_id: Optional[Union[str, uuid.UUID]] = None,
         collection_id: Optional[Union[str, uuid.UUID]] = None,
         plugin_names: Optional[List[str]] = None,
+        embedding_name: Optional[str] = None,
+        embedding_version: Optional[str] = None,
         distance_metric: Optional[DistanceMetric] = None,
     ) -> List[Tuple[NendoTrack, float]]:
         """Obtain the n nearest neighboring tracks to a query, together with scores.
@@ -510,6 +576,14 @@ class NendoLibraryVectorExtension(BaseModel):
             plugin_names (list, optional): List used for applying the filter only to
                 data of certain plugins. If None, all plugin data related to the track
                 is used for filtering.
+            embedding_name (str, optional): Name of the embedding plugin for which to
+                retrieve and compare the vectors. If none is given, the name of the
+                currently configured embedding plugin for the library vector extension
+                is used.
+            embedding_version (str, optional): Version of the embedding plugin for
+                which to retrieve and compare the vectors. If none is given, the
+                version of the currently configured embedding plugin for the library
+                vector extension is used.
             distance_metric (Optional[DistanceMetric], optional): The distance metric
                 to use. Defaults to None.
 
@@ -529,6 +603,8 @@ class NendoLibraryVectorExtension(BaseModel):
             user_id=user_id,
             collection_id=collection_id,
             plugin_names=plugin_names,
+            embedding_name=embedding_name,
+            embedding_version=embedding_version,
             distance_metric=distance_metric,
         )
 
@@ -638,6 +714,8 @@ class NendoLibraryVectorExtension(BaseModel):
         user_id: Optional[Union[str, uuid.UUID]] = None,
         collection_id: Optional[Union[str, uuid.UUID]] = None,
         plugin_names: Optional[List[str]] = None,
+        embedding_name: Optional[str] = None,
+        embedding_version: Optional[str] = None,
         distance_metric: Optional[DistanceMetric] = None,
     ) -> List[Tuple[NendoTrack, float]]:
         """Obtain the n nearest neighbors to a vector, together with their distances.
@@ -661,6 +739,14 @@ class NendoLibraryVectorExtension(BaseModel):
             plugin_names (list, optional): List used for applying the filter only to
                 data of certain plugins. If None, all plugin data related to the track
                 is used for filtering.
+            embedding_name (str, optional): Name of the embedding plugin for which to
+                retrieve and compare the vectors. If none is given, the name of the
+                currently configured embedding plugin for the library vector extension
+                is used.
+            embedding_version (str, optional): Version of the embedding plugin for
+                which to retrieve and compare the vectors. If none is given, the
+                version of the currently configured embedding plugin for the library
+                vector extension is used.
             distance_metric (Optional[DistanceMetric], optional): The distance metric
                 to use. Defaults to None.
 
