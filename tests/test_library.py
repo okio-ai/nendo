@@ -435,6 +435,24 @@ class DefaultLibraryTests(unittest.TestCase):
         )
         self.assertEqual(len(retrieved_test_collection), 2)
 
+    def test_add_tracks_to_collection(self):
+        """Test the adding of tracks to collections."""
+        nd.library.reset(force=True)
+        test_track_1 = nd.library.add_track(file_path="tests/assets/test.mp3")
+        test_track_2 = nd.library.add_track(file_path="tests/assets/test.wav")
+        test_collection = nd.library.add_collection(
+            track_ids=[],
+            name="Testcollection",
+        )
+        nd.library.add_tracks_to_collection(
+            track_ids=[test_track_1.id, test_track_2.id],
+            collection_id=test_collection.id,
+        )
+        retrieved_test_collection = nd.library.get_collection(
+            collection_id=test_collection.id,
+        )
+        self.assertEqual(len(retrieved_test_collection), 2)
+
     def test_find_collections_by_empty_value(self):
         """Test finding collections by empty search value."""
         nd.library.reset(force=True)

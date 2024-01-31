@@ -1494,6 +1494,27 @@ class NendoLibraryPlugin(NendoPlugin):
         """
         raise NotImplementedError
 
+    def add_tracks_to_collection(
+        self,
+        track_ids: List[Union[str, uuid.UUID]],
+        collection_id: Union[str, uuid.UUID],
+        meta: Optional[Dict[str, Any]] = None,
+    ) -> NendoCollection:
+        """Creates a relationship from the track to the collection.
+
+        Args:
+            track_ids (List[Union[str, uuid.UUID]]): List of track ids to add.
+            collection_id (Union[str, uuid.UUID]): ID of the collection to
+                which to add the track.
+            position (int, optional): Target position of the track inside
+                the collection.
+            meta (Dict[str, Any]): Metadata of the relationship.
+
+        Returns:
+            NendoCollection: The updated NendoCollection object.
+        """
+        return NotImplementedError
+
     @abstractmethod
     def get_collection_tracks(
         self,

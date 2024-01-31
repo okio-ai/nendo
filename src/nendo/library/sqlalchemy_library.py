@@ -1842,7 +1842,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             meta (Dict[str, Any]): Metadata of the collection.
 
         Returns:
-            schema.NendoCollection: The newly created NendoCollection object.
+            NendoCollection: The newly created NendoCollection object.
         """
         user_id = self._ensure_user_uuid(user_id)
         if track_ids is None:
@@ -1914,7 +1914,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             meta (Dict[str, Any]): Meta of the new related collection.
 
         Returns:
-            schema.NendoCollection: The newly added NendoCollection object.
+            NendoCollection: The newly added NendoCollection object.
         """
         user_id = self._ensure_user_uuid(user_id)
         # Create a new collection
@@ -1973,14 +1973,12 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             meta (Dict[str, Any]): Metadata of the relationship.
 
         Returns:
-            schema.NendoCollection: The updated NendoCollection object.
+            NendoCollection: The updated NendoCollection object.
         """
         with self.session_scope() as session:
             # Convert IDs to UUIDs if they're strings
-            if isinstance(collection_id, str):
-                collection_id = uuid.UUID(collection_id)
-            if isinstance(track_id, str):
-                track_id = uuid.UUID(track_id)
+            collection_id = ensure_uuid(collection_id)
+            track_id = ensure_uuid(track_id)
 
             # Check the collection and track objects
             collection = (
@@ -2037,6 +2035,83 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             session.refresh(collection)
             return schema.NendoCollection.model_validate(collection)
 
+    def add_tracks_to_collection(
+        self,
+        track_ids: List[Union[str, uuid.UUID]],
+        collection_id: Union[str, uuid.UUID],
+        meta: Optional[Dict[str, Any]] = None,
+    ) -> schema.NendoCollection:
+        """Creates a relationship from the track to the collection.
+
+        Args:
+            track_ids (List[Union[str, uuid.UUID]]): List of track ids to add.
+            collection_id (Union[str, uuid.UUID]): ID of the collection to
+                which to add the track.
+            position (int, optional): Target position of the track inside
+                the collection.
+            meta (Dict[str, Any]): Metadata of the relationship.
+
+        Returns:
+            NendoCollection: The updated NendoCollection object.
+        """
+        with self.session_scope() as session:
+            # Convert IDs to UUIDs if they're strings
+            collection_id = ensure_uuid(collection_id)
+            track_ids = [ensure_uuid(track_id) for track_id in track_ids]
+
+            # Check the collection and track objects
+            collection = (
+                session.query(model.NendoCollectionDB)
+                .filter_by(id=collection_id)
+                .first()
+            )
+            if not collection:
+                raise schema.NendoCollectionNotFoundError(
+                    "The collection does not exist",
+                    collection_id,
+                )
+            existing_track_ids = (
+                session.query(model.NendoTrackDB)
+                .filter(model.NendoTrackDB.id.in_(track_ids)).all()
+            )
+            existing_track_ids = [t.id for t in existing_track_ids]
+            missing_ids = [
+                tid for tid in track_ids if tid not in existing_track_ids
+            ]
+            if len(missing_ids) > 0:
+                raise schema.NendoCollectionNotFoundError(
+                    "Tracks do not exist: ",
+                    missing_ids,
+                )
+
+            # append all tracks to the end of the collection
+            last_postition = (
+                session.query(model.TrackCollectionRelationshipDB)
+                .filter_by(target_id=collection_id)
+                .order_by(
+                    model.TrackCollectionRelationshipDB.relationship_position.desc(),
+                )
+                .first()
+            )
+            position = (
+                last_postition.relationship_position + 1 if last_postition else 0
+            )
+
+            # create relationships from all tracks to the collection
+            for track_id in track_ids:
+                tc_relationship = model.TrackCollectionRelationshipDB(
+                    source_id=track_id,
+                    target_id=collection_id,
+                    relationship_type="track",
+                    meta=meta or {},
+                    relationship_position=position,
+                )
+                session.add(tc_relationship)
+                position += 1
+            session.commit()
+            session.refresh(collection)
+            return schema.NendoCollection.model_validate(collection)
+
     def get_collection_tracks(
         self,
         collection_id: uuid.UUID,
@@ -2059,6 +2134,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                 )
                 .options(joinedload(model.NendoTrackDB.related_collections))
                 .filter(model.TrackCollectionRelationshipDB.target_id == collection_id)
+                .order_by(asc(model.TrackCollectionRelationshipDB.relationship_position))
                 .all()
             )
 
