@@ -1320,7 +1320,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             if order_by:
                 if order_by == "random":
                     query_local = query_local.order_by(func.random())
-                if order_by == "collection":
+                elif order_by == "collection":
                     query_local = (
                         query_local
                         .order_by(
