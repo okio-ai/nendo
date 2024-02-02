@@ -553,6 +553,7 @@ class NendoEmbeddingPlugin(NendoPlugin):
             "genre",
             "year",
             "duration",
+            "content"
         ]
         for i in meta_items:
             if track.has_meta(i):
