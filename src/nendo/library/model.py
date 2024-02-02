@@ -43,6 +43,7 @@ def convert(obj):
 
 class JSONEncodedDict(TypeDecorator):
     impl = JSON
+    cache_ok = True
 
     def process_bind_param(self, value, dialect):  # noqa: ARG002
         return json.dumps(convert(value))
