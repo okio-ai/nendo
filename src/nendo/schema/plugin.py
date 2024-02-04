@@ -556,7 +556,7 @@ class NendoEmbeddingPlugin(NendoPlugin):
             "content",
         ]
         for i in meta_items:
-            if track.has_meta(i):
+            if track.get_meta(i) is not None:
                 text += f"{i}: {track.get_meta(i)}; "
         for pd in track.get_plugin_data():
             text += f"{pd.key}: {pd.value}; "
