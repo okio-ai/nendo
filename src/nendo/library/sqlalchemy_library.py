@@ -1679,7 +1679,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         if remove_resources and target_track.resource.location != "original":
             logger.info("Removing resources associated with Track %s", str(track_id))
             return self.storage_driver.remove_file(
-                file_name=target_track.resource["file_name"],
+                file_name=target_track.resource.file_name,
                 user_id=str(user_id),
             )
         return True
