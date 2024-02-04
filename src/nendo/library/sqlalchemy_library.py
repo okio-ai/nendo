@@ -1671,15 +1671,15 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                 .filter(model.NendoTrackDB.id == track_id)
                 .one_or_none()
             )
+            target_track = schema.NendoTrack.model_validate(target)
             session.delete(target)
         # only delete if file has been copied to the library
         # ("original_filepath" is present)
         user_id = self._ensure_user_uuid(user_id)
-        target_track = schema.NendoTrack.model_validate(target)
         if remove_resources and target_track.resource.location != "original":
             logger.info("Removing resources associated with Track %s", str(track_id))
             return self.storage_driver.remove_file(
-                file_name=target.resource["file_name"],
+                file_name=target_track.resource["file_name"],
                 user_id=str(user_id),
             )
         return True
