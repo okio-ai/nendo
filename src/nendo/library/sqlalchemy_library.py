@@ -24,7 +24,7 @@ import librosa
 import numpy as np
 import soundfile as sf
 from sqlalchemy import Float, and_, asc, desc, func, or_, true
-from sqlalchemy.orm import Query, Session, joinedload, sessionmaker
+from sqlalchemy.orm import Query, Session, joinedload, noload, sessionmaker
 from sqlalchemy.sql.expression import cast
 from sqlalchemy.sql.sqltypes import Text
 from tinytag import TinyTag
@@ -533,6 +533,17 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                     ),
                 )
                 query_local = query_local.filter(search_filter)
+                # for value in search_meta:
+                #     value_like = f"%{value}%"
+                #     json_value_filter = text("""
+                #         EXISTS (
+                #             SELECT 1
+                #             FROM json_each_text(meta) jbet (key, value)
+                #             WHERE value ilike ':value_like'
+                #         )
+                #     """).bindparams(value_like=value_like)
+
+                #     query_local = query_local.filter(json_value_filter)
 
             # apply plugin data filters
             if filters is not None:
@@ -1776,11 +1787,11 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         return (
             session.query(model.NendoCollectionDB)
             .filter(model.NendoCollectionDB.user_id == user_id)
-            .options(
-                joinedload(model.NendoCollectionDB.related_tracks).joinedload(
-                    model.TrackCollectionRelationshipDB.source,
-                ),
-            )
+            # .options(
+            #     joinedload(model.NendoCollectionDB.related_tracks).joinedload(
+            #         model.TrackCollectionRelationshipDB.source,
+            #     ),
+            # )
             .join(
                 model.CollectionCollectionRelationshipDB,
                 model.NendoCollectionDB.id
@@ -2260,6 +2271,8 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                     model.NendoCollectionDB.user_id == user_id,
                 )
 
+            query_local = query_local.options(noload("*"))
+
             if order_by:
                 if order_by == "random":
                     query_local = query_local.order_by(func.random())
@@ -2275,7 +2288,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
 
             if self.config.stream_chunk_size > 1:
                 chunk = []
-                for collection in query:
+                for collection in query_local:
                     chunk.append(schema.NendoCollection.model_validate(collection))
                     if len(chunk) == self.config.stream_chunk_size:
                         yield chunk
@@ -2283,7 +2296,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                 if chunk:  # yield remaining tracks in non-full chunk
                     yield chunk
             else:
-                for collection in query:
+                for collection in query_local:
                     yield schema.NendoCollection.model_validate(collection)
 
     def find_collections(

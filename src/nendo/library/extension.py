@@ -434,7 +434,7 @@ class NendoLibraryVectorExtension(BaseModel):
             if embedding_name is not None
             else (
                 self.embedding_plugin.plugin_name if
-                self.embedding_plugin.plugin_name is not None else
+                self.embedding_plugin is not None else
                 None
             )
         )
@@ -443,7 +443,7 @@ class NendoLibraryVectorExtension(BaseModel):
             if embedding_version is not None
             else (
                 self.embedding_plugin.plugin_version if
-                self.embedding_plugin.plugin_version is not None else
+                self.embedding_plugin is not None else
                 None
             )
         )
