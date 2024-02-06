@@ -1302,17 +1302,20 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         order: str = "asc",
         limit: Optional[int] = None,
         offset: Optional[int] = None,
+        load_related_tracks: bool = False,
         session: Optional[Session] = None,
     ) -> Union[List, Iterator]:
         """Get tracks based on the given query parameters.
 
         Args:
-            query (Optional[Query]): Query object to build from.
+            query (Query, optional): Query object to build from.
             user_id (Union[str, UUID], optional): ID of user to filter tracks by.
-            order_by (Optional[str]): Key used for ordering the results.
-            order (Optional[str]): Order in which to retrieve results ("asc" or "desc").
-            limit (Optional[int]): Limit the number of returned results.
-            offset (Optional[int]): Offset into the paginated results (requires limit).
+            order_by (str, optional): Key used for ordering the results.
+            order (str, optional): Order in which to retrieve results ("asc" or "desc").
+            limit (int, optional): Limit the number of returned results.
+            offset (int, optional): Offset into the paginated results (requires limit).
+            load_related_tracks (bool, optional): Flag that determines whether to
+                populate related_tracks field.
             session (sqlalchemy.Session): Session object to commit to.
 
         Returns:
@@ -1355,6 +1358,11 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                 if offset:
                     query_local = query_local.offset(offset)
 
+            if not load_related_tracks:
+                query_local = query_local.options(
+                    noload(model.NendoTrackDB.related_tracks),
+                )
+
             if self.config.stream_chunk_size > 1:
                 chunk = []
                 for track in query_local:
@@ -1384,10 +1392,10 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             track_id (Union[str, UUID]): ID of the track to be searched for.
             direction (str, optional): The relationship direction ("to", "from", "both").
             user_id (Union[str, UUID], optional): The user ID to filter for.
-            order_by (Optional[str]): Key used for ordering the results.
-            order (Optional[str]): Order in which to retrieve results ("asc" or "desc").
-            limit (Optional[int]): Limit the number of returned results.
-            offset (Optional[int]): Offset into the paginated results (requires limit).
+            order_by (str, optional): Key used for ordering the results.
+            order (str, optional): Order in which to retrieve results ("asc" or "desc").
+            limit (int, optional): Limit the number of returned results.
+            offset (int, optional): Offset into the paginated results (requires limit).
 
         Returns:
             Union[List, Iterator]: List or generator of tracks, depending on the
@@ -1406,6 +1414,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                 order=order,
                 limit=limit,
                 offset=offset,
+                load_related_tracks=True,
                 session=session,
             )
 
@@ -1443,10 +1452,10 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             plugin_names (list, optional): List used for applying the filter only to
                 data of certain plugins. If None, all plugin data related to the track
                 is used for filtering.
-            order_by (Optional[str]): Key used for ordering the results.
-            order (Optional[str]): Order in which to retrieve results ("asc" or "desc").
-            limit (Optional[int]): Limit the number of returned results.
-            offset (Optional[int]): Offset into the paginated results (requires limit).
+            order_by (str, optional): Key used for ordering the results.
+            order (str, optional): Order in which to retrieve results ("asc" or "desc").
+            limit (int, optional): Limit the number of returned results.
+            offset (int, optional): Offset into the paginated results (requires limit).
 
         Returns:
             Union[List, Iterator]: List or generator of tracks, depending on the
@@ -1476,6 +1485,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                 order=order,
                 limit=limit,
                 offset=offset,
+                load_related_tracks=True,
                 session=session,
             )
 
@@ -1494,9 +1504,9 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             value (str): The value to search for. The value is matched against
                 text representations of the track's `meta` and `resource` fields.
             user_id (Union[str, UUID], optional): The user ID to filter for.
-            order_by (Optional[str]): Key used for ordering the results.
-            limit (Optional[int]): Limit the number of returned results.
-            offset (Optional[int]): Offset into the paginated results (requires limit).
+            order_by (str, optional): Key used for ordering the results.
+            limit (int, optional): Limit the number of returned results.
+            offset (int, optional): Offset into the paginated results (requires limit).
 
         Returns:
             Union[List, Iterator]: List or generator of tracks, depending on the
@@ -1523,6 +1533,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                 order=order,
                 limit=limit,
                 offset=offset,
+                load_related_tracks=False,
                 session=session,
             )
 
@@ -1586,6 +1597,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                 order=order,
                 limit=limit,
                 offset=offset,
+                load_related_tracks=False,
                 session=session_local,
             )
 
@@ -2221,13 +2233,13 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         """Get a list of collections.
 
         Args:
-            query (Optional[Query]): Query object to build from.
+            query (Query, optional): Query object to build from.
             user_id (Union[str, UUID], optional): The user ID to filter for.
-            order_by (Optional[str]): Key used for ordering the results.
-            order (Optional[str]): Order in which to retrieve results
+            order_by (str, optional): Key used for ordering the results.
+            order (str, optional): Order in which to retrieve results
                 ("asc" or "desc").
-            limit (Optional[int]): Limit the number of returned results.
-            offset (Optional[int]): Offset into the paginated results (requires limit).
+            limit (int, optional): Limit the number of returned results.
+            offset (int, optional): Offset into the paginated results (requires limit).
             session (sqlalchemy.Session): Session object to commit to.
 
         Returns:
@@ -2313,10 +2325,10 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         Args:
             value (str): Term to be searched for in the description and meta field.
             user_id (Union[str, UUID], optional): The user ID to filter for.
-            order_by (Optional[str]): Key used for ordering the results.
-            order (Optional[str]): Order in which to retrieve results ("asc" or "desc").
-            limit (Optional[int]): Limit the number of returned results.
-            offset (Optional[int]): Offset into the paginated results (requires limit).
+            order_by (str, optional): Key used for ordering the results.
+            order (str, optional): Order in which to retrieve results ("asc" or "desc").
+            limit (int, optional): Limit the number of returned results.
+            offset (int, optional): Offset into the paginated results (requires limit).
 
         Returns:
             Union[List, Iterator]: List or generator of collections, depending on the
@@ -2360,11 +2372,11 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         Args:
             collection_id (str): ID of the collection to be searched for.
             user_id (Union[str, UUID], optional): The user ID to filter for.
-            order_by (Optional[str]): Key used for ordering the results.
-            order (Optional[str]): Order in which to retrieve results
+            order_by (str, optional): Key used for ordering the results.
+            order (str, optional): Order in which to retrieve results
                 ("asc" or "desc").
-            limit (Optional[int]): Limit the number of returned results.
-            offset (Optional[int]): Offset into the paginated results
+            limit (int, optional): Limit the number of returned results.
+            offset (int, optional): Offset into the paginated results
                 (requires limit).
 
         Returns:
