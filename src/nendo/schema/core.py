@@ -570,28 +570,29 @@ class NendoTrack(NendoTrackBase):
 
     def get_plugin_data(
         self,
-        plugin_name: str = "",
-        key: str = "",
+        plugin_name: Optional[str] = None,
+        plugin_version: Optional[str] = None,
+        key: Optional[str] = None,
+        user_id: Optional[Union[str, uuid.UUID]] = None,
     ) -> List[NendoPluginData]:
         """Get all plugin data related to the given plugin name and the given key.
 
         Note: Function behavior
-            - If no plugin_name is specified, all plugin data found with the given
-                key is returned.
-            - If no key is specified, all plugin data found with the given
-                plugin_name is returned.
-            - If neither key, nor plugin_name is specified, all plugin data
-                is returned.
+            - If plugin_name, plugin_version and/or key are specified, the
+                plugin data will be filtered w.r.t. them.
             - Certain kinds of plugin data are actually stored as blobs
                 and the corresponding blob id is stored in the plugin data's value
                 field. Those will be automatically loaded from the blob into memory
                 and a `NendoBlob` object will be returned inside `plugin_data.value`.
 
         Args:
-            plugin_name (str): The name of the plugin to get the data for.
-                Defaults to "".
-            key (str): The key to filter plugin data for.
-                Defaults to "".
+            plugin_name (str, optional): The name of the plugin with respect to which
+                the data is filtered.
+            plugin_version (str, optional): The version of the plugin with respect to
+                which the data is filtered.
+            key (str, optional): The key to filter plugin data for.
+            user_id (Union[str, uuid.UUID], optional): The user ID to filter the
+                plugin data.
 
         Returns:
             List[NendoPluginData]: List of nendo plugin data entries.
@@ -601,18 +602,20 @@ class NendoTrack(NendoTrackBase):
             r"[89ab][0-9a-f]{3}-[0-9a-f]{12}\Z",
             re.I,
         )
-        plugin_data = []
-        for pd in self.plugin_data:
-            if (pd.plugin_name == plugin_name or len(plugin_name) == 0) and (
-                pd.key == key or len(key) == 0
-            ):
-                # if we have a UUID, load the corresponding blob
-                if uuid_pattern.match(pd.value):
-                    loaded_blob = self.nendo_instance.library.load_blob(
-                        blob_id=uuid.UUID(pd.value),
-                    )
-                    pd.value = loaded_blob
-                plugin_data.append(pd)
+        plugin_data = self.nendo_instance.library.get_plugin_data(
+            track_id=self.id,
+            user_id=user_id,
+            plugin_name=plugin_name,
+            plugin_version=plugin_version,
+            key=key,
+        )
+        for pd in plugin_data:
+            # if we have a UUID, load the corresponding blob
+            if uuid_pattern.match(pd.value):
+                loaded_blob = self.nendo_instance.library.load_blob(
+                    blob_id=uuid.UUID(pd.value),
+                )
+                pd.value = loaded_blob
         return plugin_data
 
     def get_plugin_value(

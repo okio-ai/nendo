@@ -708,74 +708,90 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         session.commit()
         return db_tracks
 
-    def _get_all_plugin_data_db(
+    def _get_plugin_data_db(
         self,
         track_id: uuid.UUID,
+        user_id: uuid.UUID,
         session: Session,
-        user_id: Optional[uuid.UUID] = None,
+        plugin_name: Optional[str] = None,
+        plugin_version: Optional[str] = None,
+        key: Optional[str] = None,
     ) -> List[model.NendoPluginDataDB]:
         """Get all plugin data related to a track from the DB.
 
         Args:
             track_id (UUID): Track ID to get the related plugin data for.
+            user_id (UUID): The user ID to filter for.
             session (Session): SQLAlchemy session.
-            user_id (UUID, optional): The user ID to filter for.
+            plugin_name (str, optional): The name of the plugin with which
+                the plugin data was created.
+            plugin_version (str, optional): The version of the plugin with which
+                the plugin data was created.
+            key (str, optional): The key for which to filter the plugin data.
 
         Returns:
             List[model.NendoPluginDataDB]: List of nendo plugin data entries.
         """
-        user_id = user_id or self.user.id
-        with self.session_scope() as session:
+        with session as session_local:
             plugin_data_db = (
-                session.query(model.NendoPluginDataDB)
+                session_local.query(model.NendoPluginDataDB)
                 .filter(
                     and_(
                         model.NendoPluginDataDB.track_id == track_id,
                         model.NendoPluginDataDB.user_id == user_id,
                     ),
                 )
-                .all()
+            )
+            if plugin_name is not None:
+                plugin_data_db = plugin_data_db.filter(
+                    model.NendoPluginDataDB.plugin_name == plugin_name,
+                )
+            if plugin_version is not None:
+                plugin_data_db = plugin_data_db.filter(
+                    model.NendoPluginDataDB.plugin_version == plugin_version,
+                )
+            if key is not None:
+                plugin_data_db = plugin_data_db.filter(
+                    model.NendoPluginDataDB.key == key,
+                )
+            return plugin_data_db.all()
+
+    def get_plugin_data(
+        self,
+        track_id: Union[str, uuid.UUID],
+        user_id: Optional[Union[str, uuid.UUID]] = None,
+        plugin_name: Optional[str] = None,
+        plugin_version: Optional[str] = None,
+        key: Optional[str] = None,
+    ) -> List[schema.NendoPluginData]:
+        """Get all plugin data related to a track from the DB.
+
+        Args:
+            track_id (UUID): Track ID to get the related plugin data for.
+            user_id (Union[str, UUID], optional): The user ID to filter for.
+            plugin_name (str, optional): The name of the plugin with which
+                the plugin data was created.
+            plugin_version (str, optional): The version of the plugin with which
+                the plugin data was created.
+            key (str, optional): The key for which to filter the plugin data.
+
+        Returns:
+            List[NendoPluginData]: List of nendo plugin data entries.
+        """
+        track_id = ensure_uuid(track_id)
+        user_id = self._ensure_user_uuid(user_id=user_id)
+        with self.session_scope() as session:
+            plugin_data_db = self._get_plugin_data_db(
+                track_id=track_id,
+                user_id=user_id,
+                session=session,
+                plugin_name=plugin_name,
+                plugin_version=plugin_version,
+                key=key,
             )
             return [
                 schema.NendoPluginData.model_validate(pdb) for pdb in plugin_data_db
             ]
-
-    def _get_all_plugin_data_db_by_name(
-        self,
-        track_id: uuid.UUID,
-        plugin_name: str,
-        session: Session,
-        user_id: Optional[uuid.UUID] = None,
-    ) -> List[model.NendoPluginDataDB]:
-        """Get all plugin data related to a track and a given pluginfrom the DB.
-
-        Args:
-            track_id (uuid.UUID): Track ID to get the related plugin data for.
-            plugin_name (str): Name of the plugin to get related data for.
-            session (Session): SQLAlchemy session.
-            user_id (UUID, optional): The user ID to filter for.
-
-        Returns:
-            List[model.NendoPluginDataDB]: List of nendo plugin data entries.
-        """
-        user_id = user_id or self.user.id
-        with self.session_scope() as session:
-            plugin_data_db = (
-                session.query(model.NendoPluginDataDB)
-                .filter(
-                    and_(
-                        model.NendoPluginDataDB.track_id == track_id,
-                        model.NendoPluginDataDB.plugin_name == plugin_name,
-                        model.NendoPluginDataDB.user_id == user_id,
-                    ),
-                )
-                .all()
-            )
-            return (
-                schema.NendoPluginData.model_validate(plugin_data_db)
-                if plugin_data_db is not None
-                else None
-            )
 
     def _get_latest_plugin_data_db(
         self,
@@ -799,7 +815,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         Returns:
             model.NendoPluginDataDB: A single nendo plugin data entry.
         """
-        user_id = user_id or self.user.id
+        user_id = self._ensure_user_uuid(user_id)
         with self.session_scope() as session:
             plugin_data_db = (
                 session.query(model.NendoPluginDataDB)
@@ -1131,13 +1147,13 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         sr: int,
         related_track_id: Union[str, uuid.UUID],
         track_type: str = "track",
-        user_id: Optional[uuid.UUID] = None,
+        user_id: Optional[Union[str, uuid.UUID]] = None,
         track_meta: Optional[Dict[str, Any]] = None,
         relationship_type: str = "relationship",
         meta: Optional[Dict[str, Any]] = None,
     ) -> schema.NendoTrack:
         """Add a track from a signal with a relationship to another track."""
-        user_id = user_id or self.user.id
+        user_id = self._ensure_user_uuid(user_id)
         related_track_id = ensure_uuid(related_track_id)
         track = self.add_track_from_signal(
             signal=signal,
@@ -1556,8 +1572,8 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         Args:
             filters (Optional[dict]): Dictionary containing the filters to apply.
                 Defaults to None.
-            search_meta (dict): Dictionary containing the keywords to search for
-                over the track.resource.meta field. The dictionary's values
+            search_meta (dict, optional): Dictionary containing the keywords to
+                search for over the track.resource.meta field. The dictionary's values
                 should contain singular search tokens and the keys currently have no
                 effect but might in the future. Defaults to {}.
             track_type (Union[str, List[str]], optional): Track type to filter for.
@@ -1590,7 +1606,6 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                 collection_id=collection_id,
                 plugin_names=plugin_names,
             )
-
             return self.get_tracks(
                 query=query,
                 order_by=order_by,
@@ -1645,8 +1660,10 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                 .filter(model.TrackCollectionRelationshipDB.source_id == track_id)
                 .all()
             )
-            related_plugin_data = self._get_all_plugin_data_db(
+            user_id = self._ensure_user_uuid(user_id)
+            related_plugin_data = self._get_plugin_data_db(
                 track_id=track_id,
+                user_id=user_id,
                 session=session,
             )
             if len(related_plugin_data) > 0:
