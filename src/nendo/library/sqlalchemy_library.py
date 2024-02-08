@@ -2346,6 +2346,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
     def find_collections(
         self,
         value: str = "",
+        collection_types: Optional[List[str]] = None,
         user_id: Optional[Union[str, uuid.UUID]] = None,
         order_by: Optional[str] = None,
         order: Optional[str] = "asc",
@@ -2356,6 +2357,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
 
         Args:
             value (str): Term to be searched for in the description and meta field.
+            collection_types (List[str], optional): Collection types to filter for.
             user_id (Union[str, UUID], optional): The user ID to filter for.
             order_by (str, optional): Key used for ordering the results.
             order (str, optional): Order in which to retrieve results ("asc" or "desc").
@@ -2368,19 +2370,24 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         """
         user_id = self._ensure_user_uuid(user_id)
         with self.session_scope() as session:
-            query = session.query(model.NendoCollectionDB).filter(
-                and_(
-                    or_(
-                        model.NendoCollectionDB.name.ilike(f"%{value}%"),
-                        model.NendoCollectionDB.description.ilike(f"%{value}%"),
-                        # cast(
-                        #     model.NendoCollectionDB.meta, Text()).ilike(f"%{value}%"
-                        # ),
+            if value is not None and len(value) > 0:
+                query = session.query(model.NendoCollectionDB).filter(
+                    and_(
+                        or_(
+                            model.NendoCollectionDB.name.ilike(f"%{value}%"),
+                            model.NendoCollectionDB.description.ilike(f"%{value}%"),
+                            # cast(
+                            #     model.NendoCollectionDB.meta, Text()).ilike(f"%{value}%"
+                            # ),
+                        ),
                     ),
-                ),
-            )
+                )
             if user_id is not None:
                 query = query.filter(model.NendoCollectionDB.user_id == user_id)
+            if collection_types is not None:
+                query = query.filter(
+                    model.NendoCollectionDB.collection_type.in_(collection_types),
+                )
             return self._get_collections_db(
                 query,
                 user_id,
