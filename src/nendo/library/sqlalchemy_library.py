@@ -253,6 +253,9 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             },
         )
 
+        if "title" not in meta or meta["title"] is None:
+            meta.update({"title": os.path.basename(file_path)})
+
         resource = schema.NendoResource(
             file_path=self.storage_driver.get_file_path(
                 src=path_in_library,
@@ -480,10 +483,11 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             if query:
                 query_local = query
             else:
-                user_id = user_id or self.user.id
-                query_local = session_local.query(model.NendoTrackDB).filter(
-                    model.NendoTrackDB.user_id == user_id,
-                )
+                query_local = session_local.query(model.NendoTrackDB)
+                if user_id is not None:
+                    query_local = query_local.filter(
+                        model.NendoTrackDB.user_id == user_id,
+                    )
             plugin_name_condition = true()
             if (
                 plugin_names is not None
@@ -825,9 +829,16 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                         model.NendoPluginDataDB.plugin_name == plugin_name,
                         model.NendoPluginDataDB.plugin_version == plugin_version,
                         model.NendoPluginDataDB.key == key,
-                        model.NendoPluginDataDB.user_id == user_id,
                     ),
                 )
+            )
+
+            if user_id is not None:
+                plugin_data_db = plugin_data_db.filter(
+                    model.NendoPluginDataDB.user_id == user_id
+                )
+            plugin_data_db = (
+                plugin_data_db
                 .order_by(model.NendoPluginDataDB.updated_at.desc())
                 .first()
             )
@@ -1252,7 +1263,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             plugin_version = plugin.version
         plugin_data = schema.NendoPluginDataCreate(
             track_id=ensure_uuid(track_id),
-            user_id=ensure_uuid(user_id),
+            user_id=user_id,
             plugin_name=plugin_name,
             plugin_version=plugin_version,
             key=key,
@@ -1265,6 +1276,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                 plugin_version=plugin_version,
                 key=key,
                 session=session,
+                user_id=user_id,
             )
             if replace:
                 if existing_plugin_data is not None:
@@ -1347,6 +1359,10 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                 query_local = session_local.query(model.NendoTrackDB).filter(
                     model.NendoTrackDB.user_id == user_id,
                 )
+                if user_id is not None:
+                    query_local = query_local.filter(
+                        model.NendoTrackDB.user_id == user_id,
+                    )
             if order_by:
                 if order_by == "random":
                     query_local = query_local.order_by(func.random())
@@ -1531,18 +1547,17 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         user_id = self._ensure_user_uuid(user_id)
         with self.session_scope() as session:
             query = session.query(model.NendoTrackDB).filter(
-                and_(
-                    or_(
-                        cast(model.NendoTrackDB.resource, Text()).ilike(
-                            "%{}%".format(value),
-                        ),
-                        cast(model.NendoTrackDB.meta, Text()).ilike(
-                            "%{}%".format(value),
-                        ),
+                or_(
+                    cast(model.NendoTrackDB.resource, Text()).ilike(
+                        "%{}%".format(value),
                     ),
-                    model.NendoTrackDB.user_id == user_id,
+                    cast(model.NendoTrackDB.meta, Text()).ilike(
+                        "%{}%".format(value),
+                    ),
                 ),
             )
+            if user_id is not None:
+                query = query.filter(model.NendoTrackDB.user_id == user_id)
             return self.get_tracks(
                 query=query,
                 order_by=order_by,
@@ -1812,10 +1827,11 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         Returns:
             Query: The SQLAlchemy query object.
         """
-        user_id = user_id or self.user.id
+        query = session.query(model.NendoCollectionDB)
+        if user_id is not None:
+            query = query.filter(model.NendoCollectionDB.user_id == user_id)
         return (
-            session.query(model.NendoCollectionDB)
-            .filter(model.NendoCollectionDB.user_id == user_id)
+            query
             # .options(
             #     joinedload(model.NendoCollectionDB.related_tracks).joinedload(
             #         model.TrackCollectionRelationshipDB.source,
@@ -1903,19 +1919,17 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             track_objs = (
                 session.query(model.NendoTrackDB)
                 .filter(
-                    and_(
-                        model.NendoTrackDB.id.in_(
-                            [
-                                uuid.UUID(t) if isinstance(t, str) else t
-                                for t in track_ids
-                            ],
-                        ),
-                        model.NendoTrackDB.user_id == user_id,
+                    model.NendoTrackDB.id.in_(
+                        [
+                            uuid.UUID(t) if isinstance(t, str) else t
+                            for t in track_ids
+                        ],
                     ),
                 )
-                .all()
             )
-
+            if user_id is not None:
+                track_objs = track_objs.filter(model.NendoTrackDB.user_id == user_id)
+            track_objs = track_objs.all()
             # Create a new collection object
             new_collection = model.NendoCollectionDB(
                 name=name,
@@ -2265,9 +2279,9 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         """
         user_id = self._ensure_user_uuid(user_id)
         with self.session_scope() as session:
-            query = session.query(model.NendoCollectionDB).filter(
-                model.NendoCollectionDB.user_id == user_id,
-            )
+            query = session.query(model.NendoCollectionDB)
+            if user_id is not None:
+                query = query.filter(model.NendoCollectionDB.user_id == user_id)
             return self._get_collections_db(
                 query,
                 user_id,
@@ -2282,7 +2296,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
     def _get_collections_db(
         self,
         query: Optional[Query] = None,
-        user_id: Optional[Union[str, uuid.UUID]] = None,
+        user_id: Optional[uuid.UUID] = None,
         order_by: Optional[str] = None,
         order: Optional[str] = "asc",
         limit: Optional[int] = None,
@@ -2290,15 +2304,16 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         session: Optional[Session] = None,
     ) -> Union[List, Iterator]:
         """Get a list of collections from the DB."""
-        user_id = self._ensure_user_uuid(user_id)
         s = session or self.session_scope()
         with s as session_local:
             if query:
                 query_local = query
             else:
-                query_local = session_local.query(model.NendoCollectionDB).filter(
-                    model.NendoCollectionDB.user_id == user_id,
-                )
+                query_local = session_local.query(model.NendoCollectionDB)
+                if user_id is not None:
+                    query_local = query_local.filter(
+                        model.NendoCollectionDB.user_id == user_id,
+                    )
 
             query_local = query_local.options(noload("*"))
 
@@ -2362,9 +2377,10 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                         #     model.NendoCollectionDB.meta, Text()).ilike(f"%{value}%"
                         # ),
                     ),
-                    model.NendoCollectionDB.user_id == user_id,
                 ),
             )
+            if user_id is not None:
+                query = query.filter(model.NendoCollectionDB.user_id == user_id)
             return self._get_collections_db(
                 query,
                 user_id,

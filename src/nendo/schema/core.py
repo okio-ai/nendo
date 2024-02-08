@@ -621,19 +621,22 @@ class NendoTrack(NendoTrackBase):
     def get_plugin_value(
         self,
         key: str,
+        user_id: Optional[Union[str, uuid.UUID]] = None,
     ) -> Optional[str]:
         """Return the value for a specific plugin_data key.
 
         Args:
             key (str): The key for which the plugin data value should
                 be returned.
+            user_id (Union[str, uuid.UUID], optional): The user ID to filter the
+                plugin data.
 
         Returns:
             str: The plugin data value belonging to the given key.
                 If multiple plugin_data entries exist for the given key,
                 the first one is returned. If none exist, None is returned.
         """
-        pd = self.get_plugin_data(key=key)
+        pd = self.get_plugin_data(key=key, user_id=user_id)
         if len(pd) == 0:
             return None
         return pd[0].value
