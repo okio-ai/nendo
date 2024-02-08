@@ -1,0 +1,1 @@
+--8<-- "platformdocs/README.md"

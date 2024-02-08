@@ -2370,8 +2370,9 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         """
         user_id = self._ensure_user_uuid(user_id)
         with self.session_scope() as session:
+            query = session.query(model.NendoCollectionDB)
             if value is not None and len(value) > 0:
-                query = session.query(model.NendoCollectionDB).filter(
+                query = query.filter(
                     and_(
                         or_(
                             model.NendoCollectionDB.name.ilike(f"%{value}%"),
