@@ -45,6 +45,7 @@ $ export LOG_LEVEL=debug
 | copy_to_library | COPY_TO_LIBRARY | `bool` | `True` | Flag that determines whether an imported track's file should be copied into the nendo library. |
 | auto_convert | AUTO_CONVERT | `bool` | `True` | Flag that determines whether an imported track's file should be converted to Nendo's standard file format (`.wav`). |
 | skip_duplicate | SKIP_DUPLICATE | `bool` | `True` | Flag that determines whether a track that points to a file that already exists in the library can be important multiple times. If True, always the file that already exists in the library will be used instead. |
+| replace_plugin_data | REPLACE_PLUGIN_DATA | `bool` | `False` | Flag that determines whether plugin data should be replaced, if for a specific plugin name, version and key, two values are added consecutively via `track.add_plugin_data()` or `nendo.library.add_plugin_data()`. If `True`, the second call will cause Nendo to overwrite the existing value for the given plugin name, version and key combination. If `False`, the plugin data will be added in addition to the existing one. Defaults to `False`. |
 | max_threads | MAX_THREADS | `int` | `2` | Maximum number of threads to be used for multiprocessing tasks. |
 | batch_size | BATCH_SIZE | `int` | `10` | Batch size to use for multiprocessing tasks. |
 | stream_mode | STREAM_MODE | `bool` | `False` | Flag that enables `stream mode`: With stream mode, all functions that return multiple items, such as e.g. `nd.get_tracks()` return an `Iterator` instead of a `List`. |

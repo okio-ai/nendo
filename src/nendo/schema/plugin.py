@@ -107,7 +107,6 @@ class NendoAnalysisPlugin(NendoPlugin):
                     plugin_version=self.plugin_version,
                     key=str(k),
                     value=v,
-                    replace=self.nendo_instance.config.replace_plugin_data,
                 )
             return f_result
 

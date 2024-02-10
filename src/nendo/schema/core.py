@@ -537,7 +537,7 @@ class NendoTrack(NendoTrackBase):
         plugin_name: str,
         plugin_version: Optional[str] = None,
         user_id: Optional[Union[str, uuid.UUID]] = None,
-        replace: bool = True,
+        replace: Optional[bool] = None,
     ) -> NendoTrack:
         """Add plugin data to a NendoTrack and persist changes into the DB.
 
@@ -551,7 +551,8 @@ class NendoTrack(NendoTrackBase):
             user_id (Union[str, UUID], optional): ID of user adding the plugin data.
             replace (bool, optional): Flag that determines whether
                 the last existing data point for the given plugin name and -version
-                is overwritten or not. Defaults to True.
+                is overwritten or not. If undefined, the nendo configuration's
+                `replace_plugin_data` value will be used.
 
         Returns:
             NendoTrack: The track itself.

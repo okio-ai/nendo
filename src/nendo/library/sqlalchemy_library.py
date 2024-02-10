@@ -820,9 +820,10 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             model.NendoPluginDataDB: A single nendo plugin data entry.
         """
         user_id = self._ensure_user_uuid(user_id)
-        with self.session_scope() as session:
+        s = session or self.session_scope()
+        with s as session_local:
             plugin_data_db = (
-                session.query(model.NendoPluginDataDB)
+                session_local.query(model.NendoPluginDataDB)
                 .filter(
                     and_(
                         model.NendoPluginDataDB.track_id == track_id,
@@ -835,7 +836,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
 
             if user_id is not None:
                 plugin_data_db = plugin_data_db.filter(
-                    model.NendoPluginDataDB.user_id == user_id
+                    model.NendoPluginDataDB.user_id == user_id,
                 )
             plugin_data_db = (
                 plugin_data_db
@@ -843,7 +844,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                 .first()
             )
             return (
-                schema.NendoPluginData.model_validate(plugin_data_db)
+                plugin_data_db
                 if plugin_data_db is not None
                 else None
             )
@@ -1227,7 +1228,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         plugin_name: str,
         plugin_version: Optional[str] = None,
         user_id: Optional[Union[str, uuid.UUID]] = None,
-        replace: bool = False,
+        replace: Optional[bool] = None,
     ) -> schema.NendoPluginData:
         """Add plugin data to a NendoTrack and persist changes into the DB.
 
@@ -1243,13 +1244,18 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             user_id (Union[str, UUID], optional): ID of user adding the plugin data.
             replace (bool, optional): Flag that determines whether
                 the last existing data point for the given plugin name and -version
-                is overwritten or not. Defaults to False.
+                is overwritten or not. If undefined, the nendo configuration's
+                `replace_plugin_data` value will be used.
 
         Returns:
             NendoPluginData: The saved plugin data as a NendoPluginData object.
         """
         # create plugin data
         user_id = self._ensure_user_uuid(user_id)
+        replace = (
+            replace if replace is not None else
+            self.nendo_instance.config.replace_plugin_data
+        )
         value_converted = self._convert_plugin_data(value=value, user_id=user_id)
         if plugin_version is None:
             try:
@@ -1278,7 +1284,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                 session=session,
                 user_id=user_id,
             )
-            if replace:
+            if replace is True:
                 if existing_plugin_data is not None:
                     db_plugin_data = self._update_plugin_data_db(
                         existing_plugin_data=existing_plugin_data,
@@ -1291,8 +1297,6 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                         session=session,
                     )
             else:
-                if existing_plugin_data is not None:
-                    return existing_plugin_data
                 db_plugin_data = self._insert_plugin_data_db(
                     plugin_data=plugin_data,
                     session=session,
