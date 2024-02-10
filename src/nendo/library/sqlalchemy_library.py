@@ -537,17 +537,6 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                     ),
                 )
                 query_local = query_local.filter(search_filter)
-                # for value in search_meta:
-                #     value_like = f"%{value}%"
-                #     json_value_filter = text("""
-                #         EXISTS (
-                #             SELECT 1
-                #             FROM json_each_text(meta) jbet (key, value)
-                #             WHERE value ilike ':value_like'
-                #         )
-                #     """).bindparams(value_like=value_like)
-
-                #     query_local = query_local.filter(json_value_filter)
 
             # apply plugin data filters
             if filters is not None:

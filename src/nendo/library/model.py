@@ -7,7 +7,6 @@ Used by the SQLAlchemy implementation of the nendo library.
 
 from __future__ import annotations
 
-import json
 import uuid
 from datetime import date, datetime
 
@@ -38,6 +37,9 @@ def convert(obj):
         return [convert(x) for x in obj]
     if isinstance(obj, (NestedMutableDict, dict)):
         return {k: convert(v) for k, v in obj.items()}
+    if isinstance(obj, str):
+        # Remove non-ASCII characters from the string
+        return obj.encode("ascii", "ignore").decode("ascii").replace("\u0000", "")
     return obj
 
 
@@ -46,12 +48,7 @@ class JSONEncodedDict(TypeDecorator):
     cache_ok = True
 
     def process_bind_param(self, value, dialect):  # noqa: ARG002
-        return json.dumps(convert(value))
-
-    def process_result_value(self, value, dialect):  # noqa: ARG002
-        if value is not None:
-            return json.loads(value)
-        return None
+        return convert(value)
 
 
 class TrackTrackRelationshipDB(Base):
