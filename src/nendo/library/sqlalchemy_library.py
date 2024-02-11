@@ -2190,7 +2190,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                     model.TrackCollectionRelationshipDB.source_id
                     == model.NendoTrackDB.id,
                 )
-                .options(joinedload(model.NendoTrackDB.related_collections))
+                # .options(joinedload(model.NendoTrackDB.related_collections))
                 .filter(model.TrackCollectionRelationshipDB.target_id == collection_id)
                 .order_by(asc(model.TrackCollectionRelationshipDB.relationship_position))
                 .all()
