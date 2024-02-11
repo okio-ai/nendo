@@ -1360,16 +1360,28 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                 if order_by == "random":
                     query_local = query_local.order_by(func.random())
                 elif order_by == "collection":
-                    query_local = (
-                        query_local
-                        .order_by(
-                            asc(
-                                model
-                                .TrackCollectionRelationshipDB
-                                .relationship_position,
-                            ),
+                    if order == "desc":
+                        query_local = (
+                            query_local
+                            .order_by(
+                                desc(
+                                    model
+                                    .TrackCollectionRelationshipDB
+                                    .relationship_position,
+                                ),
+                            )
                         )
-                    )
+                    else:
+                        query_local = (
+                            query_local
+                            .order_by(
+                                asc(
+                                    model
+                                    .TrackCollectionRelationshipDB
+                                    .relationship_position,
+                                ),
+                            )
+                        )
                 elif order == "desc":
                     query_local = query_local.order_by(
                         desc(getattr(model.NendoTrackDB, order_by)),
@@ -2173,6 +2185,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
     def get_collection_tracks(
         self,
         collection_id: uuid.UUID,
+        order: Optional[str] = "asc",
     ) -> List[schema.NendoTrack]:
         """Get all tracks from a collection.
 
@@ -2192,9 +2205,24 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                 )
                 # .options(joinedload(model.NendoTrackDB.related_collections))
                 .filter(model.TrackCollectionRelationshipDB.target_id == collection_id)
-                .order_by(asc(model.TrackCollectionRelationshipDB.relationship_position))
-                .all()
             )
+            if order:
+                if order == "random":
+                    tracks_db = tracks_db.order_by(func.random())
+                elif order == "desc":
+                    tracks_db = tracks_db.order_by(
+                        desc(
+                            model.TrackCollectionRelationshipDB.relationship_position,
+                        ),
+                    )
+                else:
+                    tracks_db = tracks_db.order_by(
+                        asc(
+                            model.TrackCollectionRelationshipDB.relationship_position,
+                        ),
+                    )
+
+            tracks_db = tracks_db.all()
 
             return (
                 [schema.NendoTrack.model_validate(t) for t in tracks_db]
