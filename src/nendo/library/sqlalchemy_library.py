@@ -193,6 +193,9 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                             sr=None,
                             mono=False,
                         )
+                    elif file_path.endswith(".flac"):
+                        signal, sr = sf.read(file=file_path, dtype="int32")
+                        signal = signal.astype(np.float64)
                     else:
                         signal, sr = sf.read(file=file_path)
                     # resample to default rate if required
