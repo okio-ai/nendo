@@ -567,9 +567,7 @@ class NendoEmbeddingPlugin(NendoPlugin):
     ) -> Callable[
         [NendoPlugin, Any],
         Union[
-            [str, np.ndarray],
-            NendoEmbedding,
-            List[NendoEmbedding],
+            Tuple[str, np.ndarray], NendoEmbedding, List[NendoEmbedding]
         ],
     ]:
         """Decorator to register a function that embeds a given text string into a vector space.
@@ -587,7 +585,7 @@ class NendoEmbeddingPlugin(NendoPlugin):
         def wrapper(
             self,
             **kwargs: Any,
-        ) -> Union[[str, np.ndarray], NendoEmbedding, List[NendoEmbedding]]:
+        ) -> Union[Tuple[str, np.ndarray], NendoEmbedding, List[NendoEmbedding]]:
             track_or_collection, kwargs = self._pop_track_or_collection_from_args(
                 **kwargs,
             )
