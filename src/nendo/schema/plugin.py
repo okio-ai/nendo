@@ -577,7 +577,7 @@ class NendoEmbeddingPlugin(NendoPlugin):
         This decorator wraps the function and allows a plugin user to call the plugin with either a text, a track, or a collection.
 
         Args:
-            func: Callable[[NendoPlugin, str, Any], None]: The function to register.
+            func: Callable[[NendoPlugin, str, Any], Tuple[str, np.ndarray]]: The function to register.
 
         Returns:
             Callable[[NendoPlugin, Any], Union[[str, np.ndarray], NendoEmbedding, List[NendoEmbedding]]]: The wrapped function.
@@ -611,9 +611,27 @@ class NendoEmbeddingPlugin(NendoPlugin):
                     embedding=embedding_vector,
                 )
                 try:
-                    embedding = self.nendo_instance.library.add_embedding(
-                        embedding=embedding,
-                    )
+                    if self.config.replace_plugin_data is True:
+                        existing_embeddings = self.nendo_instance.library.get_embeddings(
+                            track_id = track_or_collection.id,
+                            plugin_name = self.plugin_name,
+                            plugin_version = self.plugin_version,
+                        )
+                        if len(existing_embeddings) > 0:
+                            embedding_update = existing_embeddings[0]
+                            embedding_update.text = text
+                            embedding_update.embedding = embedding_vector
+                            embedding = self.nendo_instance.library.update_embedding(
+                                embedding_update,
+                            )
+                        else:
+                            embedding = self.nendo_instance.library.add_embedding(
+                                embedding=embedding,
+                            )
+                    else:
+                        embedding = self.nendo_instance.library.add_embedding(
+                            embedding=embedding,
+                        )
                 except AttributeError as e:  # noqa: F841
                     self.logger.error(
                         "Error adding the embedding to the library. "
@@ -637,9 +655,27 @@ class NendoEmbeddingPlugin(NendoPlugin):
                     embedding=embedding_vector,
                 )
                 try:
-                    embedding = self.nendo_instance.library.add_embedding(
-                        embedding=embedding,
-                    )
+                    if self.config.replace_plugin_data is True:
+                        existing_embeddings = self.nendo_instance.library.get_embeddings(
+                            track_id = track_or_collection.id,
+                            plugin_name = self.plugin_name,
+                            plugin_version = self.plugin_version,
+                        )
+                        if len(existing_embeddings) > 0:
+                            embedding_update = existing_embeddings[0]
+                            embedding_update.text = text
+                            embedding_update.embedding = embedding_vector
+                            embedding = self.nendo_instance.library.update_embedding(
+                                embedding_update,
+                            )
+                        else:
+                            embedding = self.nendo_instance.library.add_embedding(
+                                embedding=embedding,
+                            )
+                    else:
+                        embedding = self.nendo_instance.library.add_embedding(
+                            embedding=embedding,
+                        )
                 except AttributeError as e:  # noqa: F841
                     self.logger.error(
                         "Error adding the embedding to the library. "
@@ -688,9 +724,27 @@ class NendoEmbeddingPlugin(NendoPlugin):
                     embedding=embedding_vector,
                 )
                 try:
-                    embedding = self.nendo_instance.library.add_embedding(
-                        embedding=embedding,
-                    )
+                    if self.config.replace_plugin_data is True:
+                        existing_embeddings = self.nendo_instance.library.get_embeddings(
+                            track_id = track_or_collection.id,
+                            plugin_name = self.plugin_name,
+                            plugin_version = self.plugin_version,
+                        )
+                        if len(existing_embeddings) > 0:
+                            embedding_update = existing_embeddings[0]
+                            embedding_update.text = text
+                            embedding_update.embedding = embedding_vector
+                            embedding = self.nendo_instance.library.update_embedding(
+                                embedding_update,
+                            )
+                        else:
+                            embedding = self.nendo_instance.library.add_embedding(
+                                embedding=embedding,
+                            )
+                    else:
+                        embedding = self.nendo_instance.library.add_embedding(
+                            embedding=embedding,
+                        )
                 except AttributeError as e:  # noqa: F841
                     self.logger.error(
                         "Error adding the embedding to the library. "
@@ -712,9 +766,27 @@ class NendoEmbeddingPlugin(NendoPlugin):
                     embedding=embedding_vector,
                 )
                 try:
-                    embedding = self.nendo_instance.library.add_embedding(
-                        embedding=embedding,
-                    )
+                    if self.config.replace_plugin_data is True:
+                        existing_embeddings = self.nendo_instance.library.get_embeddings(
+                            track_id = track_or_collection.id,
+                            plugin_name = self.plugin_name,
+                            plugin_version = self.plugin_version,
+                        )
+                        if len(existing_embeddings) > 0:
+                            embedding_update = existing_embeddings[0]
+                            embedding_update.text = text
+                            embedding_update.embedding = embedding_vector
+                            embedding = self.nendo_instance.library.update_embedding(
+                                embedding_update,
+                            )
+                        else:
+                            embedding = self.nendo_instance.library.add_embedding(
+                                embedding=embedding,
+                            )
+                    else:
+                        embedding = self.nendo_instance.library.add_embedding(
+                            embedding=embedding,
+                        )
                 except AttributeError as e:  # noqa: F841
                     self.logger.error(
                         "Error adding the embedding to the library. "
@@ -737,9 +809,27 @@ class NendoEmbeddingPlugin(NendoPlugin):
                     embedding=embedding_vector,
                 )
                 if hasattr(self.nendo_instance.library, "add_embedding"):
-                    embedding = self.nendo_instance.library.add_embedding(
-                        embedding=embedding,
-                    )
+                    if self.config.replace_plugin_data is True:
+                        existing_embeddings = self.nendo_instance.library.get_embeddings(
+                            track_id = track_or_collection.id,
+                            plugin_name = self.plugin_name,
+                            plugin_version = self.plugin_version,
+                        )
+                        if len(existing_embeddings) > 0:
+                            embedding_update = existing_embeddings[0]
+                            embedding_update.text = text
+                            embedding_update.embedding = embedding_vector
+                            embedding = self.nendo_instance.library.update_embedding(
+                                embedding_update,
+                            )
+                        else:
+                            embedding = self.nendo_instance.library.add_embedding(
+                                embedding=embedding,
+                            )
+                    else:
+                        embedding = self.nendo_instance.library.add_embedding(
+                            embedding=embedding,
+                        )
                 embeddings.append(embedding)
             return embeddings
 
@@ -776,9 +866,27 @@ class NendoEmbeddingPlugin(NendoPlugin):
                     embedding=embedding_vector,
                 )
                 try:
-                    embedding = self.nendo_instance.library.add_embedding(
-                        embedding=embedding,
-                    )
+                    if self.config.replace_plugin_data is True:
+                        existing_embeddings = self.nendo_instance.library.get_embeddings(
+                            track_id = track_or_collection.id,
+                            plugin_name = self.plugin_name,
+                            plugin_version = self.plugin_version,
+                        )
+                        if len(existing_embeddings) > 0:
+                            embedding_update = existing_embeddings[0]
+                            embedding_update.text = text
+                            embedding_update.embedding = embedding_vector
+                            embedding = self.nendo_instance.library.update_embedding(
+                                embedding_update,
+                            )
+                        else:
+                            embedding = self.nendo_instance.library.add_embedding(
+                                embedding=embedding,
+                            )
+                    else:
+                        embedding = self.nendo_instance.library.add_embedding(
+                            embedding=embedding,
+                        )
                 except AttributeError as e:  # noqa: F841
                     self.logger.error(
                         "Error adding the embedding to the library. "
@@ -799,9 +907,27 @@ class NendoEmbeddingPlugin(NendoPlugin):
                         embedding=embedding_vector,
                     )
                     if hasattr(self.nendo_instance.library, "add_embedding"):
-                        embedding = self.nendo_instance.library.add_embedding(
-                            embedding=embedding,
-                        )
+                        if self.config.replace_plugin_data is True:
+                            existing_embeddings = self.nendo_instance.library.get_embeddings(
+                                track_id = track_or_collection.id,
+                                plugin_name = self.plugin_name,
+                                plugin_version = self.plugin_version,
+                            )
+                            if len(existing_embeddings) > 0:
+                                embedding_update = existing_embeddings[0]
+                                embedding_update.text = text
+                                embedding_update.embedding = embedding_vector
+                                embedding = self.nendo_instance.library.update_embedding(
+                                    embedding_update,
+                                )
+                            else:
+                                embedding = self.nendo_instance.library.add_embedding(
+                                    embedding=embedding,
+                                )
+                        else:
+                            embedding = self.nendo_instance.library.add_embedding(
+                                embedding=embedding,
+                            )
                     embeddings.append(embedding)
                 return embeddings
             signal = kwargs.get("signal", None)
@@ -825,9 +951,27 @@ class NendoEmbeddingPlugin(NendoPlugin):
                 embedding=embedding_vector,
             )
             try:
-                embedding = self.nendo_instance.library.add_embedding(
-                    embedding=embedding,
-                )
+                if self.config.replace_plugin_data is True:
+                    existing_embeddings = self.nendo_instance.library.get_embeddings(
+                        track_id = track_or_collection.id,
+                        plugin_name = self.plugin_name,
+                        plugin_version = self.plugin_version,
+                    )
+                    if len(existing_embeddings) > 0:
+                        embedding_update = existing_embeddings[0]
+                        embedding_update.text = text
+                        embedding_update.embedding = embedding_vector
+                        embedding = self.nendo_instance.library.update_embedding(
+                            embedding_update,
+                        )
+                    else:
+                        embedding = self.nendo_instance.library.add_embedding(
+                            embedding=embedding,
+                        )
+                else:
+                    embedding = self.nendo_instance.library.add_embedding(
+                        embedding=embedding,
+                    )
             except AttributeError as e:  # noqa: F841
                 self.logger.error(
                     "Error adding the embedding to the library. "
@@ -1178,6 +1322,7 @@ class NendoLibraryPlugin(NendoPlugin):
         Returns:
             NendoPluginData: The saved plugin data as a NendoPluginData object.
         """
+        raise NotImplementedError
 
     @abstractmethod
     def get_track(

@@ -1212,7 +1212,7 @@ class NendoCollection(NendoCollectionBase):
             Dict[str, Any]: Meta entry for given key.
         """
         if not self.has_meta(key):
-            logger.error("Key not found in meta: %s", key)
+            logger.warning("Key not found in meta: %s", key)
             return None
         return self.meta[key]
 
