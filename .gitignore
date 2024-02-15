@@ -146,6 +146,7 @@ tests/tests/
 # docs
 htmlcov/
 plugindocs/
+platformdocs/
 
 # nendo library
 nendo_library/

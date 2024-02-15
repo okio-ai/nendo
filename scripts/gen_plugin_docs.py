@@ -9,12 +9,12 @@ from urllib.parse import urlparse
 # List of GitHub repository URLs
 github_repos = [
     "https://github.com/okio-ai/nendo_plugin_stemify_demucs/",
-    "https://github.com/okio-ai/nendo_plugin_classify_core/",
-    "https://github.com/okio-ai/nendo_plugin_quantize_core/",
-    "https://github.com/okio-ai/nendo_plugin_fx_core/",
-    "https://github.com/okio-ai/nendo_plugin_loopify/",
-    "https://github.com/okio-ai/nendo_plugin_musicgen/",
-    "https://github.com/okio-ai/nendo_plugin_vampnet/",
+    # "https://github.com/okio-ai/nendo_plugin_classify_core/",
+    # "https://github.com/okio-ai/nendo_plugin_quantize_core/",
+    # "https://github.com/okio-ai/nendo_plugin_fx_core/",
+    # "https://github.com/okio-ai/nendo_plugin_loopify/",
+    # "https://github.com/okio-ai/nendo_plugin_musicgen/",
+    # "https://github.com/okio-ai/nendo_plugin_vampnet/",
     # "https://github.com/okio-ai/nendo_plugin_textgen/",
     # "https://github.com/okio-ai/nendo_plugin_caption_lpmusiccaps/",
     # "https://github.com/okio-ai/nendo_plugin_voicegen_styletts2/",

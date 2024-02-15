@@ -2117,8 +2117,6 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             track_ids (List[Union[str, uuid.UUID]]): List of track ids to add.
             collection_id (Union[str, uuid.UUID]): ID of the collection to
                 which to add the track.
-            position (int, optional): Target position of the track inside
-                the collection.
             meta (Dict[str, Any]): Metadata of the relationship.
 
         Returns:
@@ -2233,22 +2231,22 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
     def get_collection(
         self,
         collection_id: uuid.UUID,
-        details: bool = True,
-    ) -> Union[schema.NendoCollection, schema.NendoCollectionSlim]:
+        get_related_tracks: bool = True,
+    ) -> schema.NendoCollection:
         """Get a collection by its ID.
 
         Args:
             collection_id (uuid.UUID): ID of the target collection.
-            details (bool, optional): Flag that defines whether the result should
-                contain all fields or only a subset. Defaults to True.
+            get_related_tracks (bool, optional): Flag that defines whether the
+                returned collection should contain the `related_tracks`.
+                Defaults to True.
 
         Returns:
-            Union[NendoCollection, NendoCollectionSlim]: Collection object, compact
-                version if the `details` flag has been set to False.
+            NendoCollection: The collection object.
         """
         with self.session_scope() as session:
             query = session.query(model.NendoCollectionDB)
-            if details:
+            if get_related_tracks:
                 query = query.options(
                     joinedload(model.NendoCollectionDB.related_tracks).joinedload(
                         model.TrackCollectionRelationshipDB.source,
@@ -2258,19 +2256,11 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                 model.NendoCollectionDB.id == collection_id,
             ).first()
 
-            if details:
-                collection = (
-                    schema.NendoCollection.model_validate(collection_db)
-                    if collection_db is not None
-                    else None
-                )
-            else:
-                collection = (
-                    schema.NendoCollectionSlim.model_validate(collection_db)
-                    if collection_db is not None
-                    else None
-                )
-            return collection
+            return (
+                schema.NendoCollection.model_validate(collection_db)
+                if collection_db is not None
+                else None
+            )
 
     def get_collections(
         self,

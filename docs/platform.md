@@ -1,1 +1,1 @@
---8<-- "platformdocs/README.md"
+--8<-- "platformdocs/platform.md"

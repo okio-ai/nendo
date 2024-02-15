@@ -2,14 +2,13 @@
 
 import os
 import shutil
-from urllib.parse import urlparse
 
 from git import Repo
 
 banner_image_code = [
     "<br>\n",
     '<p align="left">\n',
-    '    <img src="https://okio.ai/docs/assets/nendo_core_logo.png" width="350" alt="nendo core">\n',
+    '    <img src="https://okio.ai/docs/assets/nendo_logo.png" width="500" alt="Nendo Core">\n',
     "</p>\n",
     "<br>\n",
 ]
@@ -53,55 +52,51 @@ def remove_block_of_lines(file_path, block):
         file.write(file_str)
 
 
-def copy_or_create_docs(repo_url, repo_name):
-    """Copy the docs folder and other files, or create them if not present."""
-    repo_path = os.path.join(local_dir, repo_name)
-    os.makedirs(repo_path, exist_ok=True)
-    # Clone the repo to a temporary directory
-    temp_dir = os.path.join("/tmp", repo_name)
-    shutil.rmtree(temp_dir, ignore_errors=True)
-    Repo.clone_from(repo_url, temp_dir)
+print(f"Generating docs for nendo_platform...")
+# Clone the repos into a temporary directory
+repo_path = os.path.join(local_dir)
+os.makedirs(repo_path, exist_ok=True)
+temp_dir_platform = os.path.join("/tmp", "nendo_platform")
+temp_dir_server = os.path.join("/tmp", "nendo_server")
+temp_dir_web = os.path.join("/tmp", "nendo_web")
+shutil.rmtree(temp_dir_platform, ignore_errors=True)
+shutil.rmtree(temp_dir_server, ignore_errors=True)
+shutil.rmtree(temp_dir_web, ignore_errors=True)
+Repo.clone_from("git@github.com:okio-ai/nendo_devops.git", temp_dir_platform)
+Repo.clone_from("git@github.com:okio-ai/nendo_server.git", temp_dir_server)
+Repo.clone_from("git@github.com:okio-ai/nendo_web.git", temp_dir_web)
 
-    print(f"Generating docs for {repo_name}...")
+# # Copy the docs folder and specified files
+# shutil.copytree(
+#     os.path.join(temp_dir, "docs"),
+#     os.path.join(repo_path, "docs"),
+#     dirs_exist_ok=True,
+# )
+# for file in ["README.md", "mkdocs.yml", "contributing.md"]:
+#     if os.path.exists(os.path.join(temp_dir, file)):
+#         shutil.copy2(os.path.join(temp_dir, file), repo_path)
 
-    if os.path.exists(os.path.join(temp_dir, "docs/")):
-        # Copy the docs folder and specified files
-        shutil.copytree(
-            os.path.join(temp_dir, "docs"),
-            os.path.join(repo_path, "docs"),
-            dirs_exist_ok=True,
-        )
-        for file in ["README.md", "mkdocs.yml", "contributing.md"]:
-            if os.path.exists(os.path.join(temp_dir, file)):
-                shutil.copy2(os.path.join(temp_dir, file), repo_path)
+# for root, dirs, files in os.walk(repo_path):
+#     for file in files:
+#         file_path = os.path.join(root, file)
+#         replace_string_in_file(
+#             file_path, '--8<-- "', '--8<-- "platformdocs/',
+#         )
+#         replace_string_in_file(file_path, "](docs/", "](")
+#         remove_block_of_lines(file_path, banner_image_code)
 
-        for root, dirs, files in os.walk(repo_path):
-            for file in files:
-                file_path = os.path.join(root, file)
-                replace_string_in_file(
-                    file_path, '--8<-- "', f'--8<-- "platformdocs/{repo_name}/',
-                )
-                replace_string_in_file(file_path, "](docs/", "](")
-                remove_block_of_lines(file_path, banner_image_code)
+# copy README files to platformdocs/
+platform_file_path = os.path.join(repo_path, "platform.md")
+shutil.copy2(os.path.join(temp_dir_platform, "README.md"), platform_file_path)
+remove_block_of_lines(platform_file_path, banner_image_code)
+server_file_path = os.path.join(repo_path, "server.md")
+shutil.copy2(os.path.join(temp_dir_server, "README.md"), server_file_path)
+remove_block_of_lines(server_file_path, banner_image_code)
+web_file_path = os.path.join(repo_path, "web.md")
+shutil.copy2(os.path.join(temp_dir_web, "README.md"), web_file_path)
+remove_block_of_lines(web_file_path, banner_image_code)
 
-        # Clean up the cloned repository
-        shutil.rmtree(temp_dir)
-    else:
-        # Create docs/ and index.md
-        os.makedirs(os.path.join(repo_path, "docs"), exist_ok=True)
-        shutil.copy2(
-            os.path.join("/tmp", repo_name, "README.md"),
-            os.path.join(repo_path, "docs", "index.md"),
-        )
-        processed_repo_name = process_name(repo_name)
-
-        # Create mkdocs.yml
-        with open(os.path.join(repo_path, "mkdocs.yml"), "w") as mkdocs_file:
-            mkdocs_file.write(
-                f'site_name: {processed_repo_name}\n\nnav:\n  - {processed_repo_name}: "index.md"',
-            )
-
-
-parsed_url = urlparse(repo_url)
-repo_name = parsed_url.path.split("/")[-2]
-copy_or_create_docs(repo_url, repo_name)
+# Clean up the cloned repository
+shutil.rmtree(temp_dir_platform)
+shutil.rmtree(temp_dir_server)
+shutil.rmtree(temp_dir_web)

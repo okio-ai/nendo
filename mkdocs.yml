@@ -21,13 +21,21 @@ nav:
   - Tracks: usage/tracks.md
   - Collections: usage/collections.md
   - Library: usage/library.md
-  - Plugins: 'plugins.md'
+  - Plugins: plugins.md
   - Guides:
     - FAQ: usage/faq.md
     - Troubleshooting: usage/troubleshooting.md
 - Plugins: 
-  - Overview: 'plugins.md'
+  - Overview: plugins.md
   - Catalog: '*include ./plugindocs/*/mkdocs.yml'
+- Platform:
+  - Overview: platform.md
+  - Quick Start: platform/usage.md
+  - Configuration: platform/config.md
+  - Development: platform/development.md
+  - Components:
+    - API Server: platform/server.md
+    - Web frontend: platform/web.md
 # defer to gen-files + literate-nav
 - API reference:
   - nendo: reference/
@@ -43,11 +51,6 @@ nav:
   # - App Development: development/appdev.md
   # - Code of Conduct: code_of_conduct.md
   - Coverage report: coverage.md
-# - Insiders:
-#   - insiders/index.md
-#   - Getting started:
-#     - Installation: insiders/installation.md
-#     - Changelog: insiders/changelog.md
 - Okio's website: https://okio.ai/
 
 theme:
