@@ -85,9 +85,9 @@ To read the logs:
     make web-logs
     ```
 
-To get a shell into the running containers:
+To get a shell into a running container:
 
-!!! example "Reading logs"
+!!! example "Getting shell access"
 
     ```bash
     # get a shell into nendo_server
