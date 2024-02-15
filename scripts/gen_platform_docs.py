@@ -21,19 +21,6 @@ shutil.rmtree(local_dir, ignore_errors=True)
 os.makedirs(local_dir, exist_ok=True)
 
 
-def replace_string_in_file(file_path, target_string, replacement_string):
-    # Read the contents of the file
-    with open(file_path, "r", encoding="utf-8") as file:
-        file_contents = file.read()
-
-    # Replace the target string with the replacement string
-    file_contents = file_contents.replace(target_string, replacement_string)
-
-    # Write the updated contents back to the file
-    with open(file_path, "w", encoding="utf-8") as file:
-        file.write(file_contents)
-
-
 def remove_block_of_lines(file_path, block):
     with open(file_path, "r") as file:
         lines = file.readlines()
@@ -66,37 +53,16 @@ Repo.clone_from("git@github.com:okio-ai/nendo_devops.git", temp_dir_platform)
 Repo.clone_from("git@github.com:okio-ai/nendo_server.git", temp_dir_server)
 Repo.clone_from("git@github.com:okio-ai/nendo_web.git", temp_dir_web)
 
-# # Copy the docs folder and specified files
-# shutil.copytree(
-#     os.path.join(temp_dir, "docs"),
-#     os.path.join(repo_path, "docs"),
-#     dirs_exist_ok=True,
-# )
-# for file in ["README.md", "mkdocs.yml", "contributing.md"]:
-#     if os.path.exists(os.path.join(temp_dir, file)):
-#         shutil.copy2(os.path.join(temp_dir, file), repo_path)
-
-# for root, dirs, files in os.walk(repo_path):
-#     for file in files:
-#         file_path = os.path.join(root, file)
-#         replace_string_in_file(
-#             file_path, '--8<-- "', '--8<-- "platformdocs/',
-#         )
-#         replace_string_in_file(file_path, "](docs/", "](")
-#         remove_block_of_lines(file_path, banner_image_code)
-
-# copy README files to platformdocs/
+# copy README files to platformdocs
 platform_file_path = os.path.join(repo_path, "platform.md")
-shutil.copy2(os.path.join(temp_dir_platform, "README.md"), platform_file_path)
-remove_block_of_lines(platform_file_path, banner_image_code)
 server_file_path = os.path.join(repo_path, "server.md")
-shutil.copy2(os.path.join(temp_dir_server, "README.md"), server_file_path)
-remove_block_of_lines(server_file_path, banner_image_code)
 web_file_path = os.path.join(repo_path, "web.md")
+shutil.copy2(os.path.join(temp_dir_platform, "README.md"), platform_file_path)
+shutil.copy2(os.path.join(temp_dir_server, "README.md"), server_file_path)
 shutil.copy2(os.path.join(temp_dir_web, "README.md"), web_file_path)
+remove_block_of_lines(platform_file_path, banner_image_code)
+remove_block_of_lines(server_file_path, banner_image_code)
 remove_block_of_lines(web_file_path, banner_image_code)
-
-# Clean up the cloned repository
 shutil.rmtree(temp_dir_platform)
 shutil.rmtree(temp_dir_server)
 shutil.rmtree(temp_dir_web)
