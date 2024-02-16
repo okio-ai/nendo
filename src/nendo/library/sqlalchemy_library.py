@@ -465,7 +465,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             )
         else:
             raise ValueError(
-                "Invalid direction value. Must be 'to', 'from', or 'both'."
+                "Invalid direction value. Must be 'to', 'from', or 'both'.",
             )
         if user_id is not None:
             query = query.filter(model.NendoTrackDB.user_id == user_id)
@@ -825,7 +825,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                     model.NendoPluginDataDB.user_id == user_id,
                 )
             plugin_data_db = plugin_data_db.order_by(
-                model.NendoPluginDataDB.updated_at.desc()
+                model.NendoPluginDataDB.updated_at.desc(),
             ).first()
             return plugin_data_db if plugin_data_db is not None else None
 
@@ -1855,7 +1855,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             )
         else:
             raise ValueError(
-                "Invalid direction value. Must be 'to', 'from', or 'both'."
+                "Invalid direction value. Must be 'to', 'from', or 'both'.",
             )
         return query
 
