@@ -566,9 +566,7 @@ class NendoEmbeddingPlugin(NendoPlugin):
         func: Callable[[NendoPlugin, str, Any], Tuple[str, np.ndarray]],
     ) -> Callable[
         [NendoPlugin, Any],
-        Union[
-            Tuple[str, np.ndarray], NendoEmbedding, List[NendoEmbedding]
-        ],
+        Union[Tuple[str, np.ndarray], NendoEmbedding, List[NendoEmbedding]],
     ]:
         """Decorator to register a function that embeds a given text string into a vector space.
 
@@ -610,10 +608,12 @@ class NendoEmbeddingPlugin(NendoPlugin):
                 )
                 try:
                     if self.config.replace_plugin_data is True:
-                        existing_embeddings = self.nendo_instance.library.get_embeddings(
-                            track_id = track_or_collection.id,
-                            plugin_name = self.plugin_name,
-                            plugin_version = self.plugin_version,
+                        existing_embeddings = (
+                            self.nendo_instance.library.get_embeddings(
+                                track_id=track_or_collection.id,
+                                plugin_name=self.plugin_name,
+                                plugin_version=self.plugin_version,
+                            )
                         )
                         if len(existing_embeddings) > 0:
                             embedding_update = existing_embeddings[0]
@@ -654,10 +654,12 @@ class NendoEmbeddingPlugin(NendoPlugin):
                 )
                 try:
                     if self.config.replace_plugin_data is True:
-                        existing_embeddings = self.nendo_instance.library.get_embeddings(
-                            track_id = track_or_collection.id,
-                            plugin_name = self.plugin_name,
-                            plugin_version = self.plugin_version,
+                        existing_embeddings = (
+                            self.nendo_instance.library.get_embeddings(
+                                track_id=track_or_collection.id,
+                                plugin_name=self.plugin_name,
+                                plugin_version=self.plugin_version,
+                            )
                         )
                         if len(existing_embeddings) > 0:
                             embedding_update = existing_embeddings[0]
@@ -723,10 +725,12 @@ class NendoEmbeddingPlugin(NendoPlugin):
                 )
                 try:
                     if self.config.replace_plugin_data is True:
-                        existing_embeddings = self.nendo_instance.library.get_embeddings(
-                            track_id = track_or_collection.id,
-                            plugin_name = self.plugin_name,
-                            plugin_version = self.plugin_version,
+                        existing_embeddings = (
+                            self.nendo_instance.library.get_embeddings(
+                                track_id=track_or_collection.id,
+                                plugin_name=self.plugin_name,
+                                plugin_version=self.plugin_version,
+                            )
                         )
                         if len(existing_embeddings) > 0:
                             embedding_update = existing_embeddings[0]
@@ -765,10 +769,12 @@ class NendoEmbeddingPlugin(NendoPlugin):
                 )
                 try:
                     if self.config.replace_plugin_data is True:
-                        existing_embeddings = self.nendo_instance.library.get_embeddings(
-                            track_id = track_or_collection.id,
-                            plugin_name = self.plugin_name,
-                            plugin_version = self.plugin_version,
+                        existing_embeddings = (
+                            self.nendo_instance.library.get_embeddings(
+                                track_id=track_or_collection.id,
+                                plugin_name=self.plugin_name,
+                                plugin_version=self.plugin_version,
+                            )
                         )
                         if len(existing_embeddings) > 0:
                             embedding_update = existing_embeddings[0]
@@ -808,10 +814,12 @@ class NendoEmbeddingPlugin(NendoPlugin):
                 )
                 try:
                     if self.config.replace_plugin_data is True:
-                        existing_embeddings = self.nendo_instance.library.get_embeddings(
-                            track_id = track_or_collection.id,
-                            plugin_name = self.plugin_name,
-                            plugin_version = self.plugin_version,
+                        existing_embeddings = (
+                            self.nendo_instance.library.get_embeddings(
+                                track_id=track_or_collection.id,
+                                plugin_name=self.plugin_name,
+                                plugin_version=self.plugin_version,
+                            )
                         )
                         if len(existing_embeddings) > 0:
                             embedding_update = existing_embeddings[0]
@@ -871,10 +879,12 @@ class NendoEmbeddingPlugin(NendoPlugin):
                 )
                 try:
                     if self.config.replace_plugin_data is True:
-                        existing_embeddings = self.nendo_instance.library.get_embeddings(
-                            track_id = track_or_collection.id,
-                            plugin_name = self.plugin_name,
-                            plugin_version = self.plugin_version,
+                        existing_embeddings = (
+                            self.nendo_instance.library.get_embeddings(
+                                track_id=track_or_collection.id,
+                                plugin_name=self.plugin_name,
+                                plugin_version=self.plugin_version,
+                            )
                         )
                         if len(existing_embeddings) > 0:
                             embedding_update = existing_embeddings[0]
@@ -912,17 +922,21 @@ class NendoEmbeddingPlugin(NendoPlugin):
                     )
                     try:
                         if self.config.replace_plugin_data is True:
-                            existing_embeddings = self.nendo_instance.library.get_embeddings(
-                                track_id = track_or_collection.id,
-                                plugin_name = self.plugin_name,
-                                plugin_version = self.plugin_version,
+                            existing_embeddings = (
+                                self.nendo_instance.library.get_embeddings(
+                                    track_id=track_or_collection.id,
+                                    plugin_name=self.plugin_name,
+                                    plugin_version=self.plugin_version,
+                                )
                             )
                             if len(existing_embeddings) > 0:
                                 embedding_update = existing_embeddings[0]
                                 embedding_update.text = text
                                 embedding_update.embedding = embedding_vector
-                                embedding = self.nendo_instance.library.update_embedding(
-                                    embedding_update,
+                                embedding = (
+                                    self.nendo_instance.library.update_embedding(
+                                        embedding_update,
+                                    )
                                 )
                             else:
                                 embedding = self.nendo_instance.library.add_embedding(
@@ -963,9 +977,9 @@ class NendoEmbeddingPlugin(NendoPlugin):
             try:
                 if self.config.replace_plugin_data is True:
                     existing_embeddings = self.nendo_instance.library.get_embeddings(
-                        track_id = track_or_collection.id,
-                        plugin_name = self.plugin_name,
-                        plugin_version = self.plugin_version,
+                        track_id=track_or_collection.id,
+                        plugin_name=self.plugin_name,
+                        plugin_version=self.plugin_version,
                     )
                     if len(existing_embeddings) > 0:
                         embedding_update = existing_embeddings[0]

@@ -464,7 +464,9 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                 )
             )
         else:
-            raise ValueError("Invalid direction value. Must be 'to', 'from', or 'both'.")
+            raise ValueError(
+                "Invalid direction value. Must be 'to', 'from', or 'both'."
+            )
         if user_id is not None:
             query = query.filter(model.NendoTrackDB.user_id == user_id)
         return query
@@ -727,14 +729,11 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             List[model.NendoPluginDataDB]: List of nendo plugin data entries.
         """
         with session as session_local:
-            plugin_data_db = (
-                session_local.query(model.NendoPluginDataDB)
-                .filter(
-                    and_(
-                        model.NendoPluginDataDB.track_id == track_id,
-                        model.NendoPluginDataDB.user_id == user_id,
-                    ),
-                )
+            plugin_data_db = session_local.query(model.NendoPluginDataDB).filter(
+                and_(
+                    model.NendoPluginDataDB.track_id == track_id,
+                    model.NendoPluginDataDB.user_id == user_id,
+                ),
             )
             if plugin_name is not None:
                 plugin_data_db = plugin_data_db.filter(
@@ -812,32 +811,23 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         user_id = self._ensure_user_uuid(user_id)
         s = session or self.session_scope()
         with s as session_local:
-            plugin_data_db = (
-                session_local.query(model.NendoPluginDataDB)
-                .filter(
-                    and_(
-                        model.NendoPluginDataDB.track_id == track_id,
-                        model.NendoPluginDataDB.plugin_name == plugin_name,
-                        model.NendoPluginDataDB.plugin_version == plugin_version,
-                        model.NendoPluginDataDB.key == key,
-                    ),
-                )
+            plugin_data_db = session_local.query(model.NendoPluginDataDB).filter(
+                and_(
+                    model.NendoPluginDataDB.track_id == track_id,
+                    model.NendoPluginDataDB.plugin_name == plugin_name,
+                    model.NendoPluginDataDB.plugin_version == plugin_version,
+                    model.NendoPluginDataDB.key == key,
+                ),
             )
 
             if user_id is not None:
                 plugin_data_db = plugin_data_db.filter(
                     model.NendoPluginDataDB.user_id == user_id,
                 )
-            plugin_data_db = (
-                plugin_data_db
-                .order_by(model.NendoPluginDataDB.updated_at.desc())
-                .first()
-            )
-            return (
-                plugin_data_db
-                if plugin_data_db is not None
-                else None
-            )
+            plugin_data_db = plugin_data_db.order_by(
+                model.NendoPluginDataDB.updated_at.desc()
+            ).first()
+            return plugin_data_db if plugin_data_db is not None else None
 
     def _insert_plugin_data_db(
         self,
@@ -1243,8 +1233,9 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         # create plugin data
         user_id = self._ensure_user_uuid(user_id)
         replace = (
-            replace if replace is not None else
-            self.nendo_instance.config.replace_plugin_data
+            replace
+            if replace is not None
+            else self.nendo_instance.config.replace_plugin_data
         )
         value_converted = self._convert_plugin_data(value=value, user_id=user_id)
         if plugin_version is None:
@@ -1362,26 +1353,16 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                     query_local = query_local.order_by(func.random())
                 elif order_by == "collection":
                     if order == "desc":
-                        query_local = (
-                            query_local
-                            .order_by(
-                                desc(
-                                    model
-                                    .TrackCollectionRelationshipDB
-                                    .relationship_position,
-                                ),
-                            )
+                        query_local = query_local.order_by(
+                            desc(
+                                model.TrackCollectionRelationshipDB.relationship_position,
+                            ),
                         )
                     else:
-                        query_local = (
-                            query_local
-                            .order_by(
-                                asc(
-                                    model
-                                    .TrackCollectionRelationshipDB
-                                    .relationship_position,
-                                ),
-                            )
+                        query_local = query_local.order_by(
+                            asc(
+                                model.TrackCollectionRelationshipDB.relationship_position,
+                            ),
                         )
                 elif order == "desc":
                     query_local = query_local.order_by(
@@ -1843,49 +1824,39 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             query = query.filter(model.NendoCollectionDB.user_id == user_id)
         mccr = model.CollectionCollectionRelationshipDB
         if direction == "to":
-            query = (
-                query
-                .join(
-                    mccr,
-                    model.NendoCollectionDB.id == mccr.source_id,
-                )
-                .filter(
-                    mccr.target_id == collection_id,
-                )
+            query = query.join(
+                mccr,
+                model.NendoCollectionDB.id == mccr.source_id,
+            ).filter(
+                mccr.target_id == collection_id,
             )
         elif direction == "from":
-            query = (
-                query
-                .join(
-                    mccr,
-                    model.NendoCollectionDB.id == mccr.target_id,
-                )
-                .filter(
-                    mccr.source_id == collection_id,
-                )
+            query = query.join(
+                mccr,
+                model.NendoCollectionDB.id == mccr.target_id,
+            ).filter(
+                mccr.source_id == collection_id,
             )
         elif direction == "both":
-            query = (
-                query
-                .join(
-                    mccr,
+            query = query.join(
+                mccr,
+                or_(
+                    model.NendoCollectionDB.id == mccr.source_id,
+                    model.NendoCollectionDB.id == mccr.target_id,
+                ),
+            ).filter(
+                and_(
+                    model.NendoCollectionDB.id != collection_id,
                     or_(
-                        model.NendoCollectionDB.id == mccr.source_id,
-                        model.NendoCollectionDB.id == mccr.target_id,
+                        mccr.source_id == collection_id,
+                        mccr.target_id == collection_id,
                     ),
-                )
-                .filter(
-                    and_(
-                        model.NendoCollectionDB.id != collection_id,
-                        or_(
-                            mccr.source_id == collection_id,
-                            mccr.target_id == collection_id,
-                        ),
-                    ),
-                )
+                ),
             )
         else:
-            raise ValueError("Invalid direction value. Must be 'to', 'from', or 'both'.")
+            raise ValueError(
+                "Invalid direction value. Must be 'to', 'from', or 'both'."
+            )
         return query
 
     def _remove_track_from_collection_db(
@@ -1957,16 +1928,10 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             track_ids = []
         with self.session_scope() as session:
             # Fetch the track objects
-            track_objs = (
-                session.query(model.NendoTrackDB)
-                .filter(
-                    model.NendoTrackDB.id.in_(
-                        [
-                            uuid.UUID(t) if isinstance(t, str) else t
-                            for t in track_ids
-                        ],
-                    ),
-                )
+            track_objs = session.query(model.NendoTrackDB).filter(
+                model.NendoTrackDB.id.in_(
+                    [uuid.UUID(t) if isinstance(t, str) else t for t in track_ids],
+                ),
             )
             if user_id is not None:
                 track_objs = track_objs.filter(model.NendoTrackDB.user_id == user_id)
@@ -2176,12 +2141,11 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                 )
             existing_track_ids = (
                 session.query(model.NendoTrackDB)
-                .filter(model.NendoTrackDB.id.in_(track_ids)).all()
+                .filter(model.NendoTrackDB.id.in_(track_ids))
+                .all()
             )
             existing_track_ids = [t.id for t in existing_track_ids]
-            missing_ids = [
-                tid for tid in track_ids if tid not in existing_track_ids
-            ]
+            missing_ids = [tid for tid in track_ids if tid not in existing_track_ids]
             if len(missing_ids) > 0:
                 raise schema.NendoCollectionNotFoundError(
                     "Tracks do not exist: ",
@@ -2197,9 +2161,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                 )
                 .first()
             )
-            position = (
-                last_postition.relationship_position + 1 if last_postition else 0
-            )
+            position = last_postition.relationship_position + 1 if last_postition else 0
 
             # create relationships from all tracks to the collection
             for track_id in track_ids:
@@ -2233,8 +2195,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         """
         with self.session_scope() as session:
             tracks_db = (
-                session.query(model.NendoTrackDB)
-                .join(
+                session.query(model.NendoTrackDB).join(
                     model.TrackCollectionRelationshipDB,
                     model.TrackCollectionRelationshipDB.source_id
                     == model.NendoTrackDB.id,

@@ -433,18 +433,18 @@ class NendoLibraryVectorExtension(BaseModel):
             embedding_name
             if embedding_name is not None
             else (
-                self.embedding_plugin.plugin_name if
-                self.embedding_plugin is not None else
-                None
+                self.embedding_plugin.plugin_name
+                if self.embedding_plugin is not None
+                else None
             )
         )
         plugin_version = (
             embedding_version
             if embedding_version is not None
             else (
-                self.embedding_plugin.plugin_version if
-                self.embedding_plugin is not None else
-                None
+                self.embedding_plugin.plugin_version
+                if self.embedding_plugin is not None
+                else None
             )
         )
         track_embeddings = self.get_embeddings(
