@@ -1,5 +1,5 @@
-site_name: "Nendo Core"
-site_description: "The Nendo Core AI Audio framework."
+site_name: "Nendo"
+site_description: "The Nendo AI Audio Framework and Platform."
 site_url: "https://nendo.ai"
 repo_url: "https://github.com/okio-ai/nendo"
 repo_name: "okio-ai/nendo"
@@ -34,8 +34,10 @@ nav:
   - Configuration: platform/config.md
   - Development: platform/development.md
   - Components:
-    - API Server: platform/server.md
-    - Web frontend: platform/web.md
+    - API Server:
+      - Overview: platform/server.md
+      - API docs: platform/server_api.md
+    - Web Frontend: platform/web.md
 # defer to gen-files + literate-nav
 - API reference:
   - nendo: reference/
@@ -126,6 +128,7 @@ markdown_extensions:
 plugins:
 - search
 - monorepo
+- swagger-ui-tag
 - coverage:
     page_name: coverage
     html_report_dir: htmlcov

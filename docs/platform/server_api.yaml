@@ -1,0 +1,6090 @@
+openapi: 3.1.0
+info:
+  title: Nendo server
+  version: 0.1.0
+paths:
+  /api/verify/{token}:
+    get:
+      tags:
+        - verify
+      summary: Verify Email
+      description: Verify the user's email address.
+      operationId: verify_email_api_verify__token__get
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Token
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/assets/audio:
+    post:
+      tags:
+        - assets
+      summary: Audio:Post
+      operationId: audio_post_api_assets_audio_post
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: collection_id
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            default: ''
+            title: Collection Id
+        - name: run_action
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            default: ''
+            title: Run Action
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Body_audio_post_api_assets_audio_post'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/assets/audio/{track_id}:
+    get:
+      tags:
+        - assets
+      summary: Audio:Get
+      operationId: audio_get_api_assets_audio__track_id__get
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: track_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Track Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/assets/audio/download/track/{track_id}:
+    get:
+      tags:
+        - assets
+      summary: Track:Download
+      operationId: track_download_api_assets_audio_download_track__track_id__get
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: track_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Track Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/assets/audio/download/collection/{collection_id}:
+    get:
+      tags:
+        - assets
+      summary: Collection:Download
+      operationId: collection_download_api_assets_audio_download_collection__collection_id__get
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: collection_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Collection Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/assets/audio/download/tracks:
+    post:
+      tags:
+        - assets
+      summary: Tracks:Download
+      operationId: tracks_download_api_assets_audio_download_tracks_post
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items: {}
+              title: Track Ids
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/assets/image/{image_file_name}:
+    get:
+      tags:
+        - assets
+      summary: Image:Get
+      operationId: image_get_api_assets_image__image_file_name__get
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: image_file_name
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Image File Name
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/tracks:
+    post:
+      tags:
+        - tracks
+      summary: Track:Create
+      operationId: track_create_api_tracks_post
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TrackObj'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      tags:
+        - tracks
+      summary: Tracks:Get
+      operationId: tracks_get_api_tracks_get
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: cursor
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+            title: Cursor
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+            title: Limit
+        - name: search_filter
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Search Filter
+        - name: collection_id
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Collection Id
+        - name: track_type
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Track Type
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    options:
+      tags:
+        - tracks
+      summary: Tracks:Options
+      operationId: tracks_options_api_tracks_options
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/tracks/{track_id}:
+    patch:
+      tags:
+        - tracks
+      summary: Track:Update
+      operationId: track_update_api_tracks__track_id__patch
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: track_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Track Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TrackObj'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      tags:
+        - tracks
+      summary: Track:Get
+      operationId: track_get_api_tracks__track_id__get
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: track_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Track Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+        - tracks
+      summary: Track:Delete
+      operationId: track_delete_api_tracks__track_id__delete
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: track_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Track Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '204':
+          description: Successful Response
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/tracks/{track_id}/related:
+    get:
+      tags:
+        - tracks
+      summary: Get Related Tracks
+      operationId: get_related_tracks_api_tracks__track_id__related_get
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: track_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Track Id
+        - name: cursor
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+            title: Cursor
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+            title: Limit
+        - name: search_filter
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Search Filter
+        - name: track_type
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Track Type
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/tracks/{track_id}/similar:
+    get:
+      tags:
+        - tracks
+      summary: Get Similar Tracks
+      operationId: get_similar_tracks_api_tracks__track_id__similar_get
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: track_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Track Id
+        - name: cursor
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+            title: Cursor
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+            title: Limit
+        - name: search_filter
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Search Filter
+        - name: collection_id
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Collection Id
+        - name: track_type
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Track Type
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/collections:
+    get:
+      tags:
+        - collections
+      summary: Collections:Get
+      operationId: collections_get_api_collections_get
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: cursor
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+            title: Cursor
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+            title: Limit
+        - name: name
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Name
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    post:
+      tags:
+        - collections
+      summary: Collection:Post
+      operationId: collection_post_api_collections_post
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCollectionParam'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/collections/{collection_id}:
+    get:
+      tags:
+        - collections
+      summary: Collection:Get
+      operationId: collection_get_api_collections__collection_id__get
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: collection_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Collection Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    put:
+      tags:
+        - collections
+      summary: Collection:Put
+      operationId: collection_put_api_collections__collection_id__put
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: collection_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Collection Id
+        - name: track_id
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Track Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+        - collections
+      summary: Collection:Delete
+      operationId: collection_delete_api_collections__collection_id__delete
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: collection_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Collection Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/collections/{collection_id}/tracks:
+    get:
+      tags:
+        - collections
+      summary: Collection:Get
+      operationId: collection_get_api_collections__collection_id__tracks_get
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: collection_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Collection Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/collections/update/{collection_id}:
+    patch:
+      tags:
+        - collections
+      summary: Collection:Update
+      operationId: collection_update_api_collections_update__collection_id__patch
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: collection_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Collection Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCollectionParam'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/collections/{collection_id}/remove/{track_id}:
+    patch:
+      tags:
+        - collections
+      summary: Collection:Remove Track From Collection
+      operationId: collection_remove_track_from_collection_api_collections__collection_id__remove__track_id__patch
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: collection_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Collection Id
+        - name: track_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Track Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/collections/{collection_id}/save:
+    put:
+      tags:
+        - collections
+      summary: Collection:Make Temporary Collection Permanent
+      operationId: collection_make_temporary_collection_permanent_api_collections__collection_id__save_put
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: collection_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Collection Id
+        - name: name
+          in: query
+          required: true
+          schema:
+            type: string
+            title: Name
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/collections/related:
+    post:
+      tags:
+        - collections
+      summary: Related Collection:Post
+      operationId: related_collection_post_api_collections_related_post
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddRelatedCollectionModel'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/collections/related/{collection_id}:
+    get:
+      tags:
+        - collections
+      summary: Related Collection:Get
+      operationId: related_collection_get_api_collections_related__collection_id__get
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: collection_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Collection Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/actions:
+    get:
+      tags:
+        - actions
+      summary: All User Actions:Status
+      description: Retrieve all actions and their statuses for a given user.
+      operationId: all_user_actions_status_api_actions_get
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/actions/{action_id}:
+    get:
+      tags:
+        - actions
+      summary: Action:Status
+      description: Retrieve the status of an action.
+      operationId: action_status_api_actions__action_id__get
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: action_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Action Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+        - actions
+      summary: Action:Abort
+      description: Cancel an action.
+      operationId: action_abort_api_actions__action_id__delete
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: action_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Action Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/:
+    get:
+      tags:
+        - core
+      summary: Read Example
+      operationId: read_example_api__get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /api/healthz:
+    get:
+      tags:
+        - core
+      summary: Liveness Check
+      operationId: liveness_check_api_healthz_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /api/readyz:
+    get:
+      tags:
+        - core
+      summary: Readiness Check
+      operationId: readiness_check_api_readyz_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /api/mashuper/scenes:
+    get:
+      tags:
+        - mashuper
+      summary: Get Scenes
+      operationId: get_scenes_api_mashuper_scenes_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+      security:
+        - OAuth2PasswordBearer: []
+    post:
+      tags:
+        - mashuper
+      summary: Create Scene
+      description: Create a new scene.
+      operationId: create_scene_api_mashuper_scenes_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              title: Scene
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - OAuth2PasswordBearer: []
+  /api/mashuper/scenes/{scene_id}:
+    patch:
+      tags:
+        - mashuper
+      summary: Update Scene
+      description: Update an existing scene.
+      operationId: update_scene_api_mashuper_scenes__scene_id__patch
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: scene_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Scene Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              title: Scene
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      tags:
+        - mashuper
+      summary: Get Scene
+      description: Get a scene from the DB.
+      operationId: get_scene_api_mashuper_scenes__scene_id__get
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: scene_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Scene Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+        - mashuper
+      summary: Delete Scene
+      description: Delete a scene.
+      operationId: delete_scene_api_mashuper_scenes__scene_id__delete
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: scene_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Scene Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/mashuper/randomfile:
+    get:
+      tags:
+        - mashuper
+      summary: Get Random File
+      operationId: get_random_file_api_mashuper_randomfile_get
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: filters
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Filters
+        - name: key
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Key
+        - name: songbpm
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Songbpm
+        - name: duration_min
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: number
+              - type: 'null'
+            title: Duration Min
+        - name: duration_max
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: number
+              - type: 'null'
+            title: Duration Max
+        - name: collection_id
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Collection Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/mashuper/audio/{track_id}:
+    get:
+      tags:
+        - mashuper
+      summary: Stream Audio
+      operationId: stream_audio_api_mashuper_audio__track_id__get
+      parameters:
+        - name: track_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Track Id
+        - name: range
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Range
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/mashuper/quantize/{track_id}:
+    get:
+      tags:
+        - mashuper
+      summary: Get Quantized
+      description: Route used to quantize a target track.
+      operationId: get_quantized_api_mashuper_quantize__track_id__get
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: track_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Track Id
+        - name: songbpm
+          in: query
+          required: true
+          schema:
+            type: integer
+            title: Songbpm
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/polymath:
+    post:
+      tags:
+        - polymath
+      summary: Run Polymath
+      description: Process a track with polymath.
+      operationId: run_polymath_api_polymath_post
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: target_id
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Target Id
+        - name: replace
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+            title: Replace
+        - name: add_to_collection_id
+          in: query
+          required: false
+          schema:
+            type: string
+            default: ''
+            title: Add To Collection Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              title: Params
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/musicanalysis:
+    post:
+      tags:
+        - musicanalysis
+      summary: Run Musicanalysis
+      description: Process a track with musicanalysis.
+      operationId: run_musicanalysis_api_musicanalysis_post
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: target_id
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Target Id
+        - name: replace
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+            title: Replace
+        - name: add_to_collection_id
+          in: query
+          required: false
+          schema:
+            type: string
+            default: ''
+            title: Add To Collection Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              title: Params
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/voiceanalysis:
+    post:
+      tags:
+        - voiceanalysis
+      summary: Run Voiceanalysis
+      description: Process a track with voiceanalysis.
+      operationId: run_voiceanalysis_api_voiceanalysis_post
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: target_id
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Target Id
+        - name: replace
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+            title: Replace
+        - name: add_to_collection_id
+          in: query
+          required: false
+          schema:
+            type: string
+            title: Add To Collection Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              title: Params
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/getpage/{target_id}:
+    post:
+      tags:
+        - getpage
+      summary: Run Getpage
+      description: Crawl a webpage, summarize it and create an embedding of it.
+      operationId: run_getpage_api_getpage__target_id__post
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: target_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Target Id
+        - name: replace
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: true
+            title: Replace
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              title: Params
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/musicgen:
+    post:
+      tags:
+        - musicgen
+      summary: Run Musicgeneration
+      description: Generate a track with musicgeneration.
+      operationId: run_musicgeneration_api_musicgen_post
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: target_id
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Target Id
+        - name: replace
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+            title: Replace
+        - name: add_to_collection_id
+          in: query
+          required: false
+          schema:
+            type: string
+            default: ''
+            title: Add To Collection Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              title: Params
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/voicegen:
+    post:
+      tags:
+        - voicegen
+      summary: Run Voicegen
+      description: Generate a voice with the voice generation plugin.
+      operationId: run_voicegen_api_voicegen_post
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: target_id
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Target Id
+        - name: replace
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+            title: Replace
+        - name: add_to_collection_id
+          in: query
+          required: false
+          schema:
+            type: string
+            default: ''
+            title: Add To Collection Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              title: Params
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/verify/{token}:
+    get:
+      tags:
+        - verify
+      summary: Verify Email
+      description: Verify the user's email address.
+      operationId: verify_email_api_v1_verify__token__get
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Token
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/assets/audio:
+    post:
+      tags:
+        - assets
+      summary: Audio:Post
+      operationId: audio_post_api_v1_assets_audio_post
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: collection_id
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            default: ''
+            title: Collection Id
+        - name: run_action
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            default: ''
+            title: Run Action
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Body_audio_post_api_v1_assets_audio_post'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/assets/audio/{track_id}:
+    get:
+      tags:
+        - assets
+      summary: Audio:Get
+      operationId: audio_get_api_v1_assets_audio__track_id__get
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: track_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Track Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/assets/audio/download/track/{track_id}:
+    get:
+      tags:
+        - assets
+      summary: Track:Download
+      operationId: track_download_api_v1_assets_audio_download_track__track_id__get
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: track_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Track Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/assets/audio/download/collection/{collection_id}:
+    get:
+      tags:
+        - assets
+      summary: Collection:Download
+      operationId: collection_download_api_v1_assets_audio_download_collection__collection_id__get
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: collection_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Collection Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/assets/audio/download/tracks:
+    post:
+      tags:
+        - assets
+      summary: Tracks:Download
+      operationId: tracks_download_api_v1_assets_audio_download_tracks_post
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items: {}
+              title: Track Ids
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/assets/image/{image_file_name}:
+    get:
+      tags:
+        - assets
+      summary: Image:Get
+      operationId: image_get_api_v1_assets_image__image_file_name__get
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: image_file_name
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Image File Name
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/tracks:
+    post:
+      tags:
+        - tracks
+      summary: Track:Create
+      operationId: track_create_api_v1_tracks_post
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TrackObj'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      tags:
+        - tracks
+      summary: Tracks:Get
+      operationId: tracks_get_api_v1_tracks_get
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: cursor
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+            title: Cursor
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+            title: Limit
+        - name: search_filter
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Search Filter
+        - name: collection_id
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Collection Id
+        - name: track_type
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Track Type
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    options:
+      tags:
+        - tracks
+      summary: Tracks:Options
+      operationId: tracks_options_api_v1_tracks_options
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/tracks/{track_id}:
+    patch:
+      tags:
+        - tracks
+      summary: Track:Update
+      operationId: track_update_api_v1_tracks__track_id__patch
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: track_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Track Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TrackObj'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      tags:
+        - tracks
+      summary: Track:Get
+      operationId: track_get_api_v1_tracks__track_id__get
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: track_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Track Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+        - tracks
+      summary: Track:Delete
+      operationId: track_delete_api_v1_tracks__track_id__delete
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: track_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Track Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '204':
+          description: Successful Response
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/tracks/{track_id}/related:
+    get:
+      tags:
+        - tracks
+      summary: Get Related Tracks
+      operationId: get_related_tracks_api_v1_tracks__track_id__related_get
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: track_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Track Id
+        - name: cursor
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+            title: Cursor
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+            title: Limit
+        - name: search_filter
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Search Filter
+        - name: track_type
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Track Type
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/tracks/{track_id}/similar:
+    get:
+      tags:
+        - tracks
+      summary: Get Similar Tracks
+      operationId: get_similar_tracks_api_v1_tracks__track_id__similar_get
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: track_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Track Id
+        - name: cursor
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+            title: Cursor
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+            title: Limit
+        - name: search_filter
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Search Filter
+        - name: collection_id
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Collection Id
+        - name: track_type
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Track Type
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/collections:
+    get:
+      tags:
+        - collections
+      summary: Collections:Get
+      operationId: collections_get_api_v1_collections_get
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: cursor
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+            title: Cursor
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+            title: Limit
+        - name: name
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Name
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    post:
+      tags:
+        - collections
+      summary: Collection:Post
+      operationId: collection_post_api_v1_collections_post
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCollectionParam'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/collections/{collection_id}:
+    get:
+      tags:
+        - collections
+      summary: Collection:Get
+      operationId: collection_get_api_v1_collections__collection_id__get
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: collection_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Collection Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    put:
+      tags:
+        - collections
+      summary: Collection:Put
+      operationId: collection_put_api_v1_collections__collection_id__put
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: collection_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Collection Id
+        - name: track_id
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Track Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+        - collections
+      summary: Collection:Delete
+      operationId: collection_delete_api_v1_collections__collection_id__delete
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: collection_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Collection Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/collections/{collection_id}/tracks:
+    get:
+      tags:
+        - collections
+      summary: Collection:Get
+      operationId: collection_get_api_v1_collections__collection_id__tracks_get
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: collection_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Collection Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/collections/update/{collection_id}:
+    patch:
+      tags:
+        - collections
+      summary: Collection:Update
+      operationId: collection_update_api_v1_collections_update__collection_id__patch
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: collection_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Collection Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCollectionParam'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/collections/{collection_id}/remove/{track_id}:
+    patch:
+      tags:
+        - collections
+      summary: Collection:Remove Track From Collection
+      operationId: collection_remove_track_from_collection_api_v1_collections__collection_id__remove__track_id__patch
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: collection_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Collection Id
+        - name: track_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Track Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/collections/{collection_id}/save:
+    put:
+      tags:
+        - collections
+      summary: Collection:Make Temporary Collection Permanent
+      operationId: collection_make_temporary_collection_permanent_api_v1_collections__collection_id__save_put
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: collection_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Collection Id
+        - name: name
+          in: query
+          required: true
+          schema:
+            type: string
+            title: Name
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/collections/related:
+    post:
+      tags:
+        - collections
+      summary: Related Collection:Post
+      operationId: related_collection_post_api_v1_collections_related_post
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddRelatedCollectionModel'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/collections/related/{collection_id}:
+    get:
+      tags:
+        - collections
+      summary: Related Collection:Get
+      operationId: related_collection_get_api_v1_collections_related__collection_id__get
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: collection_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Collection Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/actions:
+    get:
+      tags:
+        - actions
+      summary: All User Actions:Status
+      description: Retrieve all actions and their statuses for a given user.
+      operationId: all_user_actions_status_api_v1_actions_get
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/actions/{action_id}:
+    get:
+      tags:
+        - actions
+      summary: Action:Status
+      description: Retrieve the status of an action.
+      operationId: action_status_api_v1_actions__action_id__get
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: action_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Action Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+        - actions
+      summary: Action:Abort
+      description: Cancel an action.
+      operationId: action_abort_api_v1_actions__action_id__delete
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: action_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Action Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/:
+    get:
+      tags:
+        - core
+      summary: Read Example
+      operationId: read_example_api_v1__get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /api/v1/healthz:
+    get:
+      tags:
+        - core
+      summary: Liveness Check
+      operationId: liveness_check_api_v1_healthz_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /api/v1/readyz:
+    get:
+      tags:
+        - core
+      summary: Readiness Check
+      operationId: readiness_check_api_v1_readyz_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /api/v1/mashuper/scenes:
+    get:
+      tags:
+        - mashuper
+      summary: Get Scenes
+      operationId: get_scenes_api_v1_mashuper_scenes_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+      security:
+        - OAuth2PasswordBearer: []
+    post:
+      tags:
+        - mashuper
+      summary: Create Scene
+      description: Create a new scene.
+      operationId: create_scene_api_v1_mashuper_scenes_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              title: Scene
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - OAuth2PasswordBearer: []
+  /api/v1/mashuper/scenes/{scene_id}:
+    patch:
+      tags:
+        - mashuper
+      summary: Update Scene
+      description: Update an existing scene.
+      operationId: update_scene_api_v1_mashuper_scenes__scene_id__patch
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: scene_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Scene Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              title: Scene
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      tags:
+        - mashuper
+      summary: Get Scene
+      description: Get a scene from the DB.
+      operationId: get_scene_api_v1_mashuper_scenes__scene_id__get
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: scene_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Scene Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+        - mashuper
+      summary: Delete Scene
+      description: Delete a scene.
+      operationId: delete_scene_api_v1_mashuper_scenes__scene_id__delete
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: scene_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Scene Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/mashuper/randomfile:
+    get:
+      tags:
+        - mashuper
+      summary: Get Random File
+      operationId: get_random_file_api_v1_mashuper_randomfile_get
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: filters
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Filters
+        - name: key
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Key
+        - name: songbpm
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Songbpm
+        - name: duration_min
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: number
+              - type: 'null'
+            title: Duration Min
+        - name: duration_max
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: number
+              - type: 'null'
+            title: Duration Max
+        - name: collection_id
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Collection Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/mashuper/audio/{track_id}:
+    get:
+      tags:
+        - mashuper
+      summary: Stream Audio
+      operationId: stream_audio_api_v1_mashuper_audio__track_id__get
+      parameters:
+        - name: track_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Track Id
+        - name: range
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Range
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/mashuper/quantize/{track_id}:
+    get:
+      tags:
+        - mashuper
+      summary: Get Quantized
+      description: Route used to quantize a target track.
+      operationId: get_quantized_api_v1_mashuper_quantize__track_id__get
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: track_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Track Id
+        - name: songbpm
+          in: query
+          required: true
+          schema:
+            type: integer
+            title: Songbpm
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/polymath:
+    post:
+      tags:
+        - polymath
+      summary: Run Polymath
+      description: Process a track with polymath.
+      operationId: run_polymath_api_v1_polymath_post
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: target_id
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Target Id
+        - name: replace
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+            title: Replace
+        - name: add_to_collection_id
+          in: query
+          required: false
+          schema:
+            type: string
+            default: ''
+            title: Add To Collection Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              title: Params
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/musicanalysis:
+    post:
+      tags:
+        - musicanalysis
+      summary: Run Musicanalysis
+      description: Process a track with musicanalysis.
+      operationId: run_musicanalysis_api_v1_musicanalysis_post
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: target_id
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Target Id
+        - name: replace
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+            title: Replace
+        - name: add_to_collection_id
+          in: query
+          required: false
+          schema:
+            type: string
+            default: ''
+            title: Add To Collection Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              title: Params
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/voiceanalysis:
+    post:
+      tags:
+        - voiceanalysis
+      summary: Run Voiceanalysis
+      description: Process a track with voiceanalysis.
+      operationId: run_voiceanalysis_api_v1_voiceanalysis_post
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: target_id
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Target Id
+        - name: replace
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+            title: Replace
+        - name: add_to_collection_id
+          in: query
+          required: false
+          schema:
+            type: string
+            title: Add To Collection Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              title: Params
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/getpage/{target_id}:
+    post:
+      tags:
+        - getpage
+      summary: Run Getpage
+      description: Crawl a webpage, summarize it and create an embedding of it.
+      operationId: run_getpage_api_v1_getpage__target_id__post
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: target_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Target Id
+        - name: replace
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: true
+            title: Replace
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              title: Params
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/musicgen:
+    post:
+      tags:
+        - musicgen
+      summary: Run Musicgeneration
+      description: Generate a track with musicgeneration.
+      operationId: run_musicgeneration_api_v1_musicgen_post
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: target_id
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Target Id
+        - name: replace
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+            title: Replace
+        - name: add_to_collection_id
+          in: query
+          required: false
+          schema:
+            type: string
+            default: ''
+            title: Add To Collection Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              title: Params
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/voicegen:
+    post:
+      tags:
+        - voicegen
+      summary: Run Voicegen
+      description: Generate a voice with the voice generation plugin.
+      operationId: run_voicegen_api_v1_voicegen_post
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: target_id
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Target Id
+        - name: replace
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+            title: Replace
+        - name: add_to_collection_id
+          in: query
+          required: false
+          schema:
+            type: string
+            default: ''
+            title: Add To Collection Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              title: Params
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/latest/verify/{token}:
+    get:
+      tags:
+        - verify
+      summary: Verify Email
+      description: Verify the user's email address.
+      operationId: verify_email_api_latest_verify__token__get
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Token
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/latest/assets/audio:
+    post:
+      tags:
+        - assets
+      summary: Audio:Post
+      operationId: audio_post_api_latest_assets_audio_post
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: collection_id
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            default: ''
+            title: Collection Id
+        - name: run_action
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            default: ''
+            title: Run Action
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Body_audio_post_api_latest_assets_audio_post'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/latest/assets/audio/{track_id}:
+    get:
+      tags:
+        - assets
+      summary: Audio:Get
+      operationId: audio_get_api_latest_assets_audio__track_id__get
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: track_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Track Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/latest/assets/audio/download/track/{track_id}:
+    get:
+      tags:
+        - assets
+      summary: Track:Download
+      operationId: track_download_api_latest_assets_audio_download_track__track_id__get
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: track_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Track Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/latest/assets/audio/download/collection/{collection_id}:
+    get:
+      tags:
+        - assets
+      summary: Collection:Download
+      operationId: collection_download_api_latest_assets_audio_download_collection__collection_id__get
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: collection_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Collection Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/latest/assets/audio/download/tracks:
+    post:
+      tags:
+        - assets
+      summary: Tracks:Download
+      operationId: tracks_download_api_latest_assets_audio_download_tracks_post
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items: {}
+              title: Track Ids
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/latest/assets/image/{image_file_name}:
+    get:
+      tags:
+        - assets
+      summary: Image:Get
+      operationId: image_get_api_latest_assets_image__image_file_name__get
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: image_file_name
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Image File Name
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/latest/tracks:
+    post:
+      tags:
+        - tracks
+      summary: Track:Create
+      operationId: track_create_api_latest_tracks_post
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TrackObj'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      tags:
+        - tracks
+      summary: Tracks:Get
+      operationId: tracks_get_api_latest_tracks_get
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: cursor
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+            title: Cursor
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+            title: Limit
+        - name: search_filter
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Search Filter
+        - name: collection_id
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Collection Id
+        - name: track_type
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Track Type
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    options:
+      tags:
+        - tracks
+      summary: Tracks:Options
+      operationId: tracks_options_api_latest_tracks_options
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/latest/tracks/{track_id}:
+    patch:
+      tags:
+        - tracks
+      summary: Track:Update
+      operationId: track_update_api_latest_tracks__track_id__patch
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: track_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Track Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TrackObj'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      tags:
+        - tracks
+      summary: Track:Get
+      operationId: track_get_api_latest_tracks__track_id__get
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: track_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Track Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+        - tracks
+      summary: Track:Delete
+      operationId: track_delete_api_latest_tracks__track_id__delete
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: track_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Track Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '204':
+          description: Successful Response
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/latest/tracks/{track_id}/related:
+    get:
+      tags:
+        - tracks
+      summary: Get Related Tracks
+      operationId: get_related_tracks_api_latest_tracks__track_id__related_get
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: track_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Track Id
+        - name: cursor
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+            title: Cursor
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+            title: Limit
+        - name: search_filter
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Search Filter
+        - name: track_type
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Track Type
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/latest/tracks/{track_id}/similar:
+    get:
+      tags:
+        - tracks
+      summary: Get Similar Tracks
+      operationId: get_similar_tracks_api_latest_tracks__track_id__similar_get
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: track_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Track Id
+        - name: cursor
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+            title: Cursor
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+            title: Limit
+        - name: search_filter
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Search Filter
+        - name: collection_id
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Collection Id
+        - name: track_type
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Track Type
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/latest/collections:
+    get:
+      tags:
+        - collections
+      summary: Collections:Get
+      operationId: collections_get_api_latest_collections_get
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: cursor
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+            title: Cursor
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+            title: Limit
+        - name: name
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Name
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    post:
+      tags:
+        - collections
+      summary: Collection:Post
+      operationId: collection_post_api_latest_collections_post
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCollectionParam'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/latest/collections/{collection_id}:
+    get:
+      tags:
+        - collections
+      summary: Collection:Get
+      operationId: collection_get_api_latest_collections__collection_id__get
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: collection_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Collection Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    put:
+      tags:
+        - collections
+      summary: Collection:Put
+      operationId: collection_put_api_latest_collections__collection_id__put
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: collection_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Collection Id
+        - name: track_id
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Track Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+        - collections
+      summary: Collection:Delete
+      operationId: collection_delete_api_latest_collections__collection_id__delete
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: collection_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Collection Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/latest/collections/{collection_id}/tracks:
+    get:
+      tags:
+        - collections
+      summary: Collection:Get
+      operationId: collection_get_api_latest_collections__collection_id__tracks_get
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: collection_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Collection Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/latest/collections/update/{collection_id}:
+    patch:
+      tags:
+        - collections
+      summary: Collection:Update
+      operationId: collection_update_api_latest_collections_update__collection_id__patch
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: collection_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Collection Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCollectionParam'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/latest/collections/{collection_id}/remove/{track_id}:
+    patch:
+      tags:
+        - collections
+      summary: Collection:Remove Track From Collection
+      operationId: collection_remove_track_from_collection_api_latest_collections__collection_id__remove__track_id__patch
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: collection_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Collection Id
+        - name: track_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Track Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/latest/collections/{collection_id}/save:
+    put:
+      tags:
+        - collections
+      summary: Collection:Make Temporary Collection Permanent
+      operationId: collection_make_temporary_collection_permanent_api_latest_collections__collection_id__save_put
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: collection_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Collection Id
+        - name: name
+          in: query
+          required: true
+          schema:
+            type: string
+            title: Name
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/latest/collections/related:
+    post:
+      tags:
+        - collections
+      summary: Related Collection:Post
+      operationId: related_collection_post_api_latest_collections_related_post
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddRelatedCollectionModel'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/latest/collections/related/{collection_id}:
+    get:
+      tags:
+        - collections
+      summary: Related Collection:Get
+      operationId: related_collection_get_api_latest_collections_related__collection_id__get
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: collection_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Collection Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/latest/actions:
+    get:
+      tags:
+        - actions
+      summary: All User Actions:Status
+      description: Retrieve all actions and their statuses for a given user.
+      operationId: all_user_actions_status_api_latest_actions_get
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/latest/actions/{action_id}:
+    get:
+      tags:
+        - actions
+      summary: Action:Status
+      description: Retrieve the status of an action.
+      operationId: action_status_api_latest_actions__action_id__get
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: action_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Action Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+        - actions
+      summary: Action:Abort
+      description: Cancel an action.
+      operationId: action_abort_api_latest_actions__action_id__delete
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: action_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Action Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NendoHTTPResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/latest/:
+    get:
+      tags:
+        - core
+      summary: Read Example
+      operationId: read_example_api_latest__get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /api/latest/healthz:
+    get:
+      tags:
+        - core
+      summary: Liveness Check
+      operationId: liveness_check_api_latest_healthz_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /api/latest/readyz:
+    get:
+      tags:
+        - core
+      summary: Readiness Check
+      operationId: readiness_check_api_latest_readyz_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /api/latest/mashuper/scenes:
+    get:
+      tags:
+        - mashuper
+      summary: Get Scenes
+      operationId: get_scenes_api_latest_mashuper_scenes_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+      security:
+        - OAuth2PasswordBearer: []
+    post:
+      tags:
+        - mashuper
+      summary: Create Scene
+      description: Create a new scene.
+      operationId: create_scene_api_latest_mashuper_scenes_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              title: Scene
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - OAuth2PasswordBearer: []
+  /api/latest/mashuper/scenes/{scene_id}:
+    patch:
+      tags:
+        - mashuper
+      summary: Update Scene
+      description: Update an existing scene.
+      operationId: update_scene_api_latest_mashuper_scenes__scene_id__patch
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: scene_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Scene Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              title: Scene
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      tags:
+        - mashuper
+      summary: Get Scene
+      description: Get a scene from the DB.
+      operationId: get_scene_api_latest_mashuper_scenes__scene_id__get
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: scene_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Scene Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+        - mashuper
+      summary: Delete Scene
+      description: Delete a scene.
+      operationId: delete_scene_api_latest_mashuper_scenes__scene_id__delete
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: scene_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Scene Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/latest/mashuper/randomfile:
+    get:
+      tags:
+        - mashuper
+      summary: Get Random File
+      operationId: get_random_file_api_latest_mashuper_randomfile_get
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: filters
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Filters
+        - name: key
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Key
+        - name: songbpm
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Songbpm
+        - name: duration_min
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: number
+              - type: 'null'
+            title: Duration Min
+        - name: duration_max
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: number
+              - type: 'null'
+            title: Duration Max
+        - name: collection_id
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Collection Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/latest/mashuper/audio/{track_id}:
+    get:
+      tags:
+        - mashuper
+      summary: Stream Audio
+      operationId: stream_audio_api_latest_mashuper_audio__track_id__get
+      parameters:
+        - name: track_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Track Id
+        - name: range
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Range
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/latest/mashuper/quantize/{track_id}:
+    get:
+      tags:
+        - mashuper
+      summary: Get Quantized
+      description: Route used to quantize a target track.
+      operationId: get_quantized_api_latest_mashuper_quantize__track_id__get
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: track_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Track Id
+        - name: songbpm
+          in: query
+          required: true
+          schema:
+            type: integer
+            title: Songbpm
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/latest/polymath:
+    post:
+      tags:
+        - polymath
+      summary: Run Polymath
+      description: Process a track with polymath.
+      operationId: run_polymath_api_latest_polymath_post
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: target_id
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Target Id
+        - name: replace
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+            title: Replace
+        - name: add_to_collection_id
+          in: query
+          required: false
+          schema:
+            type: string
+            default: ''
+            title: Add To Collection Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              title: Params
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/latest/musicanalysis:
+    post:
+      tags:
+        - musicanalysis
+      summary: Run Musicanalysis
+      description: Process a track with musicanalysis.
+      operationId: run_musicanalysis_api_latest_musicanalysis_post
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: target_id
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Target Id
+        - name: replace
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+            title: Replace
+        - name: add_to_collection_id
+          in: query
+          required: false
+          schema:
+            type: string
+            default: ''
+            title: Add To Collection Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              title: Params
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/latest/voiceanalysis:
+    post:
+      tags:
+        - voiceanalysis
+      summary: Run Voiceanalysis
+      description: Process a track with voiceanalysis.
+      operationId: run_voiceanalysis_api_latest_voiceanalysis_post
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: target_id
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Target Id
+        - name: replace
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+            title: Replace
+        - name: add_to_collection_id
+          in: query
+          required: false
+          schema:
+            type: string
+            title: Add To Collection Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              title: Params
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/latest/getpage/{target_id}:
+    post:
+      tags:
+        - getpage
+      summary: Run Getpage
+      description: Crawl a webpage, summarize it and create an embedding of it.
+      operationId: run_getpage_api_latest_getpage__target_id__post
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: target_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Target Id
+        - name: replace
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: true
+            title: Replace
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              title: Params
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/latest/musicgen:
+    post:
+      tags:
+        - musicgen
+      summary: Run Musicgeneration
+      description: Generate a track with musicgeneration.
+      operationId: run_musicgeneration_api_latest_musicgen_post
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: target_id
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Target Id
+        - name: replace
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+            title: Replace
+        - name: add_to_collection_id
+          in: query
+          required: false
+          schema:
+            type: string
+            default: ''
+            title: Add To Collection Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              title: Params
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/latest/voicegen:
+    post:
+      tags:
+        - voicegen
+      summary: Run Voicegen
+      description: Generate a voice with the voice generation plugin.
+      operationId: run_voicegen_api_latest_voicegen_post
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: target_id
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Target Id
+        - name: replace
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+            title: Replace
+        - name: add_to_collection_id
+          in: query
+          required: false
+          schema:
+            type: string
+            default: ''
+            title: Add To Collection Id
+        - name: app_state
+          in: query
+          required: true
+          schema:
+            title: App State
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              title: Params
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/auth/jwt/login:
+    post:
+      tags:
+        - auth
+      summary: Auth:Jwt.Login
+      operationId: auth_jwt_login_api_auth_jwt_login_post
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Body_auth_jwt_login_api_auth_jwt_login_post'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BearerResponse'
+              example:
+                access_token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiOTIyMWZmYzktNjQwZi00MzcyLTg2ZDMtY2U2NDJjYmE1NjAzIiwiYXVkIjoiZmFzdGFwaS11c2VyczphdXRoIiwiZXhwIjoxNTcxNTA0MTkzfQ.M10bjOe45I5Ncu_uXvOmVV8QxnL-nZfcH96U90JaocI
+                token_type: bearer
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+              examples:
+                LOGIN_BAD_CREDENTIALS:
+                  summary: Bad credentials or the user is inactive.
+                  value:
+                    detail: LOGIN_BAD_CREDENTIALS
+                LOGIN_USER_NOT_VERIFIED:
+                  summary: The user is not verified.
+                  value:
+                    detail: LOGIN_USER_NOT_VERIFIED
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/auth/jwt/logout:
+    post:
+      tags:
+        - auth
+      summary: Auth:Jwt.Logout
+      operationId: auth_jwt_logout_api_auth_jwt_logout_post
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '401':
+          description: Missing token or inactive user.
+      security:
+        - OAuth2PasswordBearer: []
+  /api/auth/register:
+    post:
+      tags:
+        - auth
+      summary: Register:Register
+      operationId: register_register_api_auth_register_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreate'
+        required: true
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRead'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+              examples:
+                REGISTER_USER_ALREADY_EXISTS:
+                  summary: A user with this email already exists.
+                  value:
+                    detail: REGISTER_USER_ALREADY_EXISTS
+                REGISTER_INVALID_PASSWORD:
+                  summary: Password validation failed.
+                  value:
+                    detail:
+                      code: REGISTER_INVALID_PASSWORD
+                      reason: Password should beat least 3 characters
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/auth/forgot-password:
+    post:
+      tags:
+        - auth
+      summary: Reset:Forgot Password
+      operationId: reset_forgot_password_api_auth_forgot_password_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Body_reset_forgot_password_api_auth_forgot_password_post'
+        required: true
+      responses:
+        '202':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/auth/reset-password:
+    post:
+      tags:
+        - auth
+      summary: Reset:Reset Password
+      operationId: reset_reset_password_api_auth_reset_password_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Body_reset_reset_password_api_auth_reset_password_post'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+              examples:
+                RESET_PASSWORD_BAD_TOKEN:
+                  summary: Bad or expired token.
+                  value:
+                    detail: RESET_PASSWORD_BAD_TOKEN
+                RESET_PASSWORD_INVALID_PASSWORD:
+                  summary: Password validation failed.
+                  value:
+                    detail:
+                      code: RESET_PASSWORD_INVALID_PASSWORD
+                      reason: Password should be at least 3 characters
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/auth/request-verify-token:
+    post:
+      tags:
+        - auth
+      summary: Verify:Request-Token
+      operationId: verify_request_token_api_auth_request_verify_token_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Body_verify_request_token_api_auth_request_verify_token_post'
+        required: true
+      responses:
+        '202':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/auth/verify:
+    post:
+      tags:
+        - auth
+      summary: Verify:Verify
+      operationId: verify_verify_api_auth_verify_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Body_verify_verify_api_auth_verify_post'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRead'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+              examples:
+                VERIFY_USER_BAD_TOKEN:
+                  summary: Bad token, not existing user ornot the e-mail currently set for the user.
+                  value:
+                    detail: VERIFY_USER_BAD_TOKEN
+                VERIFY_USER_ALREADY_VERIFIED:
+                  summary: The user is already verified.
+                  value:
+                    detail: VERIFY_USER_ALREADY_VERIFIED
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/users/me:
+    get:
+      tags:
+        - users
+      summary: Users:Current User
+      operationId: users_current_user_api_users_me_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRead'
+        '401':
+          description: Missing token or inactive user.
+      security:
+        - OAuth2PasswordBearer: []
+    patch:
+      tags:
+        - users
+      summary: Users:Patch Current User
+      operationId: users_patch_current_user_api_users_me_patch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdate'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRead'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+              examples:
+                UPDATE_USER_EMAIL_ALREADY_EXISTS:
+                  summary: A user with this email already exists.
+                  value:
+                    detail: UPDATE_USER_EMAIL_ALREADY_EXISTS
+                UPDATE_USER_INVALID_PASSWORD:
+                  summary: Password validation failed.
+                  value:
+                    detail:
+                      code: UPDATE_USER_INVALID_PASSWORD
+                      reason: Password should beat least 3 characters
+        '401':
+          description: Missing token or inactive user.
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - OAuth2PasswordBearer: []
+  /api/users/{id}:
+    get:
+      tags:
+        - users
+      summary: Users:User
+      operationId: users_user_api_users__id__get
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRead'
+        '401':
+          description: Missing token or inactive user.
+        '403':
+          description: Not a superuser.
+        '404':
+          description: The user does not exist.
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    patch:
+      tags:
+        - users
+      summary: Users:Patch User
+      operationId: users_patch_user_api_users__id__patch
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdate'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRead'
+        '400':
+          content:
+            application/json:
+              examples:
+                UPDATE_USER_EMAIL_ALREADY_EXISTS:
+                  summary: A user with this email already exists.
+                  value:
+                    detail: UPDATE_USER_EMAIL_ALREADY_EXISTS
+                UPDATE_USER_INVALID_PASSWORD:
+                  summary: Password validation failed.
+                  value:
+                    detail:
+                      code: UPDATE_USER_INVALID_PASSWORD
+                      reason: Password should beat least 3 characters
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+          description: Bad Request
+        '401':
+          description: Missing token or inactive user.
+        '403':
+          description: Not a superuser.
+        '404':
+          description: The user does not exist.
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+        - users
+      summary: Users:Delete User
+      operationId: users_delete_user_api_users__id__delete
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Id
+      responses:
+        '204':
+          description: Successful Response
+        '401':
+          description: Missing token or inactive user.
+        '403':
+          description: Not a superuser.
+        '404':
+          description: The user does not exist.
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/auth/google/authorize:
+    get:
+      tags:
+        - auth
+      summary: Oauth:Google.Jwt.Authorize
+      operationId: oauth_google_jwt_authorize_api_auth_google_authorize_get
+      parameters:
+        - name: scopes
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+            title: Scopes
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OAuth2AuthorizeResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/auth/google/callback:
+    get:
+      tags:
+        - auth
+      summary: Oauth:Google.Jwt.Callback
+      description: The response varies based on the authentication backend used.
+      operationId: oauth_google_jwt_callback_api_auth_google_callback_get
+      parameters:
+        - name: code
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Code
+        - name: code_verifier
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Code Verifier
+        - name: state
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: State
+        - name: error
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Error
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '400':
+          content:
+            application/json:
+              examples:
+                INVALID_STATE_TOKEN:
+                  summary: Invalid state token.
+                LOGIN_BAD_CREDENTIALS:
+                  summary: User is inactive.
+                  value:
+                    detail: LOGIN_BAD_CREDENTIALS
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+          description: Bad Request
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+components:
+  schemas:
+    AddRelatedCollectionModel:
+      properties:
+        track_ids:
+          items:
+            anyOf:
+              - type: string
+              - type: string
+                format: uuid
+          type: array
+          title: Track Ids
+        collection_id:
+          anyOf:
+            - type: string
+            - type: string
+              format: uuid
+          title: Collection Id
+        name:
+          type: string
+          title: Name
+        description:
+          type: string
+          title: Description
+          default: ''
+        relationship_type:
+          type: string
+          title: Relationship Type
+          default: relationship
+        meta:
+          type: object
+          title: Meta
+          default: {}
+      type: object
+      required:
+        - track_ids
+        - collection_id
+        - name
+      title: AddRelatedCollectionModel
+    BearerResponse:
+      properties:
+        access_token:
+          type: string
+          title: Access Token
+        token_type:
+          type: string
+          title: Token Type
+      type: object
+      required:
+        - access_token
+        - token_type
+      title: BearerResponse
+    Body_audio_post_api_assets_audio_post:
+      properties:
+        file:
+          type: string
+          format: binary
+          title: File
+      type: object
+      required:
+        - file
+      title: Body_audio_post_api_assets_audio_post
+    Body_audio_post_api_latest_assets_audio_post:
+      properties:
+        file:
+          type: string
+          format: binary
+          title: File
+      type: object
+      required:
+        - file
+      title: Body_audio_post_api_latest_assets_audio_post
+    Body_audio_post_api_v1_assets_audio_post:
+      properties:
+        file:
+          type: string
+          format: binary
+          title: File
+      type: object
+      required:
+        - file
+      title: Body_audio_post_api_v1_assets_audio_post
+    Body_auth_jwt_login_api_auth_jwt_login_post:
+      properties:
+        grant_type:
+          anyOf:
+            - type: string
+              pattern: password
+            - type: 'null'
+          title: Grant Type
+        username:
+          type: string
+          title: Username
+        password:
+          type: string
+          title: Password
+        scope:
+          type: string
+          title: Scope
+          default: ''
+        client_id:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Client Id
+        client_secret:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Client Secret
+      type: object
+      required:
+        - username
+        - password
+      title: Body_auth_jwt_login_api_auth_jwt_login_post
+    Body_reset_forgot_password_api_auth_forgot_password_post:
+      properties:
+        email:
+          type: string
+          format: email
+          title: Email
+      type: object
+      required:
+        - email
+      title: Body_reset_forgot_password_api_auth_forgot_password_post
+    Body_reset_reset_password_api_auth_reset_password_post:
+      properties:
+        token:
+          type: string
+          title: Token
+        password:
+          type: string
+          title: Password
+      type: object
+      required:
+        - token
+        - password
+      title: Body_reset_reset_password_api_auth_reset_password_post
+    Body_verify_request_token_api_auth_request_verify_token_post:
+      properties:
+        email:
+          type: string
+          format: email
+          title: Email
+      type: object
+      required:
+        - email
+      title: Body_verify_request_token_api_auth_request_verify_token_post
+    Body_verify_verify_api_auth_verify_post:
+      properties:
+        token:
+          type: string
+          title: Token
+      type: object
+      required:
+        - token
+      title: Body_verify_verify_api_auth_verify_post
+    CreateCollectionParam:
+      properties:
+        name:
+          type: string
+          title: Name
+        description:
+          type: string
+          title: Description
+          default: ''
+        collection_type:
+          type: string
+          title: Collection Type
+          default: generic
+        track_ids:
+          items:
+            type: string
+          type: array
+          title: Track Ids
+          default: []
+      type: object
+      required:
+        - name
+      title: CreateCollectionParam
+    ErrorModel:
+      properties:
+        detail:
+          anyOf:
+            - type: string
+            - additionalProperties:
+                type: string
+              type: object
+          title: Detail
+      type: object
+      required:
+        - detail
+      title: ErrorModel
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    NendoHTTPResponse:
+      properties:
+        data:
+          title: Data
+        error:
+          title: Error
+        has_next:
+          type: boolean
+          title: Has Next
+          default: false
+        cursor:
+          type: integer
+          title: Cursor
+          default: 0
+      type: object
+      required:
+        - data
+      title: NendoHTTPResponse
+    OAuth2AuthorizeResponse:
+      properties:
+        authorization_url:
+          type: string
+          title: Authorization Url
+      type: object
+      required:
+        - authorization_url
+      title: OAuth2AuthorizeResponse
+    TrackObj:
+      properties:
+        track_type:
+          type: string
+          title: Track Type
+        meta:
+          type: object
+          title: Meta
+          default: {}
+        resource:
+          type: object
+          title: Resource
+          default: {}
+        images:
+          items: {}
+          type: array
+          title: Images
+          default: []
+      type: object
+      required:
+        - track_type
+      title: TrackObj
+      description: Object used when creating NendoTracks.
+    UpdateCollectionParam:
+      properties:
+        name:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Name
+          default:
+            - null
+        description:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Description
+          default:
+            - null
+        collection_type:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Collection Type
+          default:
+            - null
+      type: object
+      title: UpdateCollectionParam
+    UserCreate:
+      properties:
+        email:
+          type: string
+          format: email
+          title: Email
+        password:
+          type: string
+          title: Password
+        is_active:
+          anyOf:
+            - type: boolean
+            - type: 'null'
+          title: Is Active
+          default: true
+        is_superuser:
+          anyOf:
+            - type: boolean
+            - type: 'null'
+          title: Is Superuser
+          default: false
+        is_verified:
+          anyOf:
+            - type: boolean
+            - type: 'null'
+          title: Is Verified
+          default: false
+      type: object
+      required:
+        - email
+        - password
+      title: UserCreate
+    UserRead:
+      properties:
+        id:
+          type: string
+          format: uuid
+          title: Id
+        email:
+          type: string
+          format: email
+          title: Email
+        is_active:
+          type: boolean
+          title: Is Active
+          default: true
+        is_superuser:
+          type: boolean
+          title: Is Superuser
+          default: false
+        is_verified:
+          type: boolean
+          title: Is Verified
+          default: false
+      type: object
+      required:
+        - id
+        - email
+      title: UserRead
+    UserUpdate:
+      properties:
+        password:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Password
+        email:
+          anyOf:
+            - type: string
+              format: email
+            - type: 'null'
+          title: Email
+        is_active:
+          anyOf:
+            - type: boolean
+            - type: 'null'
+          title: Is Active
+        is_superuser:
+          anyOf:
+            - type: boolean
+            - type: 'null'
+          title: Is Superuser
+        is_verified:
+          anyOf:
+            - type: boolean
+            - type: 'null'
+          title: Is Verified
+      type: object
+      title: UserUpdate
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+              - type: string
+              - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+      type: object
+      required:
+        - loc
+        - msg
+        - type
+      title: ValidationError
+  securitySchemes:
+    OAuth2PasswordBearer:
+      type: oauth2
+      flows:
+        password:
+          scopes: {}
+          tokenUrl: auth/jwt/login
