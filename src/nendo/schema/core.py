@@ -576,7 +576,7 @@ class NendoTrack(NendoTrackBase):
         key: Optional[str] = None,
         user_id: Optional[Union[str, uuid.UUID]] = None,
     ) -> List[NendoPluginData]:
-        """Get all plugin data related to the given plugin name and the given key.
+        """Get all plugin data for a given plugin name, version, key and user_id.
 
         Note: Function behavior
             - If plugin_name, plugin_version and/or key are specified, the
@@ -741,10 +741,13 @@ class NendoTrack(NendoTrackBase):
 
         Args:
             track_id (Union[str, uuid.UUID]): ID of the potential related track.
+            direction (str, optional): The relationship direction.
+                Can be either one of "to", "from", or "both".
+                Defaults to "to".
 
         Returns:
-            bool: True if a relationship from the track with the given track_id exists.
-                False otherwise.
+            bool: True if a related track with the given track_id and direction
+                of relationship exists. False otherwise.
         """
         track_id = ensure_uuid(track_id)
         related_tracks = self.get_related_tracks(
@@ -1058,13 +1061,25 @@ class NendoCollection(NendoCollectionBase):
             r.relationship_type == relationship_type for r in self.related_collections
         )
 
-    def has_related_collection(self, collection_id: Union[str, uuid.UUID]) -> bool:
-        """Check if the collection has a relationship to the specified collection ID."""
-        collection_id = ensure_uuid(collection_id)
-        if self.related_collections is None:
-            return False
+    def has_related_collection(
+        self,
+        collection_id: Union[str, uuid.UUID],
+    ) -> bool:
+        """Check if the collection has a relationship to the specified collection ID.
 
-        return any(r.target_id == collection_id for r in self.related_collections)
+        Args:
+            collection_id (Union[str, uuid.UUID]): The target collection ID for which
+                to check if it is related to the current collection.
+
+        Returns:
+            bool: True if the collection has a relationship either from or to the
+                collection with the given `collection_id`. False otherwise.
+        """
+        collection_id = ensure_uuid(collection_id)
+        related_collections = self.get_related_collections(
+            direction="both",
+        )
+        return any(rt.id == collection_id for rt in related_collections)
 
     def add_track(
         self,
@@ -1164,6 +1179,7 @@ class NendoCollection(NendoCollectionBase):
 
     def get_related_collections(
         self,
+        direction: str = "to",
         user_id: Optional[Union[str, uuid.UUID]] = None,
         order_by: Optional[str] = None,
         order: Optional[str] = "asc",
@@ -1173,6 +1189,9 @@ class NendoCollection(NendoCollectionBase):
         """Get all collections to which the current collection has a relationship.
 
         Args:
+            direction (str, optional): The relationship direction.
+                Can be either one of "to", "from", or "both".
+                Defaults to "to".
             user_id (Union[str, UUID], optional): The user ID to filter for.
             order_by (Optional[str]): Key used for ordering the results.
             order (Optional[str]): Order in which to retrieve results ("asc" or "desc").
@@ -1183,7 +1202,8 @@ class NendoCollection(NendoCollectionBase):
             List[NendoCollection]: List containting all related NendoCollections
         """
         return self.nendo_instance.library.get_related_collections(
-            track_id=self.id,
+            collection_id=self.id,
+            direction=direction,
             user_id=user_id,
             order_by=order_by,
             order=order,

@@ -398,8 +398,8 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         self,
         track_id: uuid.UUID,
         session: Session,
-        user_id: Optional[uuid.UUID] = None,
         direction: str = "to",
+        user_id: Optional[uuid.UUID] = None,
     ) -> Query:
         """Get tracks related to the track with track_id from the DB.
 
@@ -407,7 +407,8 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             track_id (UUID): ID of the track to be searched for.
             session (Session): Session to be used for the transaction.
             user_id (UUID, optional): The user ID to filter for.
-            direction (str, optional): The relationship direction ("to", "from", "both").
+            direction (str, optional): The relationship direction
+                (can be either one of "to", "from", "both").
 
         Returns:
             Query: The SQLAlchemy query object.
@@ -463,7 +464,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                 )
             )
         else:
-            raise ValueError("Invalid direction value. Must be 'to', 'from', or 'all'.")
+            raise ValueError("Invalid direction value. Must be 'to', 'from', or 'both'.")
         if user_id is not None:
             query = query.filter(model.NendoTrackDB.user_id == user_id)
         return query
@@ -1110,9 +1111,9 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
 
     def add_related_track(
         self,
-        file_path: Union[str, FilePath],
+        file_path: Union[FilePath, str],
         related_track_id: Union[str, uuid.UUID],
-        track_type: str = "track",
+        track_type: str = "str",
         user_id: Optional[Union[str, uuid.UUID]] = None,
         track_meta: Optional[Dict[str, Any]] = None,
         relationship_type: str = "relationship",
@@ -1427,7 +1428,8 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
 
         Args:
             track_id (Union[str, UUID]): ID of the track to be searched for.
-            direction (str, optional): The relationship direction ("to", "from", "both").
+            direction (str, optional): The relationship direction
+                Can be either one of "to", "from", or "both". Defaults to "to".
             user_id (Union[str, UUID], optional): The user ID to filter for.
             order_by (str, optional): Key used for ordering the results.
             order (str, optional): Order in which to retrieve results ("asc" or "desc").
@@ -1442,8 +1444,8 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             query = self._get_related_tracks_query(
                 track_id=ensure_uuid(track_id),
                 session=session,
-                user_id=user_id,
                 direction=direction,
+                user_id=user_id,
             )
             return self.get_tracks(
                 query=query,
@@ -1475,10 +1477,10 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         Args:
             track_id (Union[str, UUID]): ID of the track to be searched for.
             direction (str, optional): The relationship direction ("to", "from", "both").
-            filters (Optional[dict]): Dictionary containing the filters to apply.
+            filters (dict, optional): Dictionary containing the filters to apply.
                 Defaults to None.
-            search_meta (dict): Dictionary containing the keywords to search for
-                over the track.resource.meta field. The dictionary's values
+            search_meta (dict, optional): Dictionary containing the keywords to search
+                for over the track.resource.meta field. The dictionary's values
                 should contain singular search tokens and the keys currently have no
                 effect but might in the future. Defaults to {}.
             track_type (Union[str, List[str]], optional): Track type to filter for.
@@ -1503,8 +1505,8 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             query = self._get_related_tracks_query(
                 track_id=ensure_uuid(track_id),
                 session=session,
-                user_id=user_id,
                 direction=direction,
+                user_id=user_id,
             )
             query = self._get_filtered_tracks_query(
                 session=session,
@@ -1590,12 +1592,13 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         """Obtain tracks from the db by filtering over plugin data.
 
         Args:
-            filters (Optional[dict]): Dictionary containing the filters to apply.
+            filters (dict, optional): Dictionary containing the filters to apply.
                 Defaults to None.
             search_meta (dict, optional): Dictionary containing the keywords to
-                search for over the track.resource.meta field. The dictionary's values
-                should contain singular search tokens and the keys currently have no
-                effect but might in the future. Defaults to {}.
+                search for over the `track.meta` and `track.resource` fields.
+                The dictionary's values should contain singular search tokens
+                and the keys currently have no effect but might in other
+                implementations of the NendoLibrary. Defaults to {}.
             track_type (Union[str, List[str]], optional): Track type to filter for.
                 Can be a singular type or a list of types. Defaults to None.
             user_id (Union[str, UUID], optional): The user ID to filter for.
@@ -1667,8 +1670,8 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             tracks_with_relations = self._get_related_tracks_query(
                 track_id=track_id,
                 session=session,
-                user_id=uuid.UUID(user_id) if user_id is not None else None,
                 direction="both",
+                user_id=uuid.UUID(user_id) if user_id is not None else None,
             ).all()
             collections_with_relations = (
                 session.query(model.NendoCollectionDB)
@@ -1820,12 +1823,15 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         self,
         collection_id: uuid.UUID,
         session: Session,
+        direction: str = "to",
         user_id: Optional[uuid.UUID] = None,
     ) -> Query:
         """Create a query for the collections related to a given collection.
 
         Args:
             collection_id (UUID): ID of the collection to be searched for.
+            direction (str, optional): The relationship direction
+                Can be either one of "to", "from", or "both". Defaults to "to".
             session (Session): Session to be used for the transaction.
             user_id (UUID, optional): The user ID to filter for.
 
@@ -1835,22 +1841,52 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         query = session.query(model.NendoCollectionDB)
         if user_id is not None:
             query = query.filter(model.NendoCollectionDB.user_id == user_id)
-        return (
-            query
-            # .options(
-            #     joinedload(model.NendoCollectionDB.related_tracks).joinedload(
-            #         model.TrackCollectionRelationshipDB.source,
-            #     ),
-            # )
-            .join(
-                model.CollectionCollectionRelationshipDB,
-                model.NendoCollectionDB.id
-                == model.CollectionCollectionRelationshipDB.source_id,
+        mccr = model.CollectionCollectionRelationshipDB
+        if direction == "to":
+            query = (
+                query
+                .join(
+                    mccr,
+                    model.NendoCollectionDB.id == mccr.source_id,
+                )
+                .filter(
+                    mccr.target_id == collection_id,
+                )
             )
-            .filter(
-                model.CollectionCollectionRelationshipDB.target_id == collection_id,
+        elif direction == "from":
+            query = (
+                query
+                .join(
+                    mccr,
+                    model.NendoCollectionDB.id == mccr.target_id,
+                )
+                .filter(
+                    mccr.source_id == collection_id,
+                )
             )
-        )
+        elif direction == "both":
+            query = (
+                query
+                .join(
+                    mccr,
+                    or_(
+                        model.NendoCollectionDB.id == mccr.source_id,
+                        model.NendoCollectionDB.id == mccr.target_id,
+                    ),
+                )
+                .filter(
+                    and_(
+                        model.NendoCollectionDB.id != collection_id,
+                        or_(
+                            mccr.source_id == collection_id,
+                            mccr.target_id == collection_id,
+                        ),
+                    ),
+                )
+            )
+        else:
+            raise ValueError("Invalid direction value. Must be 'to', 'from', or 'both'.")
+        return query
 
     def _remove_track_from_collection_db(
         self,
@@ -2117,7 +2153,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             track_ids (List[Union[str, uuid.UUID]]): List of track ids to add.
             collection_id (Union[str, uuid.UUID]): ID of the collection to
                 which to add the track.
-            meta (Dict[str, Any]): Metadata of the relationship.
+            meta (Dict[str, Any], optional): Metadata of the relationship.
 
         Returns:
             NendoCollection: The updated NendoCollection object.
@@ -2188,10 +2224,12 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         """Get all tracks from a collection.
 
         Args:
-            collection_id (uuid.UUID): ID of the collection to get the tracks from.
+            collection_id (Union[str, uuid.UUID]): ID of the collection from which to
+                get all tracks.
+            order (str, optional): Ordering direction. Defaults to "asc".
 
         Returns:
-            List[schema.NendoTrack]: List of tracks in the collection.
+            List[NendoTrack]: List of tracks in the collection.
         """
         with self.session_scope() as session:
             tracks_db = (
@@ -2413,6 +2451,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
     def get_related_collections(
         self,
         collection_id: Union[str, uuid.UUID],
+        direction: str = "to",
         user_id: Optional[Union[str, uuid.UUID]] = None,
         order_by: Optional[str] = None,
         order: Optional[str] = "asc",
@@ -2423,6 +2462,8 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
 
         Args:
             collection_id (str): ID of the collection to be searched for.
+            direction (str, optional): The relationship direction
+                Can be either one of "to", "from", or "both". Defaults to "to".
             user_id (Union[str, UUID], optional): The user ID to filter for.
             order_by (str, optional): Key used for ordering the results.
             order (str, optional): Order in which to retrieve results
@@ -2440,6 +2481,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             query = self._get_related_collections_query(
                 collection_id=ensure_uuid(collection_id),
                 session=session,
+                direction=direction,
                 user_id=user_id,
             )
             return self._get_collections_db(
@@ -2537,8 +2579,8 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         """Deletes the collection identified by `collection_id`.
 
         Args:
-            collection_id (uuid.UUID): ID of the collection to remove
-            user_id (Union[str, UUID], optional): The ID of the user
+            collection_id (uuid.UUID): ID of the collection to remove.
+            user_id (Union[str, UUID], optional): The ID of the user.
             remove_relationships (bool, optional):
                 If False prevent deletion if related tracks exist,
                 if True delete relationships together with the object.
@@ -2788,7 +2830,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
 
         Args:
             blob_id (uuid.UUID): The UUID of the blob.
-            user_id (Optional[Union[str, uuid.UUID]], optional): ID of the user
+            user_id Union[str, uuid.UUID], optional): ID of the user
                 who's loading the blob.
 
         Returns:
@@ -2834,7 +2876,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
 
         Args:
             file_path (Union[str, FilePath]): The blob to store.
-            user_id (Optional[Union[str, uuid.UUID]], optional): ID of the user
+            user_id (Union[str, uuid.UUID], optional): ID of the user
                 who's storing the file to blob.
 
         Returns:
@@ -2857,7 +2899,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
 
         Args:
             data (bytes): The blob to store.
-            user_id (Optional[Union[str, uuid.UUID]], optional): ID of the user
+            user_id (Union[str, uuid.UUID], optional): ID of the user
                 who's storing the bytes to blob.
 
         Returns:
@@ -2882,7 +2924,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         Args:
             blob_id (uuid.UUID): The UUID of the blob.
             remove_resources (bool): If True, remove associated resources.
-            user_id (Optional[Union[str, uuid.UUID]], optional): ID of the user
+            user_id (Union[str, uuid.UUID], optional): ID of the user
                 who's removing the blob.
 
         Returns:
@@ -2929,7 +2971,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         Args:
             force (bool, optional): Flag that specifies whether to ask the user for
                 confirmation of the operation. Default is to ask the user.
-            user_id (Optional[Union[str, uuid.UUID]], optional): ID of the user
+            user_id (Union[str, uuid.UUID], optional): ID of the user
                 who's resetting the library. If none is given, the configured
                 nendo default user will be used.
         """

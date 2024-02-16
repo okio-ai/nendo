@@ -24,12 +24,12 @@ from pydantic import ConfigDict, DirectoryPath, FilePath
 from nendo.schema.core import (
     NendoBlob,
     NendoCollection,
-    NendoCollectionSlim,
     NendoEmbedding,
     NendoPlugin,
     NendoPluginData,
     NendoStorage,
     NendoTrack,
+    Visibility,
 )
 from nendo.schema.exception import NendoError, NendoPluginRuntimeError
 from nendo.utils import ensure_uuid, get_wrapped_methods
@@ -806,7 +806,7 @@ class NendoEmbeddingPlugin(NendoPlugin):
                     text=text,
                     embedding=embedding_vector,
                 )
-                if hasattr(self.nendo_instance.library, "add_embedding"):
+                try:
                     if self.config.replace_plugin_data is True:
                         existing_embeddings = self.nendo_instance.library.get_embeddings(
                             track_id = track_or_collection.id,
@@ -828,6 +828,12 @@ class NendoEmbeddingPlugin(NendoPlugin):
                         embedding = self.nendo_instance.library.add_embedding(
                             embedding=embedding,
                         )
+                except AttributeError as e:  # noqa: F841
+                    self.logger.error(
+                        "Error adding the embedding to the library. "
+                        "Please use a library plugin with vector support to "
+                        "enable automatic storing of embeddings.",
+                    )
                 embeddings.append(embedding)
             return embeddings
 
@@ -904,7 +910,7 @@ class NendoEmbeddingPlugin(NendoPlugin):
                         text=text,
                         embedding=embedding_vector,
                     )
-                    if hasattr(self.nendo_instance.library, "add_embedding"):
+                    try:
                         if self.config.replace_plugin_data is True:
                             existing_embeddings = self.nendo_instance.library.get_embeddings(
                                 track_id = track_or_collection.id,
@@ -926,6 +932,12 @@ class NendoEmbeddingPlugin(NendoPlugin):
                             embedding = self.nendo_instance.library.add_embedding(
                                 embedding=embedding,
                             )
+                    except AttributeError as e:  # noqa: F841
+                        self.logger.error(
+                            "Error adding the embedding to the library. "
+                            "Please use a library plugin with vector support to "
+                            "enable automatic storing of embeddings.",
+                        )
                     embeddings.append(embedding)
                 return embeddings
             signal = kwargs.get("signal", None)
@@ -1135,7 +1147,7 @@ class NendoLibraryPlugin(NendoPlugin):
         copy_to_library: Optional[bool] = None,
         skip_duplicate: Optional[bool] = None,
         user_id: Optional[uuid.UUID] = None,
-        meta: Optional[dict] = None,
+        meta: Optional[Dict[str, Any]] = None,
     ) -> NendoTrack:
         """Add the track given by path to the library.
 
@@ -1198,13 +1210,13 @@ class NendoLibraryPlugin(NendoPlugin):
         Args:
             file_path (Union[FilePath, str]): Path to the file to add as track.
             related_track_id (Union[str, uuid.UUID]): ID of the related track.
-            track_type (str): Track type. Defaults to "track".
+            track_type (str, optional): Track type. Defaults to "track".
             user_id (Union[str, UUID], optional): ID of the user adding the track.
             track_meta (dict, optional): Dictionary containing the track metadata.
-            relationship_type (str): Type of the relationship.
+            relationship_type (str, optional): Type of the relationship.
                 Defaults to "relationship".
-            meta (dict): Dictionary containing metadata about
-                the relationship. Defaults to {}.
+            meta (dict, optional): Dictionary containing metadata about
+                the relationship. Defaults to None in which case it'll be set to {}.
 
         Returns:
             NendoTrack: The track that was added to the Library
@@ -1218,7 +1230,7 @@ class NendoLibraryPlugin(NendoPlugin):
         sr: int,
         related_track_id: Union[str, uuid.UUID],
         track_type: str = "track",
-        user_id: Optional[uuid.UUID] = None,
+        user_id: Optional[Union[str, uuid.UUID]] = None,
         track_meta: Optional[Dict[str, Any]] = None,
         relationship_type: str = "relationship",
         meta: Optional[Dict[str, Any]] = None,
@@ -1231,15 +1243,15 @@ class NendoLibraryPlugin(NendoPlugin):
         Args:
             signal (np.ndarray): Waveform of the track in numpy array form.
             sr (int): Sampling rate of the waveform.
-            related_track_id (str | uuid.UUID): ID to which the relationship
+            related_track_id (Union[str, uuid.UUID]): ID to which the relationship
                 should point to.
-            track_type (str): Track type. Defaults to "track".
-            user_id (UUID, optional): ID of the user adding the track.
+            track_type (str, optional): Track type. Defaults to "track".
+            user_id (Union[str, uuid.UUID], optional): ID of the user adding the track.
             track_meta  (dict, optional): Dictionary containing the track metadata.
-            relationship_type (str): Type of the relationship.
+            relationship_type (str, optional): Type of the relationship.
                 Defaults to "relationship".
-            meta (dict): Dictionary containing metadata about
-                the relationship. Defaults to {}.
+            meta (dict, optional): Dictionary containing metadata about
+                the relationship. Defaults to None in which case it'll be set to {}.
 
         Returns:
             NendoTrack: The added track with the relationship.
@@ -1249,7 +1261,7 @@ class NendoLibraryPlugin(NendoPlugin):
     @abstractmethod
     def add_tracks(
         self,
-        path: Union[DirectoryPath, str],
+        path: Union[str, DirectoryPath],
         track_type: str = "track",
         user_id: Optional[Union[str, uuid.UUID]] = None,
         copy_to_library: Optional[bool] = None,
@@ -1261,10 +1273,10 @@ class NendoLibraryPlugin(NendoPlugin):
             path (Union[DirectoryPath, str]): Path to the directory to scan.
             track_type (str): Track type. Defaults to "track".
             user_id (UUID, optional): The ID of the user adding the tracks.
-            copy_to_library (Optional[bool], optional): Flag that specifies whether
+            copy_to_library (bool, optional): Flag that specifies whether
                 the file should be copied into the library directory.
                 Defaults to None.
-            skip_duplicate (Optional[bool], optional): Flag that specifies whether a
+            skip_duplicate (bool, optional): Flag that specifies whether a
                 file should be added that already exists in the library, based on its
                 file checksum. Defaults to None.
 
@@ -1296,23 +1308,26 @@ class NendoLibraryPlugin(NendoPlugin):
     def add_plugin_data(
         self,
         track_id: Union[str, uuid.UUID],
-        plugin_name: str,
-        plugin_version: str,
         key: str,
-        value: str,
+        value: Any,
+        plugin_name: str,
+        plugin_version: Optional[str] = None,
         user_id: Optional[Union[str, uuid.UUID]] = None,
-        replace: bool = False,
+        replace: Optional[bool] = None,
     ) -> NendoPluginData:
         """Add plugin data to a NendoTrack and persist changes into the DB.
 
         Args:
             track_id (Union[str, uuid.UUID]): ID of the track to which
                 the plugin data should be added.
-            plugin_name (str): Name of the plugin.
-            plugin_version (str): Version of the plugin.
             key (str): Key under which to save the data.
             value (str): Data to  save.
-            user_id (uuid4, optional): ID of user adding the plugin data.
+            plugin_name (str): Name of the plugin.
+            plugin_version (str, optional): Version of the plugin. Defaults to None
+                in which case the version will be inferred from the currently
+                registered version of the plugin.
+            user_id (Union[str, uuid.UUID], optional): ID of user adding the
+                plugin data.
             replace (bool, optional): Flag that determines whether
                 the last existing data point for the given plugin name and -version
                 is overwritten or not. Defaults to False.
@@ -1350,15 +1365,19 @@ class NendoLibraryPlugin(NendoPlugin):
         order: str = "asc",
         limit: Optional[int] = None,
         offset: Optional[int] = None,
+        load_related_tracks: bool = False,
     ) -> Union[List, Iterator]:
         """Get tracks based on the given query parameters.
 
         Args:
             user_id (Union[str, UUID], optional): ID of user getting the tracks.
-            order_by (Optional[str]): Key used for ordering the results.
-            order (Optional[str]): Order in which to retrieve results ("asc" or "desc").
-            limit (Optional[int]): Limit the number of returned results.
-            offset (Optional[int]): Offset into the paginated results (requires limit).
+            order_by (str, optional): Key used for ordering the results.
+            order (str, optional): Order in which to retrieve results
+                ("asc" or "desc").
+            limit (int, optional): Limit the number of returned results.
+            offset (int, optional): Offset into the paginated results (requires limit).
+            load_related_tracks (bool, optional): Flag to control whether the
+                `related_tracks` will be populated or not. Defaults to False.
 
         Returns:
             Union[List, Iterator]: List or generator of tracks, depending on the
@@ -1370,6 +1389,7 @@ class NendoLibraryPlugin(NendoPlugin):
     def get_related_tracks(
         self,
         track_id: Union[str, uuid.UUID],
+        direction: str = "to",
         user_id: Optional[Union[str, uuid.UUID]] = None,
         order_by: Optional[str] = None,
         order: Optional[str] = "asc",
@@ -1380,11 +1400,13 @@ class NendoLibraryPlugin(NendoPlugin):
 
         Args:
             track_id (str): ID of the track to be searched for.
+            direction (str, optional): The relationship direction
+                Can be either one of "to", "from", or "both". Defaults to "to".
             user_id (Union[str, UUID], optional): The user ID to filter for.
-            order_by (Optional[str]): Key used for ordering the results.
-            order (Optional[str]): Order in which to retrieve results ("asc" or "desc").
-            limit (Optional[int]): Limit the number of returned results.
-            offset (Optional[int]): Offset into the paginated results (requires limit).
+            order_by (str, optional): Key used for ordering the results.
+            order (str, optional): Order in which to retrieve results ("asc" or "desc").
+            limit (int, optional): Limit the number of returned results.
+            offset (int, optional): Offset into the paginated results (requires limit).
 
         Returns:
             Union[List, Iterator]: List or generator of tracks, depending on the
@@ -1396,6 +1418,7 @@ class NendoLibraryPlugin(NendoPlugin):
     def filter_related_tracks(
         self,
         track_id: Union[str, uuid.UUID],
+        direction: str = "to",
         filters: Optional[Dict[str, Any]] = None,
         search_meta: Optional[Dict[str, Any]] = None,
         track_type: Optional[Union[str, List[str]]] = None,
@@ -1411,7 +1434,9 @@ class NendoLibraryPlugin(NendoPlugin):
 
         Args:
             track_id (Union[str, UUID]): ID of the track to be searched for.
-            filters (Optional[dict]): Dictionary containing the filters to apply.
+            direction (str, optional): The relationship direction
+                Can be either one of "to", "from", or "both". Defaults to "to".
+            filters (dict, optional): Dictionary containing the filters to apply.
                 Defaults to None.
             search_meta (dict): Dictionary containing the keywords to search for
                 over the track.resource.meta field. The dictionary's values
@@ -1425,10 +1450,10 @@ class NendoLibraryPlugin(NendoPlugin):
             plugin_names (list, optional): List used for applying the filter only to
                 data of certain plugins. If None, all plugin data related to the track
                 is used for filtering.
-            order_by (Optional[str]): Key used for ordering the results.
-            order (Optional[str]): Order in which to retrieve results ("asc" or "desc").
-            limit (Optional[int]): Limit the number of returned results.
-            offset (Optional[int]): Offset into the paginated results (requires limit).
+            order_by (str, optional): Key used for ordering the results.
+            order (str, optional): Order in which to retrieve results ("asc" or "desc").
+            limit (int, optional): Limit the number of returned results.
+            offset (int, optional): Offset into the paginated results (requires limit).
 
         Returns:
             Union[List, Iterator]: List or generator of tracks, depending on the
@@ -1442,6 +1467,7 @@ class NendoLibraryPlugin(NendoPlugin):
         value: str,
         user_id: Optional[Union[str, uuid.UUID]] = None,
         order_by: Optional[str] = None,
+        order: str = "asc",
         limit: Optional[int] = None,
         offset: Optional[int] = None,
     ) -> Union[List, Iterator]:
@@ -1450,7 +1476,9 @@ class NendoLibraryPlugin(NendoPlugin):
         Args:
             value (str): The search value to filter by.
             user_id (Union[str, UUID], optional): The user ID to filter for.
-            order_by (str, optional): Ordering.
+            order_by (str, optional): Name of the field by which to order.
+                Defaults to None in which case no specific ordering will be applied.
+            order (str, optional): Ordering direction. Defaults to "asc".
             limit (str, optional): Pagination limit.
             offset (str, optional): Pagination offset.
 
@@ -1463,7 +1491,7 @@ class NendoLibraryPlugin(NendoPlugin):
     @abstractmethod
     def filter_tracks(
         self,
-        filters: Optional[dict] = None,
+        filters: Optional[Dict[str, Any]] = None,
         search_meta: Optional[Dict[str, Any]] = None,
         track_type: Optional[Union[str, List[str]]] = None,
         user_id: Optional[Union[str, uuid.UUID]] = None,
@@ -1477,7 +1505,7 @@ class NendoLibraryPlugin(NendoPlugin):
         """Obtain tracks from the db by filtering over plugin data.
 
         Args:
-            filters (Optional[dict]): Dictionary containing the filters to apply.
+            filters (dict, optional): Dictionary containing the filters to apply.
                 Defaults to None.
             search_meta (dict): Dictionary containing the keywords to search for
                 over the track.resource.meta field. The dictionary's values
@@ -1506,26 +1534,29 @@ class NendoLibraryPlugin(NendoPlugin):
     def remove_track(
         self,
         track_id: Union[str, uuid.UUID],
-        remove_relationships: bool = False,
-        remove_plugin_data: bool = False,
-        remove_resources: bool = True,
         user_id: Optional[Union[str, uuid.UUID]] = None,
+        remove_relationships: bool = False,
+        remove_plugin_data: bool = True,
+        remove_resources: bool = True,
     ) -> bool:
         """Delete track from library by ID.
 
         Args:
             track_id (Union[str, uuid.UUID]): The ID of the track to remove.
+            user_id (Union[str, UUID], optional): The ID of the user
+                owning the track.
             remove_relationships (bool):
                 If False prevent deletion if related tracks exist,
                 if True delete relationships together with the object.
+                Defaults to False.
             remove_plugin_data (bool):
                 If False prevent deletion if related plugin data exist,
                 if True delete plugin data together with the object.
+                Defaults to True.
             remove_resources (bool):
                 If False, keep the related resources, e.g. files,
                 if True, delete the related resources.
-            user_id (Union[str, UUID], optional): The ID of the user
-                owning the track.
+                Defaults to True.
 
         Returns:
             success (bool): True if removal was successful, False otherwise
@@ -1570,6 +1601,7 @@ class NendoLibraryPlugin(NendoPlugin):
         track_ids: Optional[List[Union[str, uuid.UUID]]] = None,
         description: str = "",
         collection_type: str = "collection",
+        visibility: Visibility = Visibility.private,
         meta: Optional[Dict[str, Any]] = None,
     ) -> NendoCollection:
         """Creates a new collection and saves it into the DB.
@@ -1581,6 +1613,8 @@ class NendoLibraryPlugin(NendoPlugin):
             user_id (UUID, optional): The ID of the user adding the collection.
             description (str): Description of the collection.
             collection_type (str): Type of the collection. Defaults to "collection".
+            visibility (str, optional): Visibility of the track in multi-user settings.
+                Defaults to "private".
             meta (Dict[str, Any]): Metadata of the collection.
 
         Returns:
@@ -1650,7 +1684,7 @@ class NendoLibraryPlugin(NendoPlugin):
             track_ids (List[Union[str, uuid.UUID]]): List of track ids to add.
             collection_id (Union[str, uuid.UUID]): ID of the collection to
                 which to add the track.
-            meta (Dict[str, Any]): Metadata of the relationship.
+            meta (Dict[str, Any], optional): Metadata of the relationship.
 
         Returns:
             NendoCollection: The updated NendoCollection object.
@@ -1660,15 +1694,18 @@ class NendoLibraryPlugin(NendoPlugin):
     @abstractmethod
     def get_collection_tracks(
         self,
-        collection_id: Union[str, uuid.UUID],
+        collection_id: uuid.UUID,
+        order: Optional[str] = "asc",
     ) -> List[NendoTrack]:
         """Get all tracks of a collection.
 
         Args:
-            collection_id (Union[str, uuid.UUID]): Collection id.
+            collection_id (Union[str, uuid.UUID]): ID of the collection from which to
+                get all tracks.
+            order (str, optional): Ordering direction. Defaults to "asc".
 
         Returns:
-            List[schema.NendoTrack]: List of tracks in the collection.
+            List[NendoTrack]: List of tracks in the collection.
         """
         raise NotImplementedError
 
@@ -1705,10 +1742,11 @@ class NendoLibraryPlugin(NendoPlugin):
 
         Args:
             user_id (Union[str, UUID], optional): The user ID to filter for.
-            order_by (Optional[str]): Key used for ordering the results.
-            order (Optional[str]): Order in which to retrieve results ("asc" or "desc").
-            limit (Optional[int]): Limit the number of returned results.
-            offset (Optional[int]): Offset into the paginated results (requires limit).
+            order_by (str, optional): Key used for ordering the results.
+            order (str, optional): Order in which to retrieve results
+                ("asc" or "desc").
+            limit (int, optional): Limit the number of returned results.
+            offset (int, optional): Offset into the paginated results (requires limit).
 
         Returns:
             Union[List, Iterator]: List or generator of collections, depending on the
@@ -1720,6 +1758,7 @@ class NendoLibraryPlugin(NendoPlugin):
     def find_collections(
         self,
         value: str = "",
+        collection_types: Optional[List[str]] = None,
         user_id: Optional[Union[str, uuid.UUID]] = None,
         order_by: Optional[str] = None,
         order: Optional[str] = "asc",
@@ -1730,11 +1769,12 @@ class NendoLibraryPlugin(NendoPlugin):
 
         Args:
             value (str): Term to be searched for in the description and meta field.
+            collection_types (List[str], optional): Collection types to filter for.
             user_id (Union[str, UUID], optional): The user ID to filter for.
-            order_by (Optional[str]): Key used for ordering the results.
-            order (Optional[str]): Order in which to retrieve results ("asc" or "desc").
-            limit (Optional[int]): Limit the number of returned results.
-            offset (Optional[int]): Offset into the paginated results (requires limit).
+            order_by (str, optional): Key used for ordering the results.
+            order (str, optional): Order in which to retrieve results ("asc" or "desc").
+            limit (int, optional): Limit the number of returned results.
+            offset (int, optional): Offset into the paginated results (requires limit).
 
         Returns:
             Union[List, Iterator]: List or generator of collections, depending on the
@@ -1746,6 +1786,7 @@ class NendoLibraryPlugin(NendoPlugin):
     def get_related_collections(
         self,
         collection_id: Union[str, uuid.UUID],
+        direction: str = "to",
         user_id: Optional[Union[str, uuid.UUID]] = None,
         order_by: Optional[str] = None,
         order: Optional[str] = "asc",
@@ -1756,11 +1797,13 @@ class NendoLibraryPlugin(NendoPlugin):
 
         Args:
             collection_id (str): ID of the collection to be searched for.
+            direction (str, optional): The relationship direction
+                Can be either one of "to", "from", or "both". Defaults to "to".
             user_id (Union[str, UUID], optional): The user ID to filter for.
-            order_by (Optional[str]): Key used for ordering the results.
-            order (Optional[str]): Order in which to retrieve results ("asc" or "desc").
-            limit (Optional[int]): Limit the number of returned results.
-            offset (Optional[int]): Offset into the paginated results (requires limit).
+            order_by (str, optional): Key used for ordering the results.
+            order (str, optional): Order in which to retrieve results ("asc" or "desc").
+            limit (int, optional): Limit the number of returned results.
+            offset (int, optional): Offset into the paginated results (requires limit).
 
         Returns:
             Union[List, Iterator]: List or generator of collections, depending on the
@@ -1808,12 +1851,14 @@ class NendoLibraryPlugin(NendoPlugin):
     def remove_collection(
         self,
         collection_id: uuid.UUID,
+        user_id: Optional[Union[str, uuid.UUID]] = None,
         remove_relationships: bool = False,
     ) -> bool:
         """Deletes the collection identified by `collection_id`.
 
         Args:
             collection_id (uuid.UUID): ID of the collection to remove.
+            user_id (Union[str, UUID], optional): The ID of the user.
             remove_relationships (bool, optional):
                 If False prevent deletion if related tracks exist,
                 if True delete relationships together with the object.
@@ -1864,7 +1909,7 @@ class NendoLibraryPlugin(NendoPlugin):
 
         Args:
             file_path (Union[FilePath, str]): Path to the file to store as blob.
-            user_id (Optional[Union[str, uuid.UUID]], optional): ID of the user
+            user_id (Union[str, uuid.UUID], optional): ID of the user
                 who's storing the file to blob.
 
         Returns:
@@ -1882,7 +1927,7 @@ class NendoLibraryPlugin(NendoPlugin):
 
         Args:
             data (bytes): The blob to store.
-            user_id (Optional[Union[str, uuid.UUID]], optional): ID of the user
+            user_id (Union[str, uuid.UUID], optional): ID of the user
                 who's storing the bytes to blob.
 
         Returns:
@@ -1900,7 +1945,7 @@ class NendoLibraryPlugin(NendoPlugin):
 
         Args:
             blob_id (uuid.UUID): The UUID of the blob.
-            user_id (Optional[Union[str, uuid.UUID]], optional): ID of the user
+            user_id (Union[str, uuid.UUID], optional): ID of the user
                 who's loading the blob.
 
         Returns:
@@ -1920,7 +1965,7 @@ class NendoLibraryPlugin(NendoPlugin):
         Args:
             blob_id (uuid.UUID): The UUID of the blob.
             remove_resources (bool): If True, remove associated resources.
-            user_id (Optional[Union[str, uuid.UUID]], optional): ID of the user
+            user_id (Union[str, uuid.UUID], optional): ID of the user
                 who's removing the blob.
 
         Returns:
@@ -1958,7 +2003,7 @@ class NendoLibraryPlugin(NendoPlugin):
         """Verify the library's integrity.
 
         Args:
-            action (Optional[str], optional): Default action to choose when an
+            action (str, optional): Default action to choose when an
                 inconsistency is detected. Choose between (i)gnore and (r)emove.
         """
         original_config = {}
@@ -2040,7 +2085,7 @@ class NendoLibraryPlugin(NendoPlugin):
         Args:
             force (bool, optional): Flag that specifies whether to ask the user for
                 confirmation of the operation. Default is to ask the user.
-            user_id (Optional[Union[str, uuid.UUID]], optional): ID of the user
+            user_id (Union[str, uuid.UUID], optional): ID of the user
                 who's resetting the library. If none is given, the configured
                 nendo default user will be used.
         """
