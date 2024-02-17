@@ -2295,6 +2295,10 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                         model.TrackCollectionRelationshipDB.source,
                     ),
                 )
+            else:
+                query = query.options(
+                    noload(model.NendoCollectionDB.related_tracks),
+                )
             collection_db = query.filter(
                 model.NendoCollectionDB.id == collection_id,
             ).first()
