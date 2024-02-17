@@ -36,6 +36,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
     - `NendoLibrary.remove_collection()`
 - Changed the signature of the `NendoLibrary.add_plugin_data()` function to make specifying of the `plugin_version` optional. If none is given, version will be inferred from the currently registered version of the plugin.
 - Extended the signature of the `NendoLibrary.filter_collections()` function by the `collection_types` parameter to also allow for filtering by a list of collection types.
+- Added the `NendoLibrary.library_size()` and `NendoLirary.collection_size()` functions to get the number of tracks in the library per user and the number of tracks in a collection, respectively.
 - A bunch of small bugfixes, too many to mention them all here.
 
 <small>[Compare with 0.1.3](https://github.com/okio-ai/nendo/compare/0.1.3...0.2.0)</small>

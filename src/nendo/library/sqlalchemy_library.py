@@ -106,14 +106,6 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
     #
     # ==========================
 
-    def __len__(self):
-        """Obtain the number of tracks."""
-        with self.session_scope() as session:
-            return session.query(model.NendoTrackDB).count()
-
-    def __iter__(self):
-        return self
-
     def __next__(self):
         with self.session_scope() as session:
             query = session.query(model.NendoTrackDB)
@@ -1800,6 +1792,58 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
     #
     # ===============================
 
+
+    @schema.NendoPlugin.stream_output
+    def _get_collections_db(
+        self,
+        query: Optional[Query] = None,
+        user_id: Optional[uuid.UUID] = None,
+        order_by: Optional[str] = None,
+        order: Optional[str] = "asc",
+        limit: Optional[int] = None,
+        offset: Optional[int] = None,
+        session: Optional[Session] = None,
+    ) -> Union[List, Iterator]:
+        """Get a list of collections from the DB."""
+        s = session or self.session_scope()
+        with s as session_local:
+            if query:
+                query_local = query
+            else:
+                query_local = session_local.query(model.NendoCollectionDB)
+                if user_id is not None:
+                    query_local = query_local.filter(
+                        model.NendoCollectionDB.user_id == user_id,
+                    )
+
+            query_local = query_local.options(noload("*"))
+
+            if order_by:
+                if order_by == "random":
+                    query_local = query_local.order_by(func.random())
+                elif order == "desc":
+                    query_local = query_local.order_by(desc(order_by))
+                else:
+                    query_local = query_local.order_by(asc(order_by))
+
+            if limit:
+                query_local = query_local.limit(limit)
+                if offset:
+                    query_local = query_local.offset(offset)
+
+            if self.config.stream_chunk_size > 1:
+                chunk = []
+                for collection in query_local:
+                    chunk.append(schema.NendoCollection.model_validate(collection))
+                    if len(chunk) == self.config.stream_chunk_size:
+                        yield chunk
+                        chunk = []
+                if chunk:  # yield remaining tracks in non-full chunk
+                    yield chunk
+            else:
+                for collection in query_local:
+                    yield schema.NendoCollection.model_validate(collection)
+
     def _get_related_collections_query(
         self,
         collection_id: uuid.UUID,
@@ -2302,57 +2346,6 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                 session,
             )
 
-    @schema.NendoPlugin.stream_output
-    def _get_collections_db(
-        self,
-        query: Optional[Query] = None,
-        user_id: Optional[uuid.UUID] = None,
-        order_by: Optional[str] = None,
-        order: Optional[str] = "asc",
-        limit: Optional[int] = None,
-        offset: Optional[int] = None,
-        session: Optional[Session] = None,
-    ) -> Union[List, Iterator]:
-        """Get a list of collections from the DB."""
-        s = session or self.session_scope()
-        with s as session_local:
-            if query:
-                query_local = query
-            else:
-                query_local = session_local.query(model.NendoCollectionDB)
-                if user_id is not None:
-                    query_local = query_local.filter(
-                        model.NendoCollectionDB.user_id == user_id,
-                    )
-
-            query_local = query_local.options(noload("*"))
-
-            if order_by:
-                if order_by == "random":
-                    query_local = query_local.order_by(func.random())
-                elif order == "desc":
-                    query_local = query_local.order_by(desc(order_by))
-                else:
-                    query_local = query_local.order_by(asc(order_by))
-
-            if limit:
-                query_local = query_local.limit(limit)
-                if offset:
-                    query_local = query_local.offset(offset)
-
-            if self.config.stream_chunk_size > 1:
-                chunk = []
-                for collection in query_local:
-                    chunk.append(schema.NendoCollection.model_validate(collection))
-                    if len(chunk) == self.config.stream_chunk_size:
-                        yield chunk
-                        chunk = []
-                if chunk:  # yield remaining tracks in non-full chunk
-                    yield chunk
-            else:
-                for collection in query_local:
-                    yield schema.NendoCollection.model_validate(collection)
-
     def find_collections(
         self,
         value: str = "",
@@ -2452,6 +2445,30 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                 limit,
                 offset,
                 session,
+            )
+
+    def collection_size(
+        self,
+        collection_id: Union[str, uuid.UUID],
+    ) -> int:
+        """Get the number of tracks in a collection.
+
+        Args:
+            collection_id (Union[str, uuid.UUID]): The ID of the collection.
+
+        Returns:
+            int: The number of tracks.
+        """
+        collection_id = ensure_uuid(collection_id)
+        with self.session_scope() as session:
+            return (
+                session.query(model.NendoTrackDB).join(
+                    model.TrackCollectionRelationshipDB,
+                    model.TrackCollectionRelationshipDB.source_id
+                    == model.NendoTrackDB.id,
+                )
+                .filter(model.TrackCollectionRelationshipDB.target_id == collection_id)
+                .count()
             )
 
     def remove_track_from_collection(
@@ -2919,6 +2936,27 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
     # MISCELLANEOUS MANAGEMENT FUNCTIONS
     #
     # ==================================
+
+    def library_size(
+        self,
+        user_id: Optional[Union[str, uuid.UUID]] = None,
+    ) -> int:
+        """Get the number of all tracks in the library (per user).
+
+        Args:
+            user_id (Union[str, uuid.UUID], optional): The ID of the user.
+                If not specified, the number of all tracks across all users is
+                returned. Defaults to None.
+
+        Returns:
+            int: The number of tracks.
+        """
+        user_id = self._ensure_user_uuid(user_id)
+        with self.session_scope() as session:
+            query = session.query(model.NendoTrackDB)
+            if user_id is not None:
+                query = query.filter(model.NendoTrackDB.user_id == user_id)
+            return query.count()
 
     def reset(
         self,

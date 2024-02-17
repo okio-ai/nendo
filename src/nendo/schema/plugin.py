@@ -1845,6 +1845,21 @@ class NendoLibraryPlugin(NendoPlugin):
         raise NotImplementedError
 
     @abstractmethod
+    def collection_size(
+        self,
+        collection_id: Union[str, uuid.UUID],
+    ) -> int:
+        """Get the number of tracks in a collection.
+
+        Args:
+            collection_id (Union[str, uuid.UUID]): The ID of the collection.
+
+        Returns:
+            int: The number of tracks.
+        """
+        raise NotImplementedError
+
+    @abstractmethod
     def remove_track_from_collection(
         self,
         track_id: Union[str, uuid.UUID],
@@ -1992,6 +2007,33 @@ class NendoLibraryPlugin(NendoPlugin):
     # MISCELLANEOUS MANAGEMENT FUNCTIONS
     #
     # ==================================
+
+    def __len__(self):
+        """Obtain the number of tracks."""
+        return self.library_size()
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        raise NotImplementedError
+
+    @abstractmethod
+    def library_size(
+        self,
+        user_id: Optional[Union[str, uuid.UUID]] = None,
+    ) -> int:
+        """Get the number of all tracks in the library (per user).
+
+        Args:
+            user_id (Union[str, uuid.UUID], optional): The ID of the user.
+                If not specified, the number of all tracks across all users is
+                returned. Defaults to None.
+
+        Returns:
+            int: The number of tracks.
+        """
+        raise NotImplementedError
 
     def get_track_or_collection(
         self,
