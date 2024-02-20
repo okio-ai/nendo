@@ -45,7 +45,7 @@
 
 Nendo core is the AI audio tool suite allowing you to effortlessly develop audio apps that amplify efficiency & creativity across all aspects of audio production.
 
-> **Note**: This repository contains the source core for the Nendo core python framework. To use the Nendo web application, refer to the [Nendo Platform](https://github.com/okio-ai/Nendo-Platform) repository.
+:grey_exclamation: _This repository contains the source core for the Nendo core python framework. To use the Nendo web application, refer to the [Nendo Platform](https://github.com/okio-ai/Nendo-Platform) repository._
 
 **[Features](#features)** - **[Requirements](#requirements)** - **[Installation](#installation)** - **[Usage](#usage)** - **[Plugins](#plugins)** - **[Contributing](#contributing)**
 
