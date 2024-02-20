@@ -50,6 +50,7 @@ nav:
     - Analysis Plugin: development/analysisplugindev.md
     - Generate Plugin: development/generateplugindev.md
     - Effect Plugin: development/effectplugindev.md
+    - Embedding Plugin: development/embeddingplugindev.md
     - Library Plugin: development/libraryplugindev.md
   # - App Development: development/appdev.md
   # - Code of Conduct: code_of_conduct.md
