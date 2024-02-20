@@ -39,7 +39,7 @@
 
 **Documentation**: <a href="https://okio.ai/docs" target="_blank">okio.ai/docs</a>
 
-**Web Application**: <a href="https://github.com/okio-ai/Nendo-Platform" target="_blank">Nendo Platform</a>
+**Nendo Plugin**: <a href="https://github.com/okio-ai/Nendo-Platform" target="_blank">Repository</a>
 
 ---
 

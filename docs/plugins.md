@@ -79,7 +79,7 @@ For information on how to implement your own plugins of each type, refer to the 
 
 === "Embedding Plufgin"
 
-    Embedding plugins are used to compute high-dimensional vector embeddings from `NendoTrack` and `NendoCollection` objects. They may use the track's waveform, a text representation of it's metadata, or both.
+    Embedding plugins are used to compute vector embeddings from `NendoTrack` and `NendoCollection` objects. They may use the track's waveform, a text representation of it's metadata, or both.
 
 === "Utility Plugin"
 
