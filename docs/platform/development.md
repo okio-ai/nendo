@@ -1,6 +1,6 @@
 # Development
 
-Nendo Platform comes with a convenient _development mode_, in which the [nendo_web](web.md) and [nendo_server](server.md) components are updated upon any changes made to the codebase.
+Nendo Platform comes with a convenient _development mode_, in which the [nendo_web](web/index.md) and [nendo_server](server/index.md) components are updated upon any changes made to the codebase.
 
 Use the following script to prepare the development environment for you:
 

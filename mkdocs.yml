@@ -35,9 +35,10 @@ nav:
   - Development: platform/development.md
   - Components:
     - API Server:
-      - Overview: platform/server.md
-      - API docs: platform/server_api.md
-    - Web Frontend: platform/web.md
+      - platform/server/index.md
+      - API docs: platform/server/api.md
+    - Web Frontend:
+      - platform/web/index.md
 # defer to gen-files + literate-nav
 - API reference:
   - nendo: reference/

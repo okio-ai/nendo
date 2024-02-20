@@ -76,3 +76,11 @@ For information on how to implement your own plugins of each type, refer to the 
 
     Library plugins are used to modify the `NendoLibrary` itself, e.g. change the way data is saved, 
     allow different integrations with other data management methods or services.
+
+=== "Embedding Plufgin"
+
+    Embedding plugins are used to compute high-dimensional vector embeddings from `NendoTrack` and `NendoCollection` objects. They may use the track's waveform, a text representation of it's metadata, or both.
+
+=== "Utility Plugin"
+
+    Utility plugins are simple plugins that take and input, for example a piece of text, and transform it. A typical example of such a plugin would be a Large Language Model that is used to summarize the transcription of a song's lyrics.

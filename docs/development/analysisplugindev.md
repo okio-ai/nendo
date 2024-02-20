@@ -47,22 +47,17 @@ class DestructionAnalyzer(NendoAnalysisPlugin):
         return {"destroyed": "yes"}
 
     @NendoAnalysisPlugin.run_track
-    def is_fucked_up(self, track: NendoTrack, use_full_analysis: bool = True):
+    def is_destroyed(self, track: NendoTrack, use_full_analysis: bool = True):
         if use_full_analysis:
             self.analyze_devo_ness(track)
         self.analyze_destruction(track)
 ```
 
-The basics are very simple: Make sure to extend `NendoAnalysisPlugin`, and make sure that your extended class has at
-least
-one method that is decorated with `@NendoAnalysisPlugin.run_track` or `@NendoAnalysisPlugin.run_collection`.
-If you used the official setup script, these steps are already taken care of.
+The basics are very simple: Make sure to extend `NendoAnalysisPlugin`, and make sure that your extended class has at least one method that is decorated with `@NendoAnalysisPlugin.run_track` or `@NendoAnalysisPlugin.run_collection`. If you used the official setup script, these steps are already taken care of.
 
-Then your plugin can have a few different methods that do the concrete metadata extraction and addition to
-the `NendoTrack`.
-These need to be decorated with `@NendoAnalysisPlugin.plugin_data`.
+Then your plugin can have a few different methods that do the concrete metadata extraction and addition to the `NendoTrack`. These need to be decorated with `@NendoAnalysisPlugin.plugin_data`.
 
-#### NendoAnalysis.plugin_data
+#### NendoAnalysisPlugin.plugin_data
 
 This decorator automatically adds all calculated metadata to the `NendoTrack`'s `List[PluginData]`.
 To learn more about `NendoTrack` or `PluginData` check out the API reference.

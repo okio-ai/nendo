@@ -17,5 +17,5 @@ Visit the following pages to learn more about how to run and use Nendo Platform:
 - [:octicons-arrow-right-24: Get Started](platform/usage.md)
 - [:octicons-arrow-right-24: Configuration Guide](platform/config.md)
 - [:octicons-arrow-right-24: Development Guide](platform/development.md)
-- [:octicons-arrow-right-24: Learn about the Nendo Platform API Server](platform/server.md)
-- [:octicons-arrow-right-24: Learn about the Nendo Platform Web Frontend](platform/web.md)
+- [:octicons-arrow-right-24: Learn about the Nendo Platform API Server](platform/server/index.md)
+- [:octicons-arrow-right-24: Learn about the Nendo Platform Web Frontend](platform/web/index.md)

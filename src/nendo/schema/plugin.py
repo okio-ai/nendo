@@ -632,7 +632,7 @@ class NendoEmbeddingPlugin(NendoPlugin):
                         )
                 except AttributeError as e:  # noqa: F841
                     self.logger.error(
-                        "Error adding the embedding to the library. "
+                        "Failed to save the embedding to the library. "
                         "Please use a library plugin with vector support to "
                         "enable automatic storing of embeddings.",
                     )
@@ -678,7 +678,7 @@ class NendoEmbeddingPlugin(NendoPlugin):
                         )
                 except AttributeError as e:  # noqa: F841
                     self.logger.error(
-                        "Error adding the embedding to the library. "
+                        "Failed to save the embedding to the library. "
                         "Please use a library plugin with vector support to "
                         "enable automatic storing of embeddings.",
                     )
@@ -749,7 +749,7 @@ class NendoEmbeddingPlugin(NendoPlugin):
                         )
                 except AttributeError as e:  # noqa: F841
                     self.logger.error(
-                        "Error adding the embedding to the library. "
+                        "Failed to save the embedding to the library. "
                         "Please use a library plugin with vector support to "
                         "enable automatic storing of embeddings.",
                     )
@@ -793,7 +793,7 @@ class NendoEmbeddingPlugin(NendoPlugin):
                         )
                 except AttributeError as e:  # noqa: F841
                     self.logger.error(
-                        "Error adding the embedding to the library. "
+                        "Failed to save the embedding to the library. "
                         "Please use a library plugin with vector support to "
                         "enable automatic storing of embeddings.",
                     )
@@ -838,7 +838,7 @@ class NendoEmbeddingPlugin(NendoPlugin):
                         )
                 except AttributeError as e:  # noqa: F841
                     self.logger.error(
-                        "Error adding the embedding to the library. "
+                        "Failed to save the embedding to the library. "
                         "Please use a library plugin with vector support to "
                         "enable automatic storing of embeddings.",
                     )
@@ -903,7 +903,7 @@ class NendoEmbeddingPlugin(NendoPlugin):
                         )
                 except AttributeError as e:  # noqa: F841
                     self.logger.error(
-                        "Error adding the embedding to the library. "
+                        "Failed to save the embedding to the library. "
                         "Please use a library plugin with vector support to "
                         "enable automatic storing of embeddings.",
                     )
@@ -948,7 +948,7 @@ class NendoEmbeddingPlugin(NendoPlugin):
                             )
                     except AttributeError as e:  # noqa: F841
                         self.logger.error(
-                            "Error adding the embedding to the library. "
+                            "Failed to save the embedding to the library. "
                             "Please use a library plugin with vector support to "
                             "enable automatic storing of embeddings.",
                         )
@@ -998,7 +998,7 @@ class NendoEmbeddingPlugin(NendoPlugin):
                     )
             except AttributeError as e:  # noqa: F841
                 self.logger.error(
-                    "Error adding the embedding to the library. "
+                    "Failed to save the embedding to the library. "
                     "Please use a library plugin with vector support to "
                     "enable automatic storing of embeddings.",
                 )
