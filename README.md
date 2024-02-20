@@ -35,11 +35,11 @@
 
 ---
 
-**Website**: <a href="https://okio.ai/" target="_blank">https://okio.ai/</a>
+**Website**: <a href="https://okio.ai/" target="_blank">okio.ai</a>
 
-**Documentation**: <a href="https://okio.ai/docs" target="_blank">https://okio.ai/docs/</a>
+**Documentation**: <a href="https://okio.ai/docs" target="_blank">okio.ai/docs</a>
 
-**Web application**: <a href="https://github.com/okio-ai/Nendo-Platform" target="_blank">https://github.com/okio-ai/Nendo-Platform</a>
+**Web Application**: <a href="https://github.com/okio-ai/Nendo-Platform" target="_blank">Nendo Platform</a>
 
 ---
 
