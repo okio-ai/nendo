@@ -95,6 +95,8 @@ target-version = "py38"
 # Same as Black.
 line-length = 88
 src = ["src"]
+
+[lint]
 select = [
     "A",
     # "ANN", # flake8-annotations
@@ -192,17 +194,15 @@ exclude = [
 ]
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 
-[tool.ruff.mccabe]
+[lint.mccabe]
 max-complexity = 10
 
-[tool.ruff.isort]
+[lint.isort]
+profile = "black"
 known-first-party = ["nendo"]
 
-[tool.ruff.pydocstyle]
+[lint.pydocstyle]
 convention = "google"
-
-[tool.isort]
-profile = "black"
 
 [build-system]
 requires = ["poetry-core"]

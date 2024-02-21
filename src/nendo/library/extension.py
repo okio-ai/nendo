@@ -151,7 +151,7 @@ class NendoLibraryVectorExtension(BaseModel):
         norm_arr1 = np.linalg.norm(vec1)
         norm_arr2 = np.linalg.norm(vec2)
         norm_mult = norm_arr1 * norm_arr2
-        if norm_mult == 0.0:  # noqa: PLR2004
+        if norm_mult == 0.0:
             raise ValueError("Division by zero in cosine similarity.")
         return dot_product / norm_mult
 

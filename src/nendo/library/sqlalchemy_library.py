@@ -1792,7 +1792,6 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
     #
     # ===============================
 
-
     @schema.NendoPlugin.stream_output
     def _get_collections_db(
         self,
@@ -2466,7 +2465,8 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         collection_id = ensure_uuid(collection_id)
         with self.session_scope() as session:
             return (
-                session.query(model.NendoTrackDB).join(
+                session.query(model.NendoTrackDB)
+                .join(
                     model.TrackCollectionRelationshipDB,
                     model.TrackCollectionRelationshipDB.source_id
                     == model.NendoTrackDB.id,
