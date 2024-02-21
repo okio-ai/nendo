@@ -10,7 +10,7 @@ It's super easy to get started with the nendo development environment. Just make
 make setup
 ```
 
-> **Note**
+> **Note**:
 > Developing for and with Nendo Core requires careful dependency management. The use of a [python virtual environment](https://docs.python.org/3/library/venv.html) like [pyenv](https://github.com/pyenv/pyenv) or [poetry](https://python-poetry.org/) is highly recommended.
 
 ## Development process

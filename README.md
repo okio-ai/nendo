@@ -53,6 +53,7 @@ Nendo core is the AI audio tool suite allowing you to effortlessly develop audio
 - Integrated essentials for audio processing and library management.
 - An extensible plugin architecture and growing ecosystem of AI Audio plugins.
 - Easily combinable tools that together address a wide range of use cases.
+- Support for storing, managing and retrieving embedding vectors.
 
 ## Requirements
 
@@ -84,7 +85,7 @@ from nendo import Nendo
 nendo = Nendo()
 ```
 
-... and just like that, you're ready to go!
+... and just like that, you're ready to go! Now, there are multiple ways to configure Nendo, refer to the [relevant documentation pages](https://okio.ai/docs/usage/config/) for more information.
 
 ## Usage
 
