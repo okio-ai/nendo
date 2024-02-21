@@ -35,8 +35,7 @@ $ export LOG_LEVEL=debug
 | log_level | LOG_LEVEL | `str` | `"info"` | The log level with which the nendo logger runs. |
 | log_file_path | LOG_FILE_PATH | `str` | `""` | The path to where the nendo log should be saved. If none is given (empty string), print to `stdout` |
 | plugins | PLUGINS | `List[str]` | `[]` | List of plugins package names to be loaded with Nendo. |
-| library_plugin | LIBRARY_PLUGIN | `str` | `"default"` | The name of the nendo library plugin to use. As all nendo plugins, their name follows the pattern `nendo_plugin_library_[name]`, where `[name]` is an arbitrary name. If set to `"default"`, the default [DuckDB](https://duckdb.org/) implementation of the [NendoLibrary]
-(library.md) will be used. |
+| library_plugin | LIBRARY_PLUGIN | `str` | `"default"` | The name of the nendo library plugin to use. Typically, its name follows the pattern `nendo_plugin_library_[name]`, where `[name]` is the name of the database backend. If set to `"default"`, the default [DuckDB](https://duckdb.org/) implementation of the [NendoLibrary](library.md) will be used. |
 | library_path | LIBRARY_PATH | `str` | `"nendo_library"` | The path to the directory to be used for storing the nendo Library files. |
 | user_name | USER_NAME | `str` | `"nendo"` | The name of the nendo user to be used for the [NendoLibrary](library.md). Only relevant if deploying nendo together with an API server. |
 | user_id | USER_ID | `str` | `"ffffffff-1111-2222-3333-1234567890ab"` | The user ID of the default user to be used for the [NendoLibrary](library.md). Only relevant if deploying nendo together with an API server. |
