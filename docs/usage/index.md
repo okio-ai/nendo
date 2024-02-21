@@ -24,6 +24,8 @@ The fundamental object in Nendo Core is the `#!python class NendoTrack`. You can
 >>> my_track = nd.add_track("/path/to/file.wav")
 >>> type(my_track)
 <class 'nendo.schema.core.NendoTrack'>
+>>> print(my_track)
+... # pretty-printed track info
 ```
 
 This will import the specified file into the [nendo library](library.md). To learn more about the `NendoTrack`, refer to the [collection user docs](tracks.md).
@@ -39,7 +41,7 @@ Multiple `NendoTrack` objects can be grouped by means of a `#!python class Nendo
 >>> my_collection = nd.add_collection(
 ... name = "Collection 1",
 ... description = "My first nendo collection.",
-... track_ids = [track.id],
+... track_ids = [my_track.id],
 ... )
 >>> type(my_collection)
 <class 'nendo.schema.core.NendoCollection'>

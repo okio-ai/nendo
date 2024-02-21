@@ -10,6 +10,9 @@ from .core import (
     NendoCollectionBase,
     NendoCollectionCreate,
     NendoCollectionSlim,
+    NendoEmbedding,
+    NendoEmbeddingBase,
+    NendoEmbeddingCreate,
     NendoPlugin,
     NendoPluginData,
     NendoPluginDataBase,
@@ -30,6 +33,7 @@ from .core import (
     NendoUserCreate,
     RegisteredNendoPlugin,
     ResourceLocation,
+    ResourceType,
     Visibility,
 )
 from .exception import (
@@ -55,6 +59,8 @@ from .exception import (
 from .plugin import (
     NendoAnalysisPlugin,
     NendoEffectPlugin,
+    NendoEmbeddingPlugin,
     NendoGeneratePlugin,
     NendoLibraryPlugin,
+    NendoUtilityPlugin,
 )

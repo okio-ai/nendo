@@ -126,9 +126,9 @@ class Nendo:
                         )
                         return plugin_instance
             except Exception as e:  # noqa: BLE001
-                raise schema.NendoPluginLoadingError(
+                raise schema.NendoPluginLoadingError(  # noqa: B904
                     f"Failed to import plugin '{module_name}'. Error: {e}",
-                ) from None
+                )
         else:
             raise schema.NendoPluginLoadingError(
                 f"Plugin {module_name} not installed in system. "
@@ -137,6 +137,7 @@ class Nendo:
 
     def _load_plugins(self, plugin_names: List[str] = settings.plugins) -> None:
         """Load the specified nendo plugins."""
+        # TODO sort the list of plugins such that the "library" plugins are loaded last
         for module_name in plugin_names:
             plugin_instance = self._load_plugin(module_name=module_name)
             self.plugins.add(

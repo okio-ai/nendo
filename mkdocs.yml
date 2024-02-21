@@ -1,5 +1,5 @@
-site_name: "Nendo Core"
-site_description: "The Nendo Core AI Audio framework."
+site_name: "Nendo"
+site_description: "The Nendo AI Audio Framework and Platform."
 site_url: "https://nendo.ai"
 repo_url: "https://github.com/okio-ai/nendo"
 repo_name: "okio-ai/nendo"
@@ -21,13 +21,24 @@ nav:
   - Tracks: usage/tracks.md
   - Collections: usage/collections.md
   - Library: usage/library.md
-  - Plugins: 'plugins.md'
+  - Plugins: plugins.md
   - Guides:
     - FAQ: usage/faq.md
     - Troubleshooting: usage/troubleshooting.md
 - Plugins: 
-  - Overview: 'plugins.md'
+  - Overview: plugins.md
   - Catalog: '*include ./plugindocs/*/mkdocs.yml'
+- Platform:
+  - Overview: platform.md
+  - Quick Start: platform/usage.md
+  - Configuration: platform/config.md
+  - Development: platform/development.md
+  - Components:
+    - API Server:
+      - platform/server/index.md
+      - API docs: platform/server/api.md
+    - Web Frontend:
+      - platform/web/index.md
 # defer to gen-files + literate-nav
 - API reference:
   - nendo: reference/
@@ -39,15 +50,11 @@ nav:
     - Analysis Plugin: development/analysisplugindev.md
     - Generate Plugin: development/generateplugindev.md
     - Effect Plugin: development/effectplugindev.md
+    - Embedding Plugin: development/embeddingplugindev.md
     - Library Plugin: development/libraryplugindev.md
   # - App Development: development/appdev.md
   # - Code of Conduct: code_of_conduct.md
   - Coverage report: coverage.md
-# - Insiders:
-#   - insiders/index.md
-#   - Getting started:
-#     - Installation: insiders/installation.md
-#     - Changelog: insiders/changelog.md
 - Okio's website: https://okio.ai/
 
 theme:
@@ -123,6 +130,7 @@ markdown_extensions:
 plugins:
 - search
 - monorepo
+- swagger-ui-tag
 - coverage:
     page_name: coverage
     html_report_dir: htmlcov

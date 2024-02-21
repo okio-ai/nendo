@@ -40,6 +40,15 @@ In nendo we currently differentiate between four types of plugins.
 
     - [nendo_plugin_fx_core](https://github.com/okio-ai/nendo_plugin_fx_core)
 
+=== "Embedding Plugins"
+
+    Plugins that compute vector embeddings of `NendoTrack`s are called embedding plugins.
+    They take either a track's signal or first create a text representation from it or take both and then embed it into a vector space. The resulting embeddings can be used for further processing, sampling, similarity search, etc.
+
+    Examples:
+
+    - [nendo_plugin_embed_clap](https://github.com/okio-ai/nendo_plugin_embed_clap)
+
 === "Library Plugins"
 
     !!! warning

@@ -1,5 +1,5 @@
 # -*- encoding: utf-8 -*-
-# ruff: noqa: A003
+# ruff: noqa: A003, D101, D102, D103
 """Module containing all SQLAlchemy ORM models for the nendo core schema.
 
 Used by the SQLAlchemy implementation of the nendo library.
@@ -7,7 +7,6 @@ Used by the SQLAlchemy implementation of the nendo library.
 
 from __future__ import annotations
 
-import json
 import uuid
 from datetime import date, datetime
 
@@ -34,22 +33,22 @@ def convert(obj):
         return convert(list(obj))
     if isinstance(obj, np.float32):
         return float(obj)
-    if isinstance(obj, NestedMutableList) or isinstance(obj, list):
+    if isinstance(obj, (NestedMutableList, list)):
         return [convert(x) for x in obj]
-    if isinstance(obj, NestedMutableDict) or isinstance(obj, dict):
+    if isinstance(obj, (NestedMutableDict, dict)):
         return {k: convert(v) for k, v in obj.items()}
+    if isinstance(obj, str):
+        # Remove non-ASCII characters from the string
+        return obj.encode("ascii", "ignore").decode("ascii").replace("\u0000", "")
     return obj
 
 
 class JSONEncodedDict(TypeDecorator):
     impl = JSON
+    cache_ok = True
 
-    def process_bind_param(self, value, dialect):
-        return json.dumps(convert(value))
-
-    def process_result_value(self, value, dialect):
-        if value is not None:
-            return json.loads(value)
+    def process_bind_param(self, value, dialect):  # noqa: ARG002
+        return convert(value)
 
 
 class TrackTrackRelationshipDB(Base):
@@ -59,7 +58,9 @@ class TrackTrackRelationshipDB(Base):
     target_id = Column(UUID(as_uuid=True), ForeignKey("tracks.id"))
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(
-        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
     )
     relationship_type = Column(String)
     meta = Column(mutable_json_type(dbtype=JSONEncodedDict, nested=True))
@@ -141,7 +142,9 @@ class NendoTrackDB(Base):
     track_type = Column(String, default="track")
     visibility = Column(ENUM(schema.Visibility), default="private")
     updated_at = Column(
-        DateTime(timezone=True), default=func.now(), onupdate=func.now()
+        DateTime(timezone=True),
+        default=func.now(),
+        onupdate=func.now(),
     )
     created_at = Column(DateTime(timezone=True), default=func.now())
     images = Column(mutable_json_type(dbtype=JSONEncodedDict, nested=True))
@@ -151,9 +154,9 @@ class NendoTrackDB(Base):
     # Relationships
     related_tracks = relationship(
         "TrackTrackRelationshipDB",
-        primaryjoin="NendoTrackDB.id==TrackTrackRelationshipDB.source_id",
-        foreign_keys="[TrackTrackRelationshipDB.source_id]",
-        back_populates="source",
+        primaryjoin="NendoTrackDB.id==TrackTrackRelationshipDB.target_id",
+        foreign_keys="[TrackTrackRelationshipDB.target_id]",
+        back_populates="target",
         # cascade="all, delete-orphan",
     )
     related_collections = relationship(
@@ -214,8 +217,8 @@ class NendoCollectionDB(Base):
 
     related_collections = relationship(
         "CollectionCollectionRelationshipDB",
-        primaryjoin="NendoCollectionDB.id==CollectionCollectionRelationshipDB.source_id",
-        foreign_keys="[CollectionCollectionRelationshipDB.source_id]",
-        back_populates="source",
+        primaryjoin="NendoCollectionDB.id==CollectionCollectionRelationshipDB.target_id",
+        foreign_keys="[CollectionCollectionRelationshipDB.target_id]",
+        back_populates="target",
         # cascade="all, delete-orphan",
     )

@@ -64,7 +64,7 @@ jobs:
       #     key: ${{ runner.os }}-python-${{ env.pythonLocation }}-${{ matrix.pydantic-version }}-${{ hashFiles('pyproject.toml') }}-test-v06
       - name: Install OS Dependencies
         # if: steps.cache.outputs.cache-hit != 'true'
-        run: sudo apt-get install -y libsndfile1-dev libportaudio2 ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y libsndfile1-dev libportaudio2 ffmpeg
       - name: Install Dependencies
         # if: steps.cache.outputs.cache-hit != 'true'
         run: make setup-test

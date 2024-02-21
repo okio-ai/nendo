@@ -20,7 +20,7 @@ from abc import ABC, abstractmethod
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from enum import Enum
-from typing import Any, ClassVar, Dict, Iterator, List, Optional, Tuple, Union
+from typing import Any, Callable, ClassVar, Dict, Iterator, List, Optional, Tuple, Union
 
 import librosa
 import numpy as np
@@ -46,6 +46,8 @@ class ResourceType(str, Enum):
 
     audio: str = "audio"
     image: str = "image"
+    text: str = "text"
+    video: str = "video"
     model: str = "model"
     blob: str = "blob"
 
@@ -228,11 +230,9 @@ class NendoPluginData(NendoPluginDataBase):
     updated_at: datetime = Field(default_factory=datetime.now)
 
     def __str__(self):
-        # output = f"id: {self.id}"
         output = "----------------"
         output += f"\nplugin name: {self.plugin_name}"
         output += f"\nplugin version: {self.plugin_version}"
-        # output += f"\nuser id: {self.user_id}"
         output += f"\nkey: {self.key}"
         output += f"\nvalue: {self.value}"
         return output
@@ -337,6 +337,8 @@ class NendoTrack(NendoTrackBase):
 
     def __len__(self):
         """Return the length of the track in seconds."""
+        if np.ndim(self.signal) == 1:
+            return self.signal.shape[0] / self.sr
         return self.signal.shape[1] / self.sr
 
     @classmethod
@@ -353,12 +355,16 @@ class NendoTrack(NendoTrackBase):
         self.__dict__["sr"] = rsr
         return new_signal
 
-    def local(self) -> str:
+    def local(self, user_id: Optional[Union[str, uuid.UUID]] = None) -> str:
         """Get a path to a local file handle on the track."""
         return self.nendo_instance.library.storage_driver.as_local(
             file_path=self.resource.src,
             location=self.resource.location,
-            user_id=self.nendo_instance.config.user_id,
+            user_id=(
+                str(user_id)
+                if user_id is not None
+                else str(self.nendo_instance.config.user_id)
+            ),
         )
 
     def overlay(self, track: NendoTrack, gain_db: Optional[float] = 0) -> NendoTrack:
@@ -421,6 +427,17 @@ class NendoTrack(NendoTrackBase):
             NendoTrack: The track itself.
         """
         self.nendo_instance.library.update_track(track=self)
+        return self
+
+    def refresh(self) -> NendoTrack:
+        """Refreshes the track with the latest values from the library.
+
+        Returns:
+            NendoTrack: The track itself.
+        """
+        refreshed_track = self.nendo_instance.library.get_track(self.id)
+        for attr in vars(refreshed_track):
+            setattr(self, attr, getattr(refreshed_track, attr))
         return self
 
     def delete(
@@ -520,7 +537,7 @@ class NendoTrack(NendoTrackBase):
         plugin_name: str,
         plugin_version: Optional[str] = None,
         user_id: Optional[Union[str, uuid.UUID]] = None,
-        replace: bool = True,
+        replace: Optional[bool] = None,
     ) -> NendoTrack:
         """Add plugin data to a NendoTrack and persist changes into the DB.
 
@@ -534,7 +551,8 @@ class NendoTrack(NendoTrackBase):
             user_id (Union[str, UUID], optional): ID of user adding the plugin data.
             replace (bool, optional): Flag that determines whether
                 the last existing data point for the given plugin name and -version
-                is overwritten or not. Defaults to True.
+                is overwritten or not. If undefined, the nendo configuration's
+                `replace_plugin_data` value will be used.
 
         Returns:
             NendoTrack: The track itself.
@@ -553,28 +571,29 @@ class NendoTrack(NendoTrackBase):
 
     def get_plugin_data(
         self,
-        plugin_name: str = "",
-        key: str = "",
+        plugin_name: Optional[str] = None,
+        plugin_version: Optional[str] = None,
+        key: Optional[str] = None,
+        user_id: Optional[Union[str, uuid.UUID]] = None,
     ) -> List[NendoPluginData]:
-        """Get all plugin data related to the given plugin name and the given key.
+        """Get all plugin data for a given plugin name, version, key and user_id.
 
         Note: Function behavior
-            - If no plugin_name is specified, all plugin data found with the given
-                key is returned.
-            - If no key is specified, all plugin data found with the given
-                plugin_name is returned.
-            - If neither key, nor plugin_name is specified, all plugin data
-                is returned.
+            - If plugin_name, plugin_version and/or key are specified, the
+                plugin data will be filtered w.r.t. them.
             - Certain kinds of plugin data are actually stored as blobs
                 and the corresponding blob id is stored in the plugin data's value
                 field. Those will be automatically loaded from the blob into memory
                 and a `NendoBlob` object will be returned inside `plugin_data.value`.
 
         Args:
-            plugin_name (str): The name of the plugin to get the data for.
-                Defaults to "".
-            key (str): The key to filter plugin data for.
-                Defaults to "".
+            plugin_name (str, optional): The name of the plugin with respect to which
+                the data is filtered.
+            plugin_version (str, optional): The version of the plugin with respect to
+                which the data is filtered.
+            key (str, optional): The key to filter plugin data for.
+            user_id (Union[str, uuid.UUID], optional): The user ID to filter the
+                plugin data.
 
         Returns:
             List[NendoPluginData]: List of nendo plugin data entries.
@@ -584,37 +603,41 @@ class NendoTrack(NendoTrackBase):
             r"[89ab][0-9a-f]{3}-[0-9a-f]{12}\Z",
             re.I,
         )
-        plugin_data = []
-        for pd in self.plugin_data:
-            if (pd.plugin_name == plugin_name or len(plugin_name) == 0) and (
-                pd.key == key or len(key) == 0
-            ):
-                # if we have a UUID, load the corresponding blob
-                if uuid_pattern.match(pd.value):
-                    loaded_blob = self.nendo_instance.library.load_blob(
-                        blob_id=uuid.UUID(pd.value),
-                    )
-                    pd.value = loaded_blob
-                plugin_data.append(pd)
+        plugin_data = self.nendo_instance.library.get_plugin_data(
+            track_id=self.id,
+            user_id=user_id,
+            plugin_name=plugin_name,
+            plugin_version=plugin_version,
+            key=key,
+        )
+        for pd in plugin_data:
+            # if we have a UUID, load the corresponding blob
+            if uuid_pattern.match(pd.value):
+                loaded_blob = self.nendo_instance.library.load_blob(
+                    blob_id=uuid.UUID(pd.value),
+                )
+                pd.value = loaded_blob
         return plugin_data
 
     def get_plugin_value(
         self,
         key: str,
-    ) -> str:
+        user_id: Optional[Union[str, uuid.UUID]] = None,
+    ) -> Optional[str]:
         """Return the value for a specific plugin_data key.
 
         Args:
             key (str): The key for which the plugin data value should
                 be returned.
+            user_id (Union[str, uuid.UUID], optional): The user ID to filter the
+                plugin data.
 
         Returns:
             str: The plugin data value belonging to the given key.
                 If multiple plugin_data entries exist for the given key,
                 the first one is returned. If none exist, None is returned.
         """
-        pd = self.get_plugin_data(key = key)
-        print(pd)
+        pd = self.get_plugin_data(key=key, user_id=user_id)
         if len(pd) == 0:
             return None
         return pd[0].value
@@ -643,16 +666,16 @@ class NendoTrack(NendoTrackBase):
         Returns:
             NendoTrack: The track itself.
         """
-        related_track = self.nendo_instance.library.add_related_track(
+        self.nendo_instance.library.add_related_track(
             file_path=file_path,
             related_track_id=self.id,
             track_type=track_type,
-            user_id=user_id or self.user_id,
+            user_id=user_id,
             track_meta=track_meta,
             relationship_type=relationship_type,
             meta=meta,
         )
-        self.related_tracks.append(related_track.related_tracks[0])
+        self.refresh()
         return self
 
     def add_related_track_from_signal(
@@ -681,7 +704,7 @@ class NendoTrack(NendoTrackBase):
         Returns:
             NendoTrack: The track itself.
         """
-        related_track = self.nendo_instance.library.add_related_track_from_signal(
+        self.nendo_instance.library.add_related_track_from_signal(
             signal=signal,
             sr=sr,
             track_type=track_type,
@@ -691,7 +714,7 @@ class NendoTrack(NendoTrackBase):
             relationship_type=relationship_type,
             meta=meta,
         )
-        self.related_tracks.append(related_track.related_tracks[0])
+        self.refresh()
         return self
 
     def has_relationship(self, relationship_type: str = "relationship") -> bool:
@@ -709,24 +732,32 @@ class NendoTrack(NendoTrackBase):
             return False
         return any(r.relationship_type == relationship_type for r in all_relationships)
 
-    def has_relationship_to(self, track_id: Union[str, uuid.UUID]) -> bool:
-        """Check if the track has a relationship to the track with the given track_id.
+    def has_related_track(
+        self,
+        track_id: Union[str, uuid.UUID],
+        direction: str = "to",
+    ) -> bool:
+        """Check if there is a related track with the given track_id.
 
         Args:
-            track_id (Union[str, uuid.UUID]): ID of the track to which to check
-                for relationships.
+            track_id (Union[str, uuid.UUID]): ID of the potential related track.
+            direction (str, optional): The relationship direction.
+                Can be either one of "to", "from", or "both".
+                Defaults to "to".
 
         Returns:
-            bool: True if a relationship to the track with the given track_id exists.
-                False otherwise.
+            bool: True if a related track with the given track_id and direction
+                of relationship exists. False otherwise.
         """
         track_id = ensure_uuid(track_id)
-        if self.related_tracks is None:
-            return False
-        return any(r.target_id == track_id for r in self.related_tracks)
+        related_tracks = self.get_related_tracks(
+            direction=direction,
+        )
+        return any(rt.id == track_id for rt in related_tracks)
 
     def get_related_tracks(
         self,
+        direction: str = "to",
         user_id: Optional[Union[str, uuid.UUID]] = None,
         order_by: Optional[str] = None,
         order: Optional[str] = "asc",
@@ -736,6 +767,7 @@ class NendoTrack(NendoTrackBase):
         """Get all tracks to which the current track has a relationship.
 
         Args:
+            direction (str, optional): The relationship direction ("to", "from", "all").
             user_id (Union[str, UUID], optional): The user ID to filter for.
             order_by (Optional[str]): Key used for ordering the results.
             order (Optional[str]): Order in which to retrieve results ("asc" or "desc").
@@ -747,6 +779,7 @@ class NendoTrack(NendoTrackBase):
         """
         return self.nendo_instance.library.get_related_tracks(
             track_id=self.id,
+            direction=direction,
             user_id=user_id,
             order_by=order_by,
             order=order,
@@ -778,6 +811,7 @@ class NendoTrack(NendoTrackBase):
             position=position,
             meta=meta,
         )
+        self.refresh()
         return self
 
     def remove_from_collection(
@@ -797,6 +831,23 @@ class NendoTrack(NendoTrackBase):
             track_id=self.id,
             collection_id=collection_id,
         )
+        self.refresh()
+        return self
+
+    def relate_to_track(
+        self,
+        track_id: Union[str, uuid.UUID],
+        relationship_type: str = "relationship",
+        meta: Optional[Dict[str, Any]] = None,
+    ):
+        """Add relationship to another track."""
+        self.nendo_instance.library.add_track_relationship(
+            track_one_id=self.id,
+            track_two_id=track_id,
+            relationship_type=relationship_type,
+            meta=meta,
+        )
+        self.refresh()
         return self
 
     def process(self, plugin: str, **kwargs: Any) -> Union[NendoTrack, NendoCollection]:
@@ -896,7 +947,6 @@ class NendoCollection(NendoCollectionBase):
         output = f"id: {self.id}"
         output += f"\ntype: {self.collection_type}"
         output += f"\ndescription: {self.description}"
-        output += f"\nuser id: {self.user_id}"
         output += f"\nvisibility: {self.visibility}"
         output += f"{pretty_print(self.meta)}"
         return output
@@ -939,6 +989,17 @@ class NendoCollection(NendoCollectionBase):
             NendoCollection: The collection itself.
         """
         self.nendo_instance.library.update_collection(collection=self)
+        return self
+
+    def refresh(self) -> NendoCollection:
+        """Refreshes the collection with the latest values from the library.
+
+        Returns:
+            NendoCollection: The collection itself.
+        """
+        refreshed_collection = self.nendo_instance.library.get_collection(self.id)
+        for attr in vars(refreshed_collection):
+            setattr(self, attr, getattr(refreshed_collection, attr))
         return self
 
     def delete(
@@ -1000,13 +1061,25 @@ class NendoCollection(NendoCollectionBase):
             r.relationship_type == relationship_type for r in self.related_collections
         )
 
-    def has_relationship_to(self, collection_id: Union[str, uuid.UUID]) -> bool:
-        """Check if the collection has a relationship to the specified collection ID."""
-        collection_id = ensure_uuid(collection_id)
-        if self.related_collections is None:
-            return False
+    def has_related_collection(
+        self,
+        collection_id: Union[str, uuid.UUID],
+    ) -> bool:
+        """Check if the collection has a relationship to the specified collection ID.
 
-        return any(r.target_id == collection_id for r in self.related_collections)
+        Args:
+            collection_id (Union[str, uuid.UUID]): The target collection ID for which
+                to check if it is related to the current collection.
+
+        Returns:
+            bool: True if the collection has a relationship either from or to the
+                collection with the given `collection_id`. False otherwise.
+        """
+        collection_id = ensure_uuid(collection_id)
+        related_collections = self.get_related_collections(
+            direction="both",
+        )
+        return any(rt.id == collection_id for rt in related_collections)
 
     def add_track(
         self,
@@ -1051,11 +1124,7 @@ class NendoCollection(NendoCollectionBase):
             track_id=track_id,
             collection_id=self.id,
         )
-        # NOTE the following removes _all_ relationships between the track and
-        # the collection. In the future, this could be refined to account for cases
-        # where multiple relationships of different types exist between a track
-        # and a collection
-        self.related_tracks = [t for t in self.related_tracks if t.id != track_id]
+        self.refresh()
         return self
 
     def add_related_collection(
@@ -1089,6 +1158,7 @@ class NendoCollection(NendoCollectionBase):
             relationship_type=relationship_type,
             meta=meta,
         )
+        self.refresh()
         return self
 
     def set_meta(self, meta: Dict[str, Any]) -> NendoCollection:
@@ -1109,6 +1179,7 @@ class NendoCollection(NendoCollectionBase):
 
     def get_related_collections(
         self,
+        direction: str = "to",
         user_id: Optional[Union[str, uuid.UUID]] = None,
         order_by: Optional[str] = None,
         order: Optional[str] = "asc",
@@ -1118,6 +1189,9 @@ class NendoCollection(NendoCollectionBase):
         """Get all collections to which the current collection has a relationship.
 
         Args:
+            direction (str, optional): The relationship direction.
+                Can be either one of "to", "from", or "both".
+                Defaults to "to".
             user_id (Union[str, UUID], optional): The user ID to filter for.
             order_by (Optional[str]): Key used for ordering the results.
             order (Optional[str]): Order in which to retrieve results ("asc" or "desc").
@@ -1128,7 +1202,8 @@ class NendoCollection(NendoCollectionBase):
             List[NendoCollection]: List containting all related NendoCollections
         """
         return self.nendo_instance.library.get_related_collections(
-            track_id=self.id,
+            collection_id=self.id,
+            direction=direction,
             user_id=user_id,
             order_by=order_by,
             order=order,
@@ -1157,7 +1232,7 @@ class NendoCollection(NendoCollectionBase):
             Dict[str, Any]: Meta entry for given key.
         """
         if not self.has_meta(key):
-            logger.error("Key not found in meta: %s", key)
+            logger.warning("Key not found in meta: %s", key)
             return None
         return self.meta[key]
 
@@ -1339,7 +1414,7 @@ class NendoPlugin(BaseModel, ABC):
 
     # ------------------
 
-    def _get_track_or_collection_from_args(
+    def _pop_track_or_collection_from_args(
         self,
         **kwargs,
     ) -> Tuple[Union[NendoTrack, NendoCollection], Dict]:
@@ -1356,6 +1431,24 @@ class NendoPlugin(BaseModel, ABC):
         return (
             self.nendo_instance.library.get_track_or_collection(track_or_collection_id),
             kwargs,
+        )
+
+    def _generate_multiple_wrapped_warning(
+        self,
+        wrapped_methods: List[Callable],
+    ) -> str:
+        warning_module = (
+            inspect.getmodule(type(self))
+            .__name__.split(".")[0]
+            .replace("nendo_plugin_", "")
+        )
+        warning_methods = [
+            f"nendo.plugins.{warning_module}.{m.__name__}()" for m in wrapped_methods
+        ]
+        return (
+            " Warning: Multiple wrapped methods found in plugin. "
+            "Please call the plugin via one of the following methods: "
+            f"{', '.join(warning_methods)}."
         )
 
     def _run_default_wrapped_method(
@@ -1375,17 +1468,8 @@ class NendoPlugin(BaseModel, ABC):
         wrapped_methods = get_wrapped_methods(self)
 
         if len(wrapped_methods) > 1:
-            warning_module = (
-                inspect.getmodule(type(self))
-                .__name__.split(".")[0]
-                .replace("nendo_plugin_", "")
-            )
-            warning_methods = [
-                f"nendo.plugins.{warning_module}.{m.__name__}()"
-                for m in wrapped_methods
-            ]
             self.logger.warning(
-                f" Warning: Multiple wrapped methods found in plugin. Please call the plugin via one of the following methods: {', '.join(warning_methods)}.",
+                self._generate_multiple_wrapped_warning(wrapped_methods),
             )
             return None
 
@@ -1675,17 +1759,18 @@ class NendoStorageLocalFS(NendoStorage):
         **kwargs: Any,
     ):
         super().__init__(**kwargs)
-        self.library_path = os.path.join(library_path, user_id)
+        self.library_path = library_path
         self.init_storage_for_user(user_id=user_id)
 
-    def init_storage_for_user(self, user_id: str) -> str:  # noqa: ARG002
+    def init_storage_for_user(self, user_id: str) -> str:
         """Initialize local storage for user."""
-        if not os.path.isdir(self.library_path):
+        user_lib_path = os.path.join(self.library_path, user_id)
+        if not os.path.isdir(user_lib_path):
             logger.info(
-                f"Library path {self.library_path} does not exist, creating now.",
+                f"Library path {user_lib_path} does not exist, creating now.",
             )
-            os.makedirs(self.library_path)
-        return self.library_path
+            os.makedirs(user_lib_path)
+        return user_lib_path
 
     def generate_filename(self, filetype: str, user_id: str) -> str:  # noqa: ARG002
         """Generate a unique filename."""
@@ -1712,10 +1797,10 @@ class NendoStorageLocalFS(NendoStorage):
         file_name: str,
         signal: np.ndarray,
         sr: int,
-        user_id: str,  # noqa: ARG002
+        user_id: str,
     ) -> str:
         """Save the given signal to storage."""
-        target_file_path = self.get_file(file_name=file_name, user_id="")
+        target_file_path = self.get_file(file_name=file_name, user_id=user_id)
         sf.write(target_file_path, signal, sr, subtype="PCM_16")
         return target_file_path
 
@@ -1723,10 +1808,10 @@ class NendoStorageLocalFS(NendoStorage):
         self,
         file_name: str,
         data: bytes,
-        user_id: str,  # noqa: ARG002
+        user_id: str,
     ) -> str:
         """Save the given bytes to storage."""
-        target_file_path = self.get_file(file_name=file_name, user_id="")
+        target_file_path = self.get_file(file_name=file_name, user_id=user_id)
         with open(target_file_path, "wb") as target_file:
             pickle.dump(data, target_file)
         return target_file_path
@@ -1749,13 +1834,13 @@ class NendoStorageLocalFS(NendoStorage):
         """Get the file name (without the path)."""
         return os.path.basename(src)
 
-    def get_file(self, file_name: str, user_id: str) -> str:  # noqa: ARG002
+    def get_file(self, file_name: str, user_id: str) -> str:
         """Get the full path to the file."""
-        return os.path.join(self.library_path, file_name)
+        return os.path.join(self.library_path, user_id, file_name)
 
-    def list_files(self, user_id: str) -> List[str]:  # noqa: ARG002
+    def list_files(self, user_id: str) -> List[str]:
         """List all files contained in the storage."""
-        with os.scandir(self.library_path) as entries:
+        with os.scandir(os.path.join(self.library_path, user_id)) as entries:
             return [entry.name for entry in entries if entry.is_file()]
 
     def get_bytes(self, file_name: str, user_id: str) -> Any:
@@ -1820,6 +1905,9 @@ class NendoPluginRegistry:
             return self._plugins[f"nendo_plugin_{plugin_name}"]
         raise AttributeError(f"Plugin '{plugin_name}' not found")
 
+    def __iter__(self):
+        return iter(self._plugins.values())
+
     def __str__(self):
         output = ""
         if not self._plugins:
@@ -1871,3 +1959,29 @@ class NendoPluginRegistry:
             plugin_name (str): Name of the plugin to remove.
         """
         del self._plugins[plugin_name]
+
+
+class NendoEmbeddingBase(BaseModel, ABC):  # noqa: D101
+    model_config = ConfigDict(
+        from_attributes=True,
+        arbitrary_types_allowed=True,
+    )
+
+    track_id: uuid.UUID
+    user_id: Optional[uuid.UUID] = None
+    plugin_name: str
+    plugin_version: str
+    text: str
+    embedding: np.ndarray
+
+
+class NendoEmbedding(NendoEmbeddingBase):
+    """Class representing an embedding of a NendoTrack into a vector space."""
+
+    id: uuid.UUID = Field(default_factory=uuid.uuid4)
+    created_at: datetime = Field(default_factory=datetime.now)
+    updated_at: datetime = Field(default_factory=datetime.now)
+
+
+class NendoEmbeddingCreate(NendoEmbeddingBase):  # noqa: D101
+    pass

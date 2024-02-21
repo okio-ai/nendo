@@ -35,8 +35,7 @@ $ export LOG_LEVEL=debug
 | log_level | LOG_LEVEL | `str` | `"info"` | The log level with which the nendo logger runs. |
 | log_file_path | LOG_FILE_PATH | `str` | `""` | The path to where the nendo log should be saved. If none is given (empty string), print to `stdout` |
 | plugins | PLUGINS | `List[str]` | `[]` | List of plugins package names to be loaded with Nendo. |
-| library_plugin | LIBRARY_PLUGIN | `str` | `"default"` | The name of the nendo library plugin to use. As all nendo plugins, their name follows the pattern `nendo_plugin_library_[name]`, where `[name]` is an arbitrary name. If set to `"default"`, the default [DuckDB](https://duckdb.org/) implementation of the [NendoLibrary]
-(library.md) will be used. |
+| library_plugin | LIBRARY_PLUGIN | `str` | `"default"` | The name of the nendo library plugin to use. Typically, its name follows the pattern `nendo_plugin_library_[name]`, where `[name]` is the name of the database backend. If set to `"default"`, the default [DuckDB](https://duckdb.org/) implementation of the [NendoLibrary](library.md) will be used. |
 | library_path | LIBRARY_PATH | `str` | `"nendo_library"` | The path to the directory to be used for storing the nendo Library files. |
 | user_name | USER_NAME | `str` | `"nendo"` | The name of the nendo user to be used for the [NendoLibrary](library.md). Only relevant if deploying nendo together with an API server. |
 | user_id | USER_ID | `str` | `"ffffffff-1111-2222-3333-1234567890ab"` | The user ID of the default user to be used for the [NendoLibrary](library.md). Only relevant if deploying nendo together with an API server. |
@@ -45,6 +44,7 @@ $ export LOG_LEVEL=debug
 | copy_to_library | COPY_TO_LIBRARY | `bool` | `True` | Flag that determines whether an imported track's file should be copied into the nendo library. |
 | auto_convert | AUTO_CONVERT | `bool` | `True` | Flag that determines whether an imported track's file should be converted to Nendo's standard file format (`.wav`). |
 | skip_duplicate | SKIP_DUPLICATE | `bool` | `True` | Flag that determines whether a track that points to a file that already exists in the library can be important multiple times. If True, always the file that already exists in the library will be used instead. |
+| replace_plugin_data | REPLACE_PLUGIN_DATA | `bool` | `False` | Flag that determines whether plugin data should be replaced, if for a specific plugin name, version and key, two values are added consecutively via `track.add_plugin_data()` or `nendo.library.add_plugin_data()`. If `True`, the second call will cause Nendo to overwrite the existing value for the given plugin name, version and key combination. If `False`, the plugin data will be added in addition to the existing one. Defaults to `False`. |
 | max_threads | MAX_THREADS | `int` | `2` | Maximum number of threads to be used for multiprocessing tasks. |
 | batch_size | BATCH_SIZE | `int` | `10` | Batch size to use for multiprocessing tasks. |
 | stream_mode | STREAM_MODE | `bool` | `False` | Flag that enables `stream mode`: With stream mode, all functions that return multiple items, such as e.g. `nd.get_tracks()` return an `Iterator` instead of a `List`. |

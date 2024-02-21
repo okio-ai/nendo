@@ -35,11 +35,11 @@
 
 ---
 
-**Website**: <a href="https://okio.ai/" target="_blank">https://okio.ai/</a>
+**Website**: <a href="https://okio.ai/" target="_blank">okio.ai</a>
 
-**Documentation**: <a href="https://okio.ai/docs" target="_blank">https://okio.ai/docs/</a>
+**Documentation**: <a href="https://okio.ai/docs" target="_blank">okio.ai/docs</a>
 
-**Source Code**: <a href="https://github.com/okio-ai/nendo" target="_blank">https://github.com/okio-ai/nendo</a>
+**Nendo Platform**: <a href="https://github.com/okio-ai/Nendo-Platform" target="_blank">Repository</a>
 
 ---
 
@@ -53,6 +53,7 @@ Nendo core is the AI audio tool suite allowing you to effortlessly develop audio
 - Integrated essentials for audio processing and library management.
 - An extensible plugin architecture and growing ecosystem of AI Audio plugins.
 - Easily combinable tools that together address a wide range of use cases.
+- Support for storing, managing and retrieving embedding vectors.
 
 ## Requirements
 
@@ -84,7 +85,7 @@ from nendo import Nendo
 nendo = Nendo()
 ```
 
-... and just like that, you're ready to go!
+... and just like that, you're ready to go! Now, there are multiple ways to configure Nendo, refer to the [relevant documentation pages](https://okio.ai/docs/usage/config/) for more information.
 
 ## Usage
 

@@ -77,6 +77,73 @@ class PluginDataTest(unittest.TestCase):
         self.assertEqual(pd, None)
         self.assertEqual(len(track.plugin_data), 0)
 
+    def test_replace_plugin_data_off(self):
+        """Test the adding of plugin data to a `NendoTrack`."""
+        nd.library.reset(force=True)
+        nd.config.replace_plugin_data = False
+        track = nd.library.add_track(file_path="tests/assets/test.mp3")
+        nd.library.add_plugin_data(
+            track_id=track.id,
+            plugin_name="test_plugin",
+            plugin_version="1.0",
+            key="test",
+            value="value",
+        )
+        nd.library.add_plugin_data(
+            track_id=track.id,
+            plugin_name="test_plugin",
+            plugin_version="1.0",
+            key="test",
+            value="value2",
+        )
+        track = nd.library.get_track(track_id=track.id)
+        self.assertEqual(len(track.plugin_data), 2)
+        nd.library.add_plugin_data(
+            track_id=track.id,
+            plugin_name="test_plugin",
+            plugin_version="1.0",
+            key="test",
+            value="value",
+            replace=True,
+        )
+        track = nd.library.get_track(track_id=track.id)
+        self.assertEqual(len(track.plugin_data), 2)
+
+
+    def test_replace_plugin_data_on(self):
+        """Test the adding of plugin data to a `NendoTrack`."""
+        nd.library.reset(force=True)
+        nd.config.replace_plugin_data = True
+        track = nd.library.add_track(file_path="tests/assets/test.mp3")
+        nd.library.add_plugin_data(
+            track_id=track.id,
+            plugin_name="test_plugin",
+            plugin_version="1.0",
+            key="test",
+            value="value",
+        )
+        pd_2 = nd.library.add_plugin_data(
+            track_id=track.id,
+            plugin_name="test_plugin",
+            plugin_version="1.0",
+            key="test",
+            value="value2",
+        )
+        track = nd.library.get_track(track_id=track.id)
+        self.assertEqual(len(track.plugin_data), 1)
+        self.assertEqual(track.plugin_data[0].id, pd_2.id)
+        nd.library.add_plugin_data(
+            track_id=track.id,
+            plugin_name="test_plugin",
+            plugin_version="1.0",
+            key="test",
+            value="value2",
+            replace=False,
+        )
+        track = nd.library.get_track(track_id=track.id)
+        self.assertEqual(len(track.plugin_data), 2)
+        nd.config.replace_plugin_data = False
+
     def test_get_plugin_data(self):
         """Test the getting of plugin data from a `NendoTrack`."""
         nd.library.reset(force=True)
@@ -105,6 +172,7 @@ class PluginDataTest(unittest.TestCase):
         self.assertEqual(plugin_data_2[0].value, "value2")
 
     def test_get_plugin_value(self):
+        """Test the getting of a single plugin value from `NendoTrack`."""
         nd.library.reset(force=True)
         track = nd.library.add_track(file_path="tests/assets/test.mp3")
         _ = nd.library.add_plugin_data(
@@ -138,7 +206,7 @@ class PluginDataTest(unittest.TestCase):
         self.assertEqual(type(example_data), list)
         self.assertEqual(example_data[0].value, pd.value)
 
-    def test_filter_by_plugin_data_and_filename(self):
+    def test_filter_by_plugin_data(self):
         """Test filtering by plugin data and track file name."""
         nd.library.reset(force=True)
         track = nd.library.add_track(file_path="tests/assets/test.mp3")
@@ -151,8 +219,6 @@ class PluginDataTest(unittest.TestCase):
         )
         example_data = nd.library.filter_tracks(
             filters={"test": "value"},
-            resource_filters={},
-            order_by="random",
             plugin_names=["test_plugin"],
         )[0].get_plugin_data(plugin_name="test_plugin")
         self.assertEqual(type(example_data), list)

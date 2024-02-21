@@ -1,25 +1,32 @@
 """Unit tests for the Nendo plugin system."""
+# ruff: noqa: ARG002
 import unittest
+from unittest.mock import Mock, patch
 
 import numpy as np
 
 from nendo import (
+    DuckDBLibrary,
     Nendo,
     NendoAnalysisPlugin,
     NendoCollection,
     NendoConfig,
     NendoEffectPlugin,
+    NendoEmbedding,
+    NendoEmbeddingPlugin,
     NendoGeneratePlugin,
     NendoTrack,
 )
 
-nd = Nendo(
-    config=NendoConfig(
-        log_level="DEBUG",
-        library_plugin="default",
-        library_path="tests/library",
-    ),
-)
+with patch.object(DuckDBLibrary, "add_embedding", Mock(), create=True) as mock_method:
+    nd = Nendo(
+        config=NendoConfig(
+            log_level="DEBUG",
+            library_plugin="default",
+            library_path="tests/library",
+            copy_to_library=False,
+        ),
+    )
 
 
 def init_plugin(clazz):
@@ -99,6 +106,30 @@ class ExampleGeneratePlugin(NendoGeneratePlugin):
         if signal is None:
             signal, sr = np.zeros([2, 23000]), 44100
         return signal, sr
+
+
+class ExampleEmbeddingPlugin(NendoEmbeddingPlugin):
+    """Example plugin for testing the NendoEmbeddingPlugin class."""
+
+    @NendoEmbeddingPlugin.run_text
+    def text_function(self, text=None):
+        """Example text function."""
+        return "text_function", np.zeros(5)
+
+    @NendoEmbeddingPlugin.run_signal_and_text
+    def signal_and_text_function(self, signal=None, sr=None, text=None):
+        """Example signal and text function."""
+        return "signal_and_text_function", np.zeros(5)
+
+    @NendoEmbeddingPlugin.run_track
+    def track_function(self, track=None):
+        """Example track function."""
+        return "track_function", np.zeros(5)
+
+    @NendoEmbeddingPlugin.run_collection
+    def collection_function(self, collection=None):
+        """Example collection function."""
+        return "collection_function", np.zeros(5)
 
 
 class NendoAnalysisPluginTest(unittest.TestCase):
@@ -334,3 +365,206 @@ class NendoEffectPluginTest(unittest.TestCase):
         result = plug.signal_function(collection=coll)
         self.assertEqual(type(result), NendoCollection)
         self.assertEqual(len(result), 1)
+
+
+class NendoEmbeddingPluginTest(unittest.TestCase):
+    """Unit test class for testing the NendoEffectPlugin class."""
+
+    def test_run_track_decorator_with_track(self):
+        """Test the `NendoEmbeddingPlugin.run_track` decorator with a `NendoTrack`."""
+        nd.library.reset(force=True)
+        plug = init_plugin(ExampleEmbeddingPlugin)
+        track = nd.library.add_track(file_path="tests/assets/test.wav")
+
+        result = plug.track_function(track=track)
+        self.assertEqual(type(result), NendoEmbedding)
+        self.assertEqual(result.text, "track_function")
+        self.assertTrue(np.all(result.embedding == np.zeros(5)))
+
+    def test_run_track_decorator_with_collection(self):
+        """Test the `NendoEmbeddingPlugin.run_track` decorator with a `NendoCollection`."""
+        nd.library.reset(force=True)
+        plug = init_plugin(ExampleEmbeddingPlugin)
+        track = nd.library.add_track(file_path="tests/assets/test.wav")
+        coll = nd.library.add_collection(name="test_collection", track_ids=[track.id])
+
+        result = plug.track_function(collection=coll)
+        self.assertEqual(type(result), list)
+        self.assertEqual(type(result[0]), NendoEmbedding)
+        self.assertEqual(result[0].text, "track_function")
+        self.assertTrue(np.all(result[0].embedding == np.zeros(5)))
+
+    def test_run_track_decorator_with_text(self):
+        """Test the `NendoEmbeddingPlugin.run_track` decorator with a `NendoTrack`."""
+        nd.library.reset(force=True)
+        plug = init_plugin(ExampleEmbeddingPlugin)
+
+        result = plug.track_function(text="test")
+        self.assertEqual(type(result), NendoEmbedding)
+        self.assertEqual(result.text, "track_function")
+        self.assertTrue(np.all(result.embedding == np.zeros(5)))
+
+    def test_run_track_decorator_with_signal_and_text(self):
+        """Test the `NendoEmbeddingPlugin.run_track` decorator with a `NendoTrack`."""
+        nd.library.reset(force=True)
+        plug = init_plugin(ExampleEmbeddingPlugin)
+
+        result = plug.track_function(signal=np.zeros(5), sr=5000, text="test")
+        self.assertEqual(type(result), NendoEmbedding)
+        self.assertEqual(result.text, "track_function")
+        self.assertTrue(np.all(result.embedding == np.zeros(5)))
+
+    def test_run_collection_decorator_with_track(self):
+        """Test the `NendoEmbeddingPlugin.run_collection` decorator with a `NendoTrack`."""
+        nd.library.reset(force=True)
+        plug = init_plugin(ExampleEmbeddingPlugin)
+        track = nd.library.add_track(file_path="tests/assets/test.wav")
+
+        result = plug.collection_function(track=track)
+        self.assertEqual(type(result), tuple)
+        self.assertEqual(len(result), 2)
+        self.assertEqual(len(nd.library.get_collections()), 1)
+        self.assertEqual(type(result[0]), str)
+        self.assertEqual(type(result[1]), np.ndarray)
+        self.assertEqual(result[0], "collection_function")
+        self.assertTrue(np.all(result[1] == np.zeros(5)))
+
+    def test_run_collection_decorator_with_collection(self):
+        """Test the `NendoEmbeddingPlugin.run_collection` decorator with a `NendoCollection`."""
+        nd.library.reset(force=True)
+        plug = init_plugin(ExampleEmbeddingPlugin)
+        track = nd.library.add_track(file_path="tests/assets/test.wav")
+        coll = nd.library.add_collection(name="test_collection", track_ids=[track.id])
+
+        result = plug.collection_function(collection=coll)
+        self.assertEqual(type(result), tuple)
+        self.assertEqual(len(result), 2)
+        self.assertEqual(len(nd.library.get_collections()), 1)
+        self.assertEqual(type(result[0]), str)
+        self.assertEqual(type(result[1]), np.ndarray)
+        self.assertEqual(result[0], "collection_function")
+        self.assertTrue(np.all(result[1] == np.zeros(5)))
+
+    def test_run_collection_decorator_with_text(self):
+        """Test the `NendoEmbeddingPlugin.run_collection` decorator with a `NendoTrack`."""
+        nd.library.reset(force=True)
+        plug = init_plugin(ExampleEmbeddingPlugin)
+
+        result = plug.collection_function(text="test")
+        self.assertEqual(type(result), tuple)
+        self.assertEqual(len(result), 2)
+        self.assertEqual(len(nd.library.get_collections()), 1)
+        self.assertEqual(type(result[0]), str)
+        self.assertEqual(type(result[1]), np.ndarray)
+        self.assertEqual(result[0], "collection_function")
+        self.assertTrue(np.all(result[1] == np.zeros(5)))
+
+    def test_run_collection_decorator_with_text_and_signal(self):
+        """Test the `NendoEmbeddingPlugin.run_collection` decorator with a `NendoTrack`."""
+        nd.library.reset(force=True)
+        plug = init_plugin(ExampleEmbeddingPlugin)
+
+        result = plug.collection_function(signal=np.zeros(5), sr=5000, text="test")
+        self.assertEqual(type(result), tuple)
+        self.assertEqual(len(result), 2)
+        self.assertEqual(len(nd.library.get_collections()), 1)
+        self.assertEqual(type(result[0]), str)
+        self.assertEqual(type(result[1]), np.ndarray)
+        self.assertEqual(result[0], "collection_function")
+        self.assertTrue(np.all(result[1] == np.zeros(5)))
+
+    def test_run_signal_decorator_with_text(self):
+        """Test the `NendoEmbeddingPlugin.run_signal` decorator with a `NendoTrack`."""
+        nd.library.reset(force=True)
+        plug = init_plugin(ExampleEmbeddingPlugin)
+
+        result = plug.signal_and_text_function(text="test")
+        self.assertEqual(type(result), NendoEmbedding)
+        self.assertEqual(result.text, "signal_and_text_function")
+        self.assertTrue(np.all(result.embedding == np.zeros(5)))
+
+    def test_run_signal_decorator_with_signal_and_text(self):
+        """Test the `NendoEmbeddingPlugin.run_signal` decorator with a `NendoTrack`."""
+        nd.library.reset(force=True)
+        plug = init_plugin(ExampleEmbeddingPlugin)
+
+        result = plug.signal_and_text_function(signal=np.zeros(5), sr=5000, text="test")
+        self.assertEqual(type(result), NendoEmbedding)
+        self.assertEqual(result.text, "signal_and_text_function")
+        self.assertTrue(np.all(result.embedding == np.zeros(5)))
+
+    def test_run_signal_decorator_with_track(self):
+        """Test the `NendoEmbeddingPlugin.run_signal` decorator with a `NendoTrack`."""
+        nd.library.reset(force=True)
+        plug = init_plugin(ExampleEmbeddingPlugin)
+        track = nd.library.add_track(file_path="tests/assets/test.wav")
+
+        result = plug.signal_and_text_function(track=track)
+        self.assertEqual(type(result), NendoEmbedding)
+        self.assertEqual(len(nd.library.get_tracks()), 1)
+        self.assertEqual(result.text, "signal_and_text_function")
+        self.assertTrue(np.all(result.embedding == np.zeros(5)))
+
+    def test_run_signal_decorator_with_collection(self):
+        """Test the `NendoEmbeddingPlugin.run_signal` decorator with a `NendoCollection`."""
+        nd.library.reset(force=True)
+        plug = init_plugin(ExampleEmbeddingPlugin)
+        track = nd.library.add_track(file_path="tests/assets/test.wav")
+        coll = nd.library.add_collection(name="test_collection", track_ids=[track.id])
+
+        result = plug.signal_and_text_function(collection=coll)
+        self.assertEqual(type(result), list)
+        self.assertEqual(len(result), 1)
+        self.assertEqual(len(nd.library.get_collections()), 1)
+        self.assertEqual(type(result[0]), NendoEmbedding)
+        self.assertEqual(result[0].text, "signal_and_text_function")
+        self.assertTrue(np.all(result[0].embedding == np.zeros(5)))
+
+    def test_run_text_decorator_with_text(self):
+        """Test the `NendoEmbeddingPlugin.run_text` decorator with a text string."""
+        nd.library.reset(force=True)
+        plug = init_plugin(ExampleEmbeddingPlugin)
+
+        text, vector = plug.text_function(text="test")
+        self.assertEqual(type(text), str)
+        self.assertEqual(text, "text_function")
+        self.assertEqual(type(vector), np.ndarray)
+        self.assertTrue(np.all(vector == np.zeros(5)))
+
+    def test_run_text_decorator_with_text_and_signal(self):
+        """Test the `NendoEmbeddingPlugin.run_text` decorator with a signal, a signal ratio and a text."""
+        nd.library.reset(force=True)
+        plug = init_plugin(ExampleEmbeddingPlugin)
+
+        text, vector = plug.text_function(signal=np.zeros(5), sr=5000, text="test")
+        self.assertEqual(type(text), str)
+        self.assertEqual(text, "text_function")
+        self.assertEqual(type(vector), np.ndarray)
+        self.assertTrue(np.all(vector == np.zeros(5)))
+
+    def test_run_text_decorator_with_track(self):
+        """Test the `NendoEmbeddingPlugin.run_text` decorator with a `NendoTrack`."""
+        nd.library.reset(force=True)
+        plug = init_plugin(ExampleEmbeddingPlugin)
+        track = nd.library.add_track(file_path="tests/assets/test.wav")
+
+        embedding = plug.text_function(track=track)
+        self.assertEqual(type(embedding), NendoEmbedding)
+        self.assertEqual(embedding.text, "text_function")
+        self.assertEqual(type(embedding.embedding), np.ndarray)
+        self.assertTrue(np.all(embedding.embedding == np.zeros(5)))
+
+    def test_run_text_decorator_with_collection(self):
+        """Test the `NendoEmbeddingPlugin.run_text` decorator with a `NendoCollection`."""
+        nd.library.reset(force=True)
+        plug = init_plugin(ExampleEmbeddingPlugin)
+        track = nd.library.add_track(file_path="tests/assets/test.wav")
+        coll = nd.library.add_collection(name="test_collection", track_ids=[track.id])
+
+        result = plug.text_function(collection=coll)
+        self.assertEqual(type(result), list)
+        self.assertEqual(len(result), 1)
+        self.assertEqual(len(nd.library.get_collections()), 1)
+        self.assertEqual(type(result[0]), NendoEmbedding)
+        self.assertEqual(result[0].text, "text_function")
+        self.assertTrue(np.all(result[0].embedding == np.zeros(5)))

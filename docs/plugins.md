@@ -15,21 +15,17 @@ pip install nendo-plugin-example
 
 ## Enabling a plugin
 
-To configure nendo to load an installed plugin upon startup, add its name to the list of activated plugins 
-given by `NendoConfig.plugins`. For example,
+To configure nendo to load an installed plugin upon startup, add its name to the list of activated plugins given by `NendoConfig.plugins`.
 
-!!! note
-    Note that in order to be picked up by nendo,
-    the plugin name must start with the prefix `nendo_plugin_` ([flask-style](https://tedboy.github.io/flask/flask_doc.extensiondev.html)):
-
-```pycon
->>> from nendo import Nendo, NendoConfig
->>> nd = Nendo(
-...    config=NendoConfig(
-...        plugins=["nendo_plugin_example"]
-...    )
-...)
-```
+!!! example
+    ```python
+    from nendo import Nendo, NendoConfig
+    nd = Nendo(
+        config=NendoConfig(
+            plugins=["nendo_plugin_example"]
+        )
+    )
+    ```
 
 ## Running a plugin
 
@@ -47,11 +43,11 @@ Alternatively, a plugin can be called directly on a track/collection via the `pr
 !!! tip 
     This also allows you to easily chain plugins!
 
-```pycon
->>> my_track = nd.add_track(path='/path/to/file.mp3')
->>> result = track.process('nendo_plugin_example') # this runs the plugin
->>> chained_result = track.process('nendo_plugin_example').process('nendo_plugin_example_2') # this chains two plugins
-```
+    ```pycon
+    >>> my_track = nd.add_track(path='/path/to/file.mp3')
+    >>> result = track.process('nendo_plugin_example') # this runs the plugin
+    >>> chained_result = track.process('nendo_plugin_example').process('nendo_plugin_example_2') # this chains two plugins
+    ```
 
 ## Plugin Types
 
@@ -76,3 +72,11 @@ For information on how to implement your own plugins of each type, refer to the 
 
     Library plugins are used to modify the `NendoLibrary` itself, e.g. change the way data is saved, 
     allow different integrations with other data management methods or services.
+
+=== "Embedding Plugin"
+
+    Embedding plugins are used to compute vector embeddings from `NendoTrack` and `NendoCollection` objects. They may use the track's waveform, a text representation of it's metadata, or both.
+
+=== "Utility Plugin"
+
+    Utility plugins are simple plugins that take and input, for example a piece of text, and transform it. A typical example of such a plugin would be a Large Language Model that is used to summarize the transcription of a song's lyrics.
