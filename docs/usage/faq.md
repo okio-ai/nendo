@@ -1,6 +1,6 @@
 # FAQ
 
-We try to answer the most common questions that might come up when getting into nendo. If no answer to your question can be found in the paragraphs below, don't hesitate to contact us via [email](mailto:info@okio.ai) or connect with us via our [discord channel](https://discord.gg/XpkUsjwXTp).
+We try to answer the most common questions that might come up when getting into nendo. If no answer to your question can be found in the paragraphs below, don't hesitate to contact us via [email](mailto:info@okio.ai) or connect with us via our [discord channel](https://discord.gg/gaZMZKzScj).
 
 ### Why did you choose to do it this way and not that way?
 
