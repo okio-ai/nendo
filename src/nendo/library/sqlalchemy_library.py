@@ -154,7 +154,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         # skip adding a duplicate based on config flag and hashsum of the file
         skip_duplicate = skip_duplicate or self.config.skip_duplicate
         if skip_duplicate:
-            tracks = list(self.find_tracks(value=file_checksum))
+            tracks = list(self.find_tracks(value=file_checksum, user_id=user_id))
             if len(tracks) > 0:
                 return schema.NendoTrack.model_validate(tracks[0])
 
@@ -344,7 +344,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         file_paths: List[FilePath],
         track_type: str = "track",
         copy_to_library: Optional[bool] = None,
-        skip_duplicate: bool = True,
+        skip_duplicate: Optional[bool] = None,
         user_id: Optional[uuid.UUID] = None,
         meta: Optional[Dict[str, Any]] = None,
     ) -> List[schema.NendoTrack]:
@@ -626,25 +626,30 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         Returns:
             model.NendoTrackDB: The ORM model object of the upserted track
         """
+        track_dict = track.model_dump()
+        track_dict.pop("nendo_instance")
         if type(track) == schema.NendoTrackCreate:
             # create new track
-            track_dict = track.model_dump()
-            track_dict.pop("nendo_instance")
-            db_track = model.NendoTrackDB(**track_dict)
+            new_track = model.NendoTrackDB(**track_dict)
+            db_track = new_track
             session.add(db_track)
         else:
             # update existing track
+            track_dict["related_tracks"] = []
+            track_dict["related_collections"]  = []
+            track_dict["plugin_data"] = []
+            new_track = model.NendoTrackDB(**track_dict)
             db_track = (
                 session.query(model.NendoTrackDB).filter_by(id=track.id).one_or_none()
             )
             if db_track is None:
                 raise schema.NendoTrackNotFoundError("Track not found", id=track.id)
-            db_track.user_id = track.user_id
-            db_track.visibility = track.visibility
-            db_track.resource = track.resource.model_dump()
-            db_track.track_type = track.track_type
-            db_track.images = track.images
-            db_track.meta = track.meta
+            db_track.user_id = new_track.user_id
+            db_track.visibility = new_track.visibility
+            db_track.resource = new_track.resource
+            db_track.track_type = new_track.track_type
+            db_track.images = new_track.images
+            db_track.meta = new_track.meta
         session.commit()
         return db_track
 
