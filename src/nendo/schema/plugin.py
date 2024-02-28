@@ -1280,7 +1280,7 @@ class NendoLibraryPlugin(NendoPlugin):
         user_id: Optional[Union[str, uuid.UUID]] = None,
         copy_to_library: Optional[bool] = None,
         skip_duplicate: bool = True,
-    ) -> NendoCollection:
+    ) -> List[NendoTrack]:
         """Scan the provided path and upsert the information into the library.
 
         Args:
@@ -1295,7 +1295,7 @@ class NendoLibraryPlugin(NendoPlugin):
                 file checksum. Defaults to None.
 
         Returns:
-            collection (NendoCollection): The collection of tracks that were added to the Library
+            List[NendoTrack]: List of tracks that were added to the library.
         """
         raise NotImplementedError
 

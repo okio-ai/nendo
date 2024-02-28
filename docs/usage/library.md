@@ -82,11 +82,13 @@ The first step in most AI audio workflows is to import existing assets for analy
     !!! example
 
         ```pycon
-        >>> new_collection = nendo.library.add_tracks("/path/to/my/files/")
-        >>> type(new_collection)
-        <class 'nendo.schema.core.NendoCollection'>
+        >>> added_tracks = nendo.library.add_tracks("/path/to/my/files/")
+        >>> type(added_tracks)
+        <class 'list'>
         >>> len(new_collection)
         32
+        >>> type(added_tracks[0])
+        <class 'nendo.schema.core.NendoTrack'>
         ```
 
 === "Creating a collection"
