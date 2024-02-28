@@ -1022,7 +1022,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         user_id: Optional[Union[str, uuid.UUID]] = None,
         copy_to_library: Optional[bool] = None,
         skip_duplicate: bool = True,
-    ) -> schema.NendoCollection:
+    ) -> List[schema.NendoTrack]:
         """Scan the provided path and upsert the information into the library.
 
         Args:
@@ -1030,7 +1030,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             track_type (str, optional): Track type for the new tracks
             user_id (UUID, optional): The ID of the user adding the track.
             copy_to_library (bool): Copy and convert the data into the nendo Library?
-            skip_duplicate (bool): Skip adding duplicates?
+            skip_duplicate (bool): Skip adding duplicates.
 
         Returns:
             tracks (list[NendoTrack]): The tracks that were added to the Library
@@ -1047,14 +1047,13 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                     if AudioFileUtils().is_supported_filetype(file)
                 ],
             )
-        tracks = self._add_tracks_db(
+        return self._add_tracks_db(
             file_paths=file_list,
             track_type=track_type,
             copy_to_library=copy_to_library,
             skip_duplicate=skip_duplicate,
             user_id=user_id,
         )
-        return self.add_collection(name=path, track_ids=[t.id for t in tracks])
 
     def add_track_relationship(
         self,
