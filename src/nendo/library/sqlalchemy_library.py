@@ -246,7 +246,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
         )
 
         if "title" not in meta or meta["title"] is None:
-            meta.update({"title": os.path.basename(file_path)})
+            meta.update({"title": os.path.splitext(os.path.basename(file_path))[0]})
 
         resource = schema.NendoResource(
             file_path=self.storage_driver.get_file_path(
