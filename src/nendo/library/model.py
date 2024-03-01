@@ -38,8 +38,11 @@ def convert(obj):
     if isinstance(obj, (NestedMutableDict, dict)):
         return {k: convert(v) for k, v in obj.items()}
     if isinstance(obj, str):
-        # Remove non-ASCII characters from the string
-        return obj.encode("ascii", "ignore").decode("ascii").replace("\u0000", "")
+        # samitize the string
+        sanitized_str = obj.encode("ascii", "ignore").decode("ascii")
+        sanitized_str = sanitized_str.replace("'", "\\'")
+        sanitized_str = sanitized_str.replace("\u0000", "")
+        return sanitized_str
     return obj
 
 
