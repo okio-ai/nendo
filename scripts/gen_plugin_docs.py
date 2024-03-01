@@ -15,11 +15,11 @@ github_repos = [
     "https://github.com/okio-ai/nendo_plugin_loopify/",
     "https://github.com/okio-ai/nendo_plugin_musicgen/",
     "https://github.com/okio-ai/nendo_plugin_vampnet/",
-    # "https://github.com/okio-ai/nendo_plugin_textgen/",
-    # "https://github.com/okio-ai/nendo_plugin_caption_lpmusiccaps/",
-    # "https://github.com/okio-ai/nendo_plugin_voicegen_styletts2/",
-    # "https://github.com/okio-ai/nendo_plugin_transcribe_whisper/",
-    # "https://github.com/okio-ai/nendo_plugin_embed_clap/",
+    "https://github.com/okio-ai/nendo_plugin_textgen/",
+    "https://github.com/okio-ai/nendo_plugin_caption_lpmusiccaps/",
+    "https://github.com/okio-ai/nendo_plugin_voicegen_styletts2/",
+    "https://github.com/okio-ai/nendo_plugin_transcribe_whisper/",
+    "https://github.com/okio-ai/nendo_plugin_embed_clap/",
     # "https://github.com/okio-ai/nendo_plugin_library_postgres/",
 ]
 

@@ -39,16 +39,16 @@ def remove_block_of_lines(file_path, block):
         file.write(file_str)
 
 
-print(f"Generating docs for nendo_platform...")
+print(f"Generating docs for nendo-platform...")
 # Clone the repos into a temporary directory
 repo_path = os.path.join(local_dir)
 os.makedirs(repo_path, exist_ok=True)
-temp_dir_server = os.path.join("/tmp", "nendo_server")
-temp_dir_web = os.path.join("/tmp", "nendo_web")
+temp_dir_server = os.path.join("/tmp", "nendo-server")
+temp_dir_web = os.path.join("/tmp", "nendo-web")
 shutil.rmtree(temp_dir_server, ignore_errors=True)
 shutil.rmtree(temp_dir_web, ignore_errors=True)
-Repo.clone_from("git@github.com:okio-ai/nendo_server.git", temp_dir_server)
-Repo.clone_from("git@github.com:okio-ai/nendo_web.git", temp_dir_web)
+Repo.clone_from("git@github.com:okio-ai/nendo-server.git", temp_dir_server)
+Repo.clone_from("git@github.com:okio-ai/nendo-web.git", temp_dir_web)
 
 # copy README files to platformdocs
 server_file_path = os.path.join(repo_path, "server.md")

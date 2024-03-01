@@ -79,7 +79,7 @@ Is there already another plugin for that problem? (Check the [Plugin Catalog](..
 5. **Document:** Document the functionality of your plugin in the `README.md` file.
 Make sure to be concise and clear so that the nendo community can understand what your plugin does.
 6. **Publish:** Publish your plugin via pypi and contact us to add it to the official [Plugin Catalog](../plugins.md).
-7. **Share:** Share your plugin with the nendo community via the official [discord](https://discord.gg/XpkUsjwXTp) 
+7. **Share:** Share your plugin with the nendo community via the official [discord](https://discord.gg/gaZMZKzScj) 
 or send us a tweet [@okio](https://twitter.com/okio_ai)!
 
 
@@ -258,5 +258,5 @@ Now we can specify it when starting nendo:
 ## Publishing a plugin
 
 To publish a plugin, simply build and ship a package to your favorite package 
-manager and then contact us via our [discord channel](https://discord.gg/XpkUsjwXTp) to
+manager and then contact us via our [discord channel](https://discord.gg/gaZMZKzScj) to
 enter the plugin's name in the official [Plugin Catalog](../plugins.md).

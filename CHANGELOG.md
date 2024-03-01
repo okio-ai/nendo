@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [0.2.0](https://github.com/okio-ai/nendo/releases/tag/0.2.0) - 2024-02-19
 
+<small>[Compare with 0.1.3](https://github.com/okio-ai/nendo/compare/0.1.3...0.2.0)</small>
+
 ### Features
 
 - Added the first extension for the Nendo Library: The `NendoLibraryVectorExtension` is a mix-in class that can be used by implementations of the Nendo Library to add support for saving and retrieving embedding vectors.
@@ -52,8 +54,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Fixed a problem with the way dictionaries (like `NendoTrack.meta` and `NendoTrack.resource`) were stored in the Nendo Library which resulted in them being stored as JSON strings instead of JSON dictionaries. **This means that upgrading Nendo will break any apps that use libraries that were created with previous versions of nendo.** Please make sure you understand the implications and either flush your DB or convert it to match the new data model.
 - Fixed a bug where the length of a `NendoTrack` would not be correctly determined if the track had a mono signal.
 - A bunch of small bugfixes, too many to mention them all here.
-
-<small>[Compare with 0.1.3](https://github.com/okio-ai/nendo/compare/0.1.3...0.2.0)</small>
 
 ## [0.1.3](https://github.com/okio-ai/nendo/releases/tag/0.1.3) - 2023-12-08
 

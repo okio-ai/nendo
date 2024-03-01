@@ -21,3 +21,8 @@ SSL_CERTIFICATE_PATH | `str` | `"./conf/nginx/certs/nendo.crt"` | Path to the SS
 SSL_KEY_PATH | `str` | `"./conf/nginx/certs/nendo.key"` | Path to the SSL key file (only relevant when `USE_SSL=true`). |
 MAILGUN_FROM_ADDRESS | `str` | `"postmaster@yourdomain.com"` | Sets the `FROM` for administrative emails (registration, verification, password reset, etc.) from the server. |
 MAILGUN_API_KEY | `str` | `"REPLACE_KEY"` | Mail API key. |
+AUTO_RESAMPLE | `bool` | `False` | Flag that determines whether tracks should be automatically resampled upon import. |
+DEFAULT_SR | `int` | `44100` | The default sample rate to be used when auto-resampling tracks upon import. |
+COPY_TO_LIBRARY | `bool` | `True` | Flag that determines whether an imported track's file should be copied into the nendo library. |
+AUTO_CONVERT | `bool` | `True` | Flag that determines whether an imported track's file should be converted to Nendo's standard file format (`.wav`). |
+SKIP_DUPLICATE | `bool` | `True` | Flag that determines whether a track that points to a file that already exists in the library can be important multiple times. If True, always the file that already exists in the library will be used instead. |

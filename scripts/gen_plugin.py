@@ -119,7 +119,7 @@ def create_readme_md(plugin_name: str, description: str, author: str) -> str:
     return f"""# {plugin_name}
 
 ![Documentation](https://img.shields.io/website/https/nendo.ai)
-[![Twitter](https://img.shields.io/twitter/url/https/twitter.com/okio_ai.svg?style=social&label=Follow%20%40okio_ai)](https://twitter.com/okio_ai) [![](https://dcbadge.vercel.app/api/server/XpkUsjwXTp?compact=true&style=flat)](https://discord.gg/XpkUsjwXTp)
+[![Twitter](https://img.shields.io/twitter/url/https/twitter.com/okio_ai.svg?style=social&label=Follow%20%40okio_ai)](https://twitter.com/okio_ai) [![](https://dcbadge.vercel.app/api/server/gaZMZKzScj?compact=true&style=flat)](https://discord.gg/gaZMZKzScj)
 
 Created by {author}
 

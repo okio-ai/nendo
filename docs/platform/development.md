@@ -1,6 +1,6 @@
 # Development
 
-Nendo Platform comes with a convenient _development mode_, in which the [nendo_web](web/index.md) and [nendo_server](server/index.md) components are updated upon any changes made to the codebase.
+Nendo Platform comes with a convenient _development mode_, in which the [nendo-web](web/index.md) and [nendo-server](server/index.md) components are updated upon any changes made to the codebase.
 
 Use the following script to prepare the development environment for you:
 
@@ -20,13 +20,13 @@ make run-dev
 This will run Nendo Platform in development mode with more verbose logging and hot-reloading of components upon code changes.
 
 !!! tip "Hot-reloading"
-    The hot-reloading only works with changes that are done to the application code, i.e. code that resides in the `nendo_server/` subdirectory of `nendo_server` and in the `src/` subdirectory of `nendo_web` accordingly. All changes to files outside those directories require [rebuilding of the images, as explained below](#building).
+    The hot-reloading only works with changes that are done to the application code, i.e. code that resides in the `nendo_server/` subdirectory of `nendo-server` and in the `src/` subdirectory of `nendo-web` accordingly. All changes to files outside those directories require [rebuilding of the images, as explained below](#building).
 
-Now you can start developing your app by changing files in the `repo/nendo_server` and `repo/nendo_web` directories.
+Now you can start developing your app by changing files in the `repo/nendo-server` and `repo/nendo-web` directories.
 
 ## Building
 
-If you end up changing something about `nendo_server` or `nendo_web` that requires (re-)building of the images, you should use the respective `make` commands for that. To build both images (server _and_ web):
+If you end up changing something about `nendo-server` or `nendo_web` that requires (re-)building of the images, you should use the respective `make` commands for that. To build both images (server _and_ web):
 
 ```bash
 # build for production
@@ -35,7 +35,7 @@ make build
 make build-dev
 ```
 
-To only build `nendo_server`:
+To only build `nendo-server`:
 
 ```bash
 # build for production
@@ -44,7 +44,7 @@ make server-build
 make server-build-dev
 ```
 
-To only build `nendo_web`:
+To only build `nendo-web`:
 
 ```bash
 # build for production
@@ -79,9 +79,9 @@ To read the logs:
 !!! example "Reading logs"
 
     ```bash
-    # get the logs of nendo_server
+    # get the logs of nendo-server
     make server-logs
-    # get the logs of nendo_web
+    # get the logs of nendo-web
     make web-logs
     ```
 
@@ -90,8 +90,8 @@ To get a shell into a running container:
 !!! example "Getting shell access"
 
     ```bash
-    # get a shell into nendo_server
+    # get a shell into nendo-server
     make server-shell
-    # get a shell into nendo_web
+    # get a shell into nendo-web
     make web-shell
     ```

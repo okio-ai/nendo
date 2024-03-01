@@ -26,7 +26,7 @@
     <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT">
 </a>
 <a href="https://discord.gg/gaZMZKzScj" target="_blank">
-    <img src="https://dcbadge.vercel.app/api/server/XpkUsjwXTp?compact=true&style=flat" alt="Discord">
+    <img src="https://dcbadge.vercel.app/api/server/gaZMZKzScj?compact=true&style=flat" alt="Discord">
 </a>
 <a href="https://twitter.com/okio_ai" target="_blank">
     <img src="https://img.shields.io/twitter/url/https/twitter.com/okio_ai.svg?style=social&label=Follow%20%40okio_ai" alt="Twitter">
