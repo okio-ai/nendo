@@ -83,7 +83,7 @@ class NendoAnalysisPlugin(NendoPlugin):
     # ----------
     @staticmethod
     def plugin_data(
-        func: Callable[[NendoPlugin, NendoTrack], Dict[str, Any]],
+        *args, **kwargs
     ) -> Callable[[NendoPlugin, NendoTrack], Dict[str, Any]]:
         """Decorator to enrich a NendoTrack with data from a plugin.
 
@@ -93,24 +93,55 @@ class NendoAnalysisPlugin(NendoPlugin):
         Returns:
             Callable[[NendoPlugin, NendoTrack], Dict[str, Any]]: The wrapped function.
         """
-
-        def wrapper(self, track: NendoTrack):
-            try:
-                f_result = func(self, track)
-            except NendoError as e:
-                raise NendoPluginRuntimeError(
-                    f"Error running plugin function: {e}",
-                ) from None
-            for k, v in f_result.items():
-                track.add_plugin_data(
-                    plugin_name=self.plugin_name,
-                    plugin_version=self.plugin_version,
-                    key=str(k),
-                    value=v,
-                )
-            return f_result
-
-        return wrapper
+        if len(args) == 1 and callable(args[0]) and not kwargs:
+            func = args[0]
+            def wrapper(self, track: NendoTrack):
+                try:
+                    f_result = func(self, track)
+                except NendoError as e:
+                    raise NendoPluginRuntimeError(
+                        f"Error running plugin function: {e}",
+                    ) from None
+                for k, v in f_result.items():
+                    track.add_plugin_data(
+                        plugin_name=self.plugin_name,
+                        plugin_version=self.plugin_version,
+                        key=str(k),
+                        value=v,
+                    )
+                return f_result
+            return wrapper
+        def plugin_func(func: Callable[[NendoPlugin, NendoTrack], Dict[str, Any]]):
+            def wrapper(self, track: NendoTrack):
+                # check if return values are declared and already exist
+                if self.config.replace_plugin_data is False:
+                    all_values_present = True
+                    all_values = {}
+                    for pk in args:
+                        value = track.get_plugin_value(key=pk)
+                        if value is None:
+                            all_values_present = False
+                            break
+                        else:
+                            all_values.update({pk: value})
+                    if all_values_present:
+                        return all_values
+                try:
+                    f_result = func(self, track)
+                except NendoError as e:
+                    raise NendoPluginRuntimeError(
+                        f"Error running plugin function: {e}",
+                    ) from None
+                for k, v in f_result.items():
+                    track.add_plugin_data(
+                        plugin_name=self.plugin_name,
+                        plugin_version=self.plugin_version,
+                        key=str(k),
+                        value=v,
+                    )
+                return f_result
+            return wrapper
+        return plugin_func
 
     @staticmethod
     def run_collection(
