@@ -2092,11 +2092,11 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
             NendoCollection: The updated NendoCollection object.
         """
         with self.session_scope() as session:
-            # Convert IDs to UUIDs if they're strings
+            # convert IDs to UUIDs if they're strings
             collection_id = ensure_uuid(collection_id)
             track_id = ensure_uuid(track_id)
 
-            # Check the collection and track objects
+            # check the collection and track objects
             collection = (
                 session.query(model.NendoCollectionDB)
                 .filter_by(id=collection_id)
@@ -2113,8 +2113,20 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                     "The track does not exist",
                     track_id,
                 )
-
+            
+            # check if the track is already in the collection
             rc_rel_db = model.TrackCollectionRelationshipDB
+            relationship = (
+                session.query(rc_rel_db)
+                .filter(
+                    rc_rel_db.source_id == track_id,
+                    rc_rel_db.target_id == collection_id,
+                )
+                .first()
+            )
+            if relationship is not None:
+                return schema.NendoCollection.model_validate(collection)
+
             if position is not None:
                 # Update other states to keep ordering consistent
                 session.query(rc_rel_db).filter(
