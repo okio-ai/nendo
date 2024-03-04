@@ -420,6 +420,19 @@ class NendoTrack(NendoTrackBase):
         end_frame = int(end * self.sr)
         return self.signal[:, start_frame:end_frame]
 
+    def is_silent(self, threshold: float = 0.01) -> bool:
+        """Check if a track is silent using RMS energy and a threshold.
+
+        Args:
+            threshold (float, optional): The threshold for silence.
+                Defaults to 0.01.
+
+        Returns:
+            bool: True if the track is silent, False otherwise.
+        """
+        rms = np.sqrt(np.mean(self.signal ** 2))
+        return rms < threshold
+
     def save(self) -> NendoTrack:
         """Save the track to the library.
 

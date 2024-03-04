@@ -49,20 +49,13 @@ class NendoTrackTests(unittest.TestCase):
         self.assertTrue(track.has_relationship("stem"))
         self.assertFalse(track.has_relationship("outpainting"))
 
-    # def test_add_relationship(self):
-    #     resource = NendoResource(
-    #         file_path="tests/assets/",
-    #         file_name="test.wav",
-    #         resource_type="audio",
-    #         meta={
-    #             "checksum": "file_checksum",
-    #             "original_filename": os.path.basename("tests/assets/test.wav"),
-    #         },
-    #     )
-    #     track = NendoTrack(id=uuid.uuid4(), user_id=uuid.uuid4(), resource=resource)
-
-    #     track.add_relationship(track_id=uuid.uuid4(), relationship_type="stem")
-    #     self.assertTrue(track.has_relationship("stem"))
+    def test_is_silent(self):
+        """Test the `NendoTrack.is_silent()` method."""
+        nd.library.reset(force=True)
+        track = nd.library.add_track(file_path="tests/assets/test.wav")
+        self.assertFalse(track.is_silent())
+        silent_track = nd.library.add_track(file_path="tests/assets/silence.mp3")
+        self.assertTrue(silent_track.is_silent())
 
     def test_signal_sr_properties_exist(self):
         """Test the `NendoTrack.signal` and `NendoTrack.sr` properties."""
