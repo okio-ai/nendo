@@ -5,6 +5,20 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 <!-- insertion marker -->
+## [0.2.3](https://github.com/okio-ai/nendo/releases/tag/0.2.3) - 2024-03-04
+
+<small>[Compare with 0.2.2](https://github.com/okio-ai/nendo/compare/0.2.2...0.2.3)</small>
+
+### Features
+
+- remove tracks from collection function ([881c64e](https://github.com/okio-ai/nendo/commit/881c64ed129ba7d8a0b3c0c13e1b9dd9be8670c5) by Felix Lorenz).
+- add helper method to check if a track is silence (#21) ([020d0ce](https://github.com/okio-ai/nendo/commit/020d0cea2b0ed1bcd5d55b8014f3853712d75cd0) by Aaron Abebe).
+- skip computing plugin data again if config.replace_plugin_data is False ([14e5bcd](https://github.com/okio-ai/nendo/commit/14e5bcd32976c506ecedd59b2693a1255a79d390) by Felix Lorenz).
+
+### Bug Fixes
+
+- add_track_to_collection doesn't add the same track twice ([2159f91](https://github.com/okio-ai/nendo/commit/2159f91dc241d55d900bf8373e6d1b5fa414bb48) by Felix Lorenz).
+
 ## [0.2.2](https://github.com/okio-ai/nendo/releases/tag/0.2.2) - 2024-03-02
 
 <small>[Compare with 0.2.1](https://github.com/okio-ai/nendo/compare/0.2.1...0.2.2)</small>
