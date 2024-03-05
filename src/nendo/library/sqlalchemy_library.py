@@ -2208,6 +2208,23 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                     "Tracks do not exist: ",
                     missing_ids,
                 )
+                
+            # only add relationships that do not already exist
+            rc_rel_db = model.TrackCollectionRelationshipDB
+            existing_relationships = (
+                session.query(rc_rel_db)
+                .filter(
+                    rc_rel_db.source_id.in_(track_ids),
+                    rc_rel_db.target_id == collection_id,
+                )
+                .all()
+            )
+            existing_relationship_track_ids = [
+                rel.source_id for rel in existing_relationships
+            ]
+            track_ids = [
+                tid for tid in track_ids if tid not in existing_relationship_track_ids
+            ]
 
             # append all tracks to the end of the collection
             last_postition = (

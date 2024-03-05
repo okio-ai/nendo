@@ -448,10 +448,15 @@ class DefaultLibraryTests(unittest.TestCase):
             track_ids=[test_track_1.id, test_track_2.id],
             collection_id=test_collection.id,
         )
-        retrieved_test_collection = nd.library.get_collection(
+        test_collection.refresh()
+        self.assertEqual(len(test_collection), 2)
+        nd.library.add_tracks_to_collection(
+            track_ids=[test_track_1.id, test_track_2.id],
             collection_id=test_collection.id,
         )
-        self.assertEqual(len(retrieved_test_collection), 2)
+        test_collection.refresh()
+        self.assertEqual(len(test_collection), 2)
+        
 
     def test_find_collections_by_empty_value(self):
         """Test finding collections by empty search value."""
