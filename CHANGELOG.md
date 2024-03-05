@@ -5,6 +5,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 <!-- insertion marker -->
+## [0.2.5](https://github.com/okio-ai/nendo/releases/tag/0.2.5) - 2024-03-05
+
+<small>[Compare with 0.2.4](https://github.com/okio-ai/nendo/compare/0.2.4...0.2.5)</small>
+
+### Bug Fixes
+
+- add_tracks_to_collection ignores tracks that are already in the collection ([7aacdca](https://github.com/okio-ai/nendo/commit/7aacdca751a9ad752aed0aba2541533d26579115) by Felix Lorenz).
+
 ## [0.2.4](https://github.com/okio-ai/nendo/releases/tag/0.2.4) - 2024-03-05
 
 <small>[Compare with 0.2.3](https://github.com/okio-ai/nendo/compare/0.2.3...0.2.4)</small>
@@ -33,12 +41,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Bug Fixes
 
-- set fallback track title without extension ([06396e6](https://github.com/okio-ai/nendo/commit/06396e66bc8360c462ea64e0350f9e3a4001ac89) by faradox).
-- add sanitization of strings for json insert ([65b5cf5](https://github.com/okio-ai/nendo/commit/65b5cf5ec2685410d013b1616c070fd6a8747dd0) by faradox).
+- set fallback track title without extension ([06396e6](https://github.com/okio-ai/nendo/commit/06396e66bc8360c462ea64e0350f9e3a4001ac89) by Felix Lorenz).
+- add sanitization of strings for json insert ([65b5cf5](https://github.com/okio-ai/nendo/commit/65b5cf5ec2685410d013b1616c070fd6a8747dd0) by Felix Lorenz).
 
 ### Docs
 
-- improve documentation in various places ([a084146](https://github.com/okio-ai/nendo/commit/a0841468a93e25cd0a8000d9883b057897861e0e) by faradox).
+- improve documentation in various places ([a084146](https://github.com/okio-ai/nendo/commit/a0841468a93e25cd0a8000d9883b057897861e0e) by Felix Lorenz).
 
 ## [0.2.1](https://github.com/okio-ai/nendo/releases/tag/0.2.1) - 2024-02-28
 
