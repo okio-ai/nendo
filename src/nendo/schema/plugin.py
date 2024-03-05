@@ -84,7 +84,10 @@ class NendoAnalysisPlugin(NendoPlugin):
     @staticmethod
     def plugin_data(
         *args, **kwargs
-    ) -> Callable[[NendoPlugin, NendoTrack], Dict[str, Any]]:
+    ) -> Union[
+        Callable[[NendoPlugin, NendoTrack], Dict[str, Any]],
+        Callable
+    ]:
         """Decorator to enrich a NendoTrack with data from a plugin.
 
         Args:
@@ -95,9 +98,9 @@ class NendoAnalysisPlugin(NendoPlugin):
         """
         if len(args) == 1 and callable(args[0]) and not kwargs:
             func = args[0]
-            def wrapper(self, track: NendoTrack):
+            def wrapper(self, track: NendoTrack, *params: Any) -> Dict[str, Any]:
                 try:
-                    f_result = func(self, track)
+                    f_result = func(self, track, *params)
                 except NendoError as e:
                     raise NendoPluginRuntimeError(
                         f"Error running plugin function: {e}",
@@ -111,8 +114,8 @@ class NendoAnalysisPlugin(NendoPlugin):
                     )
                 return f_result
             return wrapper
-        def plugin_func(func: Callable[[NendoPlugin, NendoTrack], Dict[str, Any]]):
-            def wrapper(self, track: NendoTrack):
+        def plugin_func(func: Callable[[NendoPlugin, NendoTrack, Any], Dict[str, Any]]):
+            def wrapper(self, track: NendoTrack, *params: Any) -> Dict[str, Any]:
                 # check if return values are declared and already exist
                 if self.config.replace_plugin_data is False:
                     all_values_present = True
@@ -127,7 +130,7 @@ class NendoAnalysisPlugin(NendoPlugin):
                     if all_values_present:
                         return all_values
                 try:
-                    f_result = func(self, track)
+                    f_result = func(self, track, *params)
                 except NendoError as e:
                     raise NendoPluginRuntimeError(
                         f"Error running plugin function: {e}",
