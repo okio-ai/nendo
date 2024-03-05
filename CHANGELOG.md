@@ -5,6 +5,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 <!-- insertion marker -->
+## [0.2.4](https://github.com/okio-ai/nendo/releases/tag/0.2.4) - 2024-03-05
+
+<small>[Compare with 0.2.3](https://github.com/okio-ai/nendo/compare/0.2.3...0.2.4)</small>
+
+### Bug Fixes
+
+- make plugin data accept extra params (#22) ([017ee09](https://github.com/okio-ai/nendo/commit/017ee09a5761bc7e8014b58cda827496c6dee252) by Aaron Abebe).
+
 ## [0.2.3](https://github.com/okio-ai/nendo/releases/tag/0.2.3) - 2024-03-04
 
 <small>[Compare with 0.2.2](https://github.com/okio-ai/nendo/compare/0.2.2...0.2.3)</small>
