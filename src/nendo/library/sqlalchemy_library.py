@@ -2421,7 +2421,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                     ),
                 )
             if user_id is not None:
-                query = query.filter(model.NendoCollectionDB.user_id == user_id)
+                query = query.filter(model.NendoCollectionDB.user_id.in_([user_id, self.user.id]))
             if collection_types is not None:
                 query = query.filter(
                     model.NendoCollectionDB.collection_type.in_(collection_types),
