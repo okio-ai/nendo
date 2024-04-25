@@ -481,7 +481,7 @@ class SqlAlchemyNendoLibrary(schema.NendoLibraryPlugin):
                 query_local = session_local.query(model.NendoTrackDB)
                 if user_id is not None:
                     query_local = query_local.filter(
-                        model.NendoTrackDB.user_id == user_id,
+                        model.NendoTrackDB.user_id.in_([user_id, self.user.id])
                     )
             plugin_name_condition = true()
             if (
